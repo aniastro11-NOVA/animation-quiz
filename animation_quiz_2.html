@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>애니메이션 용어 예상문제</title>
+<title>애니메이션 용어 예상문제 — 동점자 결선</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f4f8; color: #1a202c; min-height: 100vh; }
@@ -194,283 +194,159 @@ input:focus, textarea:focus { border-color: #4299e1; }
 </head>
 <body>
 
-<header id="main-header">
+<header>
   <h1>🎬 애니메이션 용어 예상문제</h1>
-  <p id="header-sub">2024 | 카메라·편집·샷&앵글</p>
-  <div class="progress-bar-wrap" id="prog-wrap" style="display:none">
-    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  <p>2024 | 카메라·편집·샷&앵글 — 동점자 결선</p>
+  <div id="prog-wrap" style="display:none">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-fill" style="width:10%"></div></div>
+    <div class="progress-label" id="prog-label">1 / 10</div>
   </div>
-  <div class="progress-label" id="prog-label"></div>
 </header>
 
-<!-- ══════════════════════════════════════
-     PAGE 1 : 시작 (응시자)
-══════════════════════════════════════ -->
+<div id="floating" style="display:none;position:fixed;bottom:16px;right:16px;background:#2d3748;color:white;padding:8px 14px;border-radius:99px;font-size:0.78rem;font-weight:600;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.2)">📝 0 / 10 완료</div>
+
+<!-- PAGE 1: 시작 -->
 <div class="page active" id="start-page">
   <div class="card">
-    <div class="big-emoji">🎬</div>
-    <h2>애니메이션 용어 시험</h2>
-    <p>카메라 기법, 편집 용어, 샷&앵글에 관한<br>20문항 객관식 시험입니다.</p>
+    <div class="big-emoji">🏆</div>
+    <h2>동점자 결선 시험</h2>
+    <p>카메라 기법, 편집 용어, 샷&앵글에 관한<br>10문항 객관식 결선 시험입니다.</p>
     <div class="chips">
-      <span class="chip">📋 20문항</span>
+      <span class="chip">📋 10문항</span>
       <span class="chip">⏱ 제한없음</span>
       <span class="chip">🔒 점수 비공개</span>
     </div>
     <div class="field-label">이름 / 학번</div>
-    <input type="text" id="student-name" placeholder="홍길동 또는 2024001" maxlength="20">
+    <input type="text" id="student-name" placeholder="홍길동 또는 2024001" />
     <button class="btn-primary" onclick="startQuiz()">시험 시작하기 ▶</button>
-    <span class="examiner-link" onclick="goExaminer()">🔐 채점자 모드</span>
+    <span class="examiner-link" onclick="goExaminer()">🔒 채점자 모드</span>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     PAGE 2 : 퀴즈
-══════════════════════════════════════ -->
+<!-- PAGE 2: 퀴즈 -->
 <div class="page" id="quiz-page">
 
-  <div class="question-card" data-answer="1" data-cat="camera">
-    <div class="q-number">문제 1 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">카메라의 위치는 고정된 채, 축을 중심으로 <strong>좌우</strong>로 회전하는 카메라워크는?</p>
+  <div class="question-card" data-answer="0" data-cat="edit">
+    <div class="q-number">문제 1 / 10</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">디졸브(Dissolve)에 대한 설명으로 올바른 것은?</p>
     <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>트럭 인/아웃(Truck In/Out)</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>팬(PAN)</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>틸트(Tilt)</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>로테이션(Rotation)</button>
+      <button class="option" data-idx="0"><span class="opt-label">A</span>한 장면이 서서히 사라지면서 동시에 다음 장면이 서서히 나타나는 전환 기법</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>한 장면이 갑자기 잘리며 다음 장면이 시작되는 편집 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>화면이 특정 방향으로 밀려나가며 새로운 화면이 등장하는 기법</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>화면이 순간적으로 하얗게 되었다가 다음 장면이 나타나는 기법</button>
     </div>
     <div class="q-nav"><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
   </div>
 
-  <div class="question-card" data-answer="2" data-cat="camera">
-    <div class="q-number">문제 2 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">A지점에서 B지점으로 카메라를 <strong>매우 빠르게</strong> 이동시켜 속도감을 주며, 장소 전환 트랜지션으로도 쓰이는 팬 기법은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>드리프트 팬(Drift Pan)</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>팔로우 팬(Follow Pan)</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>집 팬(Zip Pan / Whip Pan)</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>일반 팬(Normal Pan)</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="1" data-cat="camera">
-    <div class="q-number">문제 3 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">랜덤하게 움직이는 피사체를 따라가는 카메라워크로, <strong>초케 팬</strong> 또는 <strong>메모리 팬</strong>이라고도 불리는 기법은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>집 팬(Zip Pan)</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>팔로우 팬(Follow Pan)</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>드리프트 팬(Drift Pan)</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>고정 카메라(Static)</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="0" data-cat="camera">
-    <div class="q-number">문제 4 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">카메라 자체가 피사체에서 <strong>멀어지는</strong> 트럭 아웃(Truck Out)의 연출 효과로 올바른 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>피사체와의 단절, 또는 가려진 부분을 드러내는 UNVEIL 효과</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>피사체를 강조하는 효과</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>카메라 축을 중심으로 회전하는 효과</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>피사체를 클로즈업하여 심리를 묘사하는 효과</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="2" data-cat="camera">
-    <div class="q-number">문제 5 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">로테이트/로테이션(Rotate/Rotation)으로 표현할 수 있는 이미지의 조합으로 올바른 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>속도감 / 공간의 확장</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>시간의 흐름 / 장소 전환</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>인물의 불안정한 심리 / 영웅적 이미지</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>피사체의 고립감 / 원근감 강조</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="3" data-cat="camera">
-    <div class="q-number">문제 6 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">이즈 인/아웃(Ease In/Out)을 <strong>사용하지 않아도 되는</strong> 상황은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>고정 카메라로 시작하여 PAN을 시작할 때</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>TRUCK IN/OUT을 멈추어 다시 고정 카메라를 유지할 때</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>PAN을 멈추어 고정 카메라로 전환할 때</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>씬 처음부터 끝까지 드리프트 팬 기법을 사용할 때</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="1" data-cat="camera">
-    <div class="q-number">문제 7 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">포커스 인/아웃(Focus In/Out)이 주로 활용되는 상황으로 가장 적절한 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>카메라가 피사체를 향해 직접 이동할 때</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>인물이 의식을 잃거나 회복할 때, POV 샷 등에서</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>두 인물이 대화를 나눌 때 교차 편집하는 경우</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>빠른 속도감을 표현하는 액션 장면에서</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="0" data-cat="camera">
-    <div class="q-number">문제 8 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">심도(Depth of Field)에 영향을 주는 세 가지 요소로 올바른 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>조리개 / 초점거리 / 피사체와의 거리</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>셔터속도 / 화이트밸런스 / ISO</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>렌즈 종류 / 필터 / 조명</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>카메라 이동 속도 / 피사체 크기 / 배경색</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="2" data-cat="camera">
-    <div class="q-number">문제 9 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
-    <p class="q-text">광각렌즈(Wide Angle Lens)의 특성으로 <strong>틀린</strong> 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>넓은 화각의 이미지를 만든다</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>원근감을 강조하여 가까운 물체는 더 가깝게, 먼 물체는 더 멀리 보인다</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>멀리 있는 피사체를 당겨 배경을 압축하는 효과가 있다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>피사 심도를 넓게 표현하여 화면 전체가 초점이 맞은 듯 선명하다</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="3" data-cat="edit">
-    <div class="q-number">문제 10 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">시퀀스(Sequence), 씬(Scene), 컷(Cut) 중 <strong>가장 작은</strong> 편집 단위는?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>시퀀스(Sequence)</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>씬(Scene)</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>시퀀스와 씬은 동일한 단위이다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>컷(Cut)</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="1" data-cat="edit">
-    <div class="q-number">문제 11 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">점프 컷(Jump Cut)에 대한 설명으로 <strong>틀린</strong> 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>급격한 장면전환으로 연속성을 깨뜨리는 편집 방식이다</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>시각적으로 유사한 두 장면을 이어 붙여 연속성을 강조하는 기법이다</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>피사체가 갑자기 등장하거나 사라지는 효과를 낼 수 있다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>장 뤽 고다르가 즐겨 사용했으며 &lt;네 멋대로 해라&gt;가 대표작이다</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
   <div class="question-card" data-answer="2" data-cat="edit">
-    <div class="q-number">문제 12 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">점프 컷(Jump Cut)과 <strong>상반되는</strong> 기법으로, 시각적으로 유사한 두 장면을 이어 붙이는 편집 기법은?</p>
+    <div class="q-number">문제 2 / 10</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">와이프(Wipe) 트랜지션의 특징으로 올바른 것은?</p>
     <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>크로스컷(Cross cut)</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>스매쉬컷(Smash cut)</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>매치컷(Match cut)</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>액션컷(Action cut)</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="0" data-cat="edit">
-    <div class="q-number">문제 13 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">롱테이크(Long Take)에 대한 설명으로 올바른 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>일반 상업영화 쇼트(10초 내외)와 달리, 1~2분 이상의 쇼트가 편집 없이 진행되는 것</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>동시간에 일어나는 두 사건을 교차하여 보여주는 편집 기법</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>화면이 사진처럼 정지되는 편집 효과</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>과거 장면으로 전환하는 편집 기법</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="3" data-cat="edit">
-    <div class="q-number">문제 14 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">크로스컷(Cross Cut)의 정의로 올바른 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>내용 단위로 끊어주는 가장 일반적인 컷</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>동작이 이어지도록 연결하는 편집 기법</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>하나의 쇼트를 컷 없이 길게 촬영하는 기법</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>동시간에 일어나고 있는 다른 사건을 교차하여 동시에 보여주는 편집 기법</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="1" data-cat="edit">
-    <div class="q-number">문제 15 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">프리즈 프레임(Freeze Frame)이 주로 사용되는 상황은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>두 인물이 동시에 등장하는 장면 전환 시</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>한 시퀀스의 끝이나 영화의 엔딩을 마무리할 때</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>과거 회상 장면으로 넘어갈 때</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>카메라가 빠르게 이동하는 액션 장면에서</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="2" data-cat="edit">
-    <div class="q-number">문제 16 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
-    <p class="q-text">플래시백(Flashback)에 대한 설명으로 올바른 것은?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>이야기가 진행되다가 갑자기 미래 장면으로 전환되는 기법</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>화면이 순간적으로 밝아지며 장면을 전환하는 시각 효과</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>이야기 진행 중 갑자기 과거 장면으로 전환되는 기법이며, 반대 개념은 플래시포워드이다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>두 개의 서로 다른 시간대 장면을 동시에 보여주는 기법</button>
-    </div>
-    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
-  </div>
-
-  <div class="question-card" data-answer="0" data-cat="shot">
-    <div class="q-number">문제 17 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
-    <p class="q-text">마스터 샷(Master Shot)과 이스태블리싱 샷(Establishing Shot)의 <strong>결정적 차이</strong>는?</p>
-    <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>이스태블리싱 샷은 배경 중심, 마스터 샷은 배우를 포함하며, 차이는 중심 배우의 유무이다</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>마스터 샷은 클로즈업으로, 이스태블리싱 샷은 롱 샷으로만 촬영된다</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>마스터 샷은 실내에서, 이스태블리싱 샷은 실외에서만 사용된다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>이스태블리싱 샷은 편집 없이 긴 시간 지속되는 샷이다</button>
+      <button class="option" data-idx="0"><span class="opt-label">A</span>두 장면이 동시에 겹쳐지며 서서히 전환되는 기법</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>한 장면이 서서히 어두워지고 다음 장면이 서서히 밝아지는 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>한 장면이 특정 방향으로 밀려나가며 다음 장면이 등장하는 기법</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>화면이 갑자기 잘리며 전환되는 기법</button>
     </div>
     <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
   </div>
 
   <div class="question-card" data-answer="1" data-cat="shot">
-    <div class="q-number">문제 18 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
-    <p class="q-text">다음 샷을 화면 크기가 <strong>넓은 것 → 좁은 것</strong> 순으로 올바르게 나열한 것은?<br><small style="color:#718096;font-weight:400">① 미디엄 클로즈업 ② 익스트림 롱 샷 ③ 풀 샷 ④ 익스트림 클로즈업 ⑤ 카우보이 샷</small></p>
+    <div class="q-number">문제 3 / 10</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">오버더숄더샷(OTS, Over the Shoulder Shot)을 주로 사용하는 상황은?</p>
     <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>③ → ② → ⑤ → ① → ④</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>② → ③ → ⑤ → ① → ④</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>② → ③ → ① → ⑤ → ④</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>② → ⑤ → ③ → ① → ④</button>
+      <button class="option" data-idx="0"><span class="opt-label">A</span>캐릭터의 전신을 보여줄 때</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>두 인물이 대화하는 장면에서 한 인물의 어깨 너머로 상대방을 촬영할 때</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>매우 멀리서 전체 배경을 촬영할 때</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>인물의 얼굴 표정만 극단적으로 클로즈업할 때</button>
     </div>
     <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
   </div>
 
   <div class="question-card" data-answer="3" data-cat="shot">
-    <div class="q-number">문제 19 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
-    <p class="q-text">카우보이 샷(Cowboy Shot)에 대한 설명으로 올바른 것은?</p>
+    <div class="q-number">문제 4 / 10</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">버즈아이뷰(Bird's Eye View) 앵글의 설명으로 올바른 것은?</p>
     <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>인물의 발끝까지 보이는 샷으로 풀 샷(Full Shot)과 동일하다</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>카메라를 매우 낮은 위치에서 위를 향해 촬영하는 앵글 기법이다</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>인물의 얼굴만 극단적으로 클로즈업하는 기법이다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>인물의 허리 둘레까지 포착하는 미디엄 풀 샷의 일종으로, 총이나 칼의 움직임을 보여줄 때 활용된다</button>
+      <button class="option" data-idx="0"><span class="opt-label">A</span>카메라를 피사체와 같은 높이에서 정면으로 촬영하는 앵글</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>카메라가 아주 낮은 위치에서 위를 향해 촬영하는 앵글</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>카메라가 약 45도 각도에서 비스듬히 내려다보는 앵글</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>카메라가 정 위에서 아래를 향해 90도로 촬영하는 앵글</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="camera">
+    <div class="q-number">문제 5 / 10</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">달리줌(Dolly Zoom, 버티고 효과)에 대한 설명으로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>카메라와 피사체 모두 이동하지 않고 줌만 변경하는 기법</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>카메라가 이동하면서 동시에 반대 방향으로 줌을 조절하여, 인물 크기는 유지하되 배경 원근감이 변하는 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>두 대의 카메라로 동시에 촬영하여 배경을 입체적으로 표현하는 기법</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>빠른 팬과 줌을 동시에 사용하여 속도감을 극대화하는 기법</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="camera">
+    <div class="q-number">문제 6 / 10</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">핸드헬드(Handheld) 카메라 기법이 주로 표현하는 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>안정되고 차분한 분위기와 객관적인 시점</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>매끄럽고 정교한 카메라 이동</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>역동성, 긴장감, 현장감 또는 불안정한 심리 상태</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>피사체를 흐리게 하여 배경을 강조하는 효과</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="3" data-cat="edit">
+    <div class="q-number">문제 7 / 10</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">컷어웨이(Cutaway)의 정의로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>두 인물의 대화 장면을 교차해서 보여주는 기법</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>장면을 점점 어둡게 하여 끝내는 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>동일 인물의 다른 각도 장면을 이어 붙이는 기법</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>메인 장면에서 잠깐 다른 장면(관련 정보나 반응)으로 전환했다가 다시 돌아오는 편집 기법</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="edit">
+    <div class="q-number">문제 8 / 10</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">몽타주(Montage) 편집 기법에 대한 설명으로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>한 장면을 편집 없이 길게 촬영하여 현실감을 높이는 기법</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>여러 짧은 이미지들을 연결하여 새로운 의미나 감정을 만들어내는 편집 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>동일 배우가 여러 장소에 동시에 있는 것처럼 표현하는 기법</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>한 캐릭터의 내면 독백을 시각적으로 표현하는 기법</button>
     </div>
     <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
   </div>
 
   <div class="question-card" data-answer="2" data-cat="shot">
-    <div class="q-number">문제 20 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
-    <p class="q-text">시점 샷(POV Shot, Point of View)에 대한 설명으로 <strong>틀린</strong> 것은?</p>
+    <div class="q-number">문제 9 / 10</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">하이앵글(High Angle) 촬영의 연출 효과로 가장 올바른 것은?</p>
     <div class="options">
-      <button class="option" data-idx="0"><span class="opt-label">A</span>사건 참여자인 인물의 눈에 보이는 주관적인 장면이다</button>
-      <button class="option" data-idx="1"><span class="opt-label">B</span>관객이 등장인물의 시선으로 다른 인물과 배경을 보며 등장인물과 동일시된다</button>
-      <button class="option" data-idx="2"><span class="opt-label">C</span>객관적인 시점으로 사건 전체를 조망하는 기법이다</button>
-      <button class="option" data-idx="3"><span class="opt-label">D</span>인물이 의식을 잃을 때 포커스 인/아웃과 함께 사용되기도 한다</button>
+      <button class="option" data-idx="0"><span class="opt-label">A</span>피사체를 웅장하고 강인하게 표현한다</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>피사체를 실제보다 크고 위협적으로 보이게 한다</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>피사체를 작고 나약하거나 심리적으로 위축된 것처럼 표현한다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>화면을 기울여 불안정한 긴장감을 준다</button>
     </div>
     <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
   </div>
 
+  <div class="question-card" data-answer="1" data-cat="shot">
+    <div class="q-number">문제 10 / 10</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">아이레벨(Eye Level) 앵글의 특성은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>카메라가 피사체보다 높은 위치에서 내려다보는 앵글</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>카메라를 피사체와 같은 높이에서 촬영하여 가장 자연스럽고 중립적인 시점을 제공하는 앵글</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>카메라가 피사체보다 낮은 위치에서 올려다보는 앵글</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>카메라를 옆으로 기울여 불안감을 주는 앵글</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-submit-final" onclick="finalSubmit()">📤 제출하기</button></div>
+  </div>
 
 </div><!-- /quiz-page -->
-
 <!-- ══════════════════════════════════════
      PAGE 3 : 제출 완료 (응시자)
 ══════════════════════════════════════ -->
@@ -554,35 +430,25 @@ input:focus, textarea:focus { border-color: #4299e1; }
 // ─────────────────────────────────────
 //  데이터
 // ─────────────────────────────────────
-const TOTAL   = 20;
+const TOTAL   = 10;
 const PASS_WD = '5798';   // ← 채점자 비밀번호 (여기서 변경 가능)
 const LABELS  = ['A','B','C','D'];
 const CAT_LABEL = { camera:'카메라', edit:'편집', shot:'샷&앵글' };
 const CAT_DOT   = { camera:'dot-cam', edit:'dot-edi', shot:'dot-sho' };
 
-const ANSWERS = [1,2,1,0,2,3,1,0,2,3,1,2,0,3,1,2,0,1,3,2]; // 20문항 정답 인덱스
+const ANSWERS = [0,2,1,3,1,2,3,1,2,1]; // 10문항 동점자 결선 정답 인덱스
 
 const OPT_TEXTS = [
-  ['트럭 인/아웃(Truck In/Out)','팬(PAN)','틸트(Tilt)','로테이션(Rotation)'],
-  ['드리프트 팬(Drift Pan)','팔로우 팬(Follow Pan)','집 팬(Zip Pan / Whip Pan)','일반 팬(Normal Pan)'],
-  ['집 팬(Zip Pan)','팔로우 팬(Follow Pan)','드리프트 팬(Drift Pan)','고정 카메라(Static)'],
-  ['피사체와의 단절·UNVEIL 효과','피사체 강조 효과','카메라 축 회전 효과','클로즈업 심리 묘사 효과'],
-  ['속도감/공간 확장','시간 흐름/장소 전환','불안정한 심리/영웅적 이미지','고립감/원근감 강조'],
-  ['PAN 시작 시','Truck 멈추어 고정 전환 시','PAN 멈추어 고정 전환 시','씬 전체 드리프트 팬 사용 시'],
-  ['카메라 직접 이동 시','의식 상실/회복 시, POV 샷 등','교차 편집 시','액션 장면에서'],
-  ['조리개/초점거리/피사체와의 거리','셔터속도/화이트밸런스/ISO','렌즈종류/필터/조명','이동속도/피사체크기/배경색'],
-  ['넓은 화각 이미지 생성','원근감 강조(가까운→더가까이, 먼→더멀리)','배경 압축 효과(망원렌즈 특성)','피사 심도 넓게 표현'],
-  ['시퀀스(Sequence)','씬(Scene)','시퀀스=씬 동일 단위','컷(Cut)'],
-  ['연속성을 깨뜨리는 편집 방식','유사 장면을 이어 붙여 연속성 강조(매치컷)','갑작스런 등장/소멸 효과 가능','장 뤽 고다르 대표 기법'],
-  ['크로스컷(Cross cut)','스매쉬컷(Smash cut)','매치컷(Match cut)','액션컷(Action cut)'],
-  ['편집 없는 1~2분 이상의 쇼트','두 사건 교차 편집 기법','화면 정지 효과','과거 장면 전환 기법'],
-  ['내용단위 컷','동작 연결 편집','컷 없이 길게 촬영','동시간 다른 사건 교차 편집'],
-  ['두 인물 동시 등장 전환 시','시퀀스 끝·영화 엔딩 마무리 시','과거 회상 장면 전환 시','액션 장면에서'],
-  ['미래 장면 전환 기법','화면 밝아짐 시각 효과','과거 장면 전환, 반대=플래시포워드','다른 시간대 동시 표시'],
-  ['배경 중심 vs 배우 포함(배우 유무 차이)','마스터=클로즈업, 이스태블리싱=롱샷','마스터=실내, 이스태블리싱=실외','이스태블리싱=긴 지속 샷'],
-  ['③→②→⑤→①→④','②→③→⑤→①→④','②→③→①→⑤→④','②→⑤→③→①→④'],
-  ['풀 샷(Full Shot)과 동일','낮은 위치에서 위를 향한 앵글','얼굴만 극단 클로즈업','허리 둘레 포착 미디엄 풀 샷, 총/칼 행동 표현'],
-  ['사건 참여자 주관적 시점','관객=등장인물과 동일시','객관적 시점으로 전체 조망(틀림)','의식 잃을 때 포커스 인/아웃과 사용'],
+  ['한 장면이 서서히 사라지며 다음 장면이 서서히 나타나는 전환 기법','갑자기 잘리며 다음 장면이 시작되는 기법','특정 방향으로 밀려나가며 전환되는 기법','화면이 하얗게 되었다가 전환되는 기법'],
+  ['두 장면이 겹쳐지며 전환되는 기법(디졸브)','서서히 어두워지고 밝아지는 기법(페이드)','특정 방향으로 밀려나가며 전환되는 기법(와이프)','갑자기 잘리며 전환되는 기법(컷)'],
+  ['캐릭터 전신을 보여줄 때','두 인물 대화에서 한 인물 어깨 너머로 상대방 촬영','전체 배경을 멀리서 촬영할 때','얼굴만 극단적으로 클로즈업할 때'],
+  ['피사체와 같은 높이 정면 촬영(아이레벨)','낮은 위치에서 위를 향해 촬영(웜즈아이뷰)','45도 비스듬히 내려다보는 앵글(하이앵글)','정 위에서 아래를 향해 90도 촬영(버즈아이뷰)'],
+  ['카메라·피사체 고정, 줌만 변경','카메라 이동+반대 방향 줌으로 배경 원근감 변경(달리줌)','두 대 카메라 입체 촬영','빠른 팬+줌으로 속도감 극대화'],
+  ['안정되고 차분한 분위기·객관적 시점','매끄럽고 정교한 카메라 이동','역동성·긴장감·현장감·불안정한 심리 표현(핸드헬드)','피사체를 흐리게 하여 배경 강조'],
+  ['두 인물 대화 교차 기법(OTS/크로스컷)','점점 어둡게 하여 끝내는 기법(페이드아웃)','동일 인물 다른 각도 이어 붙이기','메인 장면에서 잠깐 다른 장면으로 전환 후 복귀(컷어웨이)'],
+  ['편집 없이 길게 촬영하는 기법(롱테이크)','여러 짧은 이미지 연결로 새로운 의미·감정 생성(몽타주)','배우가 여러 장소에 동시에 있는 것처럼 표현','캐릭터 내면 독백 시각 표현'],
+  ['피사체를 웅장하고 강인하게 표현(로우앵글)','피사체를 크고 위협적으로 표현(로우앵글)','피사체를 작고 나약하거나 심리적으로 위축된 것처럼 표현(하이앵글)','화면 기울여 불안감 표현(더치앵글)'],
+  ['카메라가 피사체보다 높은 위치에서 내려다보는 앵글(하이앵글)','피사체와 같은 높이 촬영으로 자연스럽고 중립적 시점(아이레벨)','카메라가 낮은 위치에서 올려다보는 앵글(로우앵글)','카메라를 옆으로 기울여 불안감 표현(더치앵글)'],
 ];
 
 // ─────────────────────────────────────
@@ -771,8 +637,7 @@ function showResult(payload) {
 
   const tbody = document.getElementById('res-tbody');
   tbody.innerHTML = '';
-  const catList = ['camera','camera','camera','camera','camera','camera','camera','camera','camera',
-                   'edit','edit','edit','edit','edit','edit','edit','shot','shot','shot','shot'];
+  const catList = ['edit','edit','shot','shot','camera','camera','edit','edit','shot','shot'];
 
   ans.forEach((v, i) => {
     const isRight = v === ANSWERS[i];
