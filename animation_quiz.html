@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>애니메이션 용어 예상문제</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f4f8; color: #1a202c; min-height: 100vh; }
+
+header {
+  background: linear-gradient(135deg, #2d3748, #4a5568);
+  color: white; padding: 16px 16px 12px; text-align: center;
+  position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+header h1 { font-size: 1.05rem; font-weight: 700; }
+header p  { font-size: 0.72rem; opacity: 0.7; margin-top: 2px; }
+.progress-bar-wrap { background: rgba(255,255,255,0.2); border-radius: 99px; height: 5px; margin-top: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: #63b3ed; border-radius: 99px; transition: width 0.4s ease; }
+.progress-label { font-size: 0.68rem; opacity: 0.75; margin-top: 5px; text-align: right; }
+
+.page { display: none; max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
+.page.active { display: block; }
+
+/* ── 카드 공통 ── */
+.card {
+  background: white; border-radius: 20px; padding: 32px 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 14px;
+  text-align: center;
+}
+.big-emoji { font-size: 3.2rem; margin-bottom: 12px; }
+.card h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; }
+.card p  { font-size: 0.85rem; color: #718096; line-height: 1.6; }
+.chips { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 18px 0; }
+.chip { font-size: 0.78rem; color: #4a5568; background: #edf2f7; padding: 5px 14px; border-radius: 99px; }
+
+/* ── 입력 ── */
+.field-label { font-size: 0.78rem; font-weight: 700; color: #4a5568; text-align: left; margin-bottom: 6px; margin-top: 18px; }
+input[type="text"], input[type="password"], textarea {
+  width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0;
+  border-radius: 12px; font-size: 0.92rem; outline: none;
+  transition: border 0.2s; font-family: inherit; resize: none;
+}
+input:focus, textarea:focus { border-color: #4299e1; }
+
+/* ── 버튼 ── */
+.btn-primary {
+  width: 100%; padding: 14px; background: #4299e1; color: white;
+  border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; margin-top: 14px; transition: background 0.2s; font-family: inherit;
+}
+.btn-primary:hover { background: #3182ce; }
+.btn-secondary {
+  width: 100%; padding: 13px; background: #edf2f7; color: #2d3748;
+  border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; margin-top: 10px; transition: background 0.2s; font-family: inherit;
+}
+.btn-secondary:hover { background: #e2e8f0; }
+.btn-dark {
+  width: 100%; padding: 13px; background: #2d3748; color: white;
+  border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; margin-top: 10px; transition: background 0.2s; font-family: inherit;
+}
+.btn-dark:hover { background: #1a202c; }
+.btn-purple {
+  width: 100%; padding: 13px; background: #805ad5; color: white;
+  border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; margin-top: 10px; transition: background 0.2s; font-family: inherit;
+}
+.btn-purple:hover { background: #6b46c1; }
+
+.examiner-link {
+  display: block; margin-top: 20px; font-size: 0.75rem;
+  color: #a0aec0; cursor: pointer; text-decoration: underline;
+}
+.examiner-link:hover { color: #718096; }
+
+/* ── 퀴즈 ── */
+#quiz-page { max-width: 680px; }
+.question-card {
+  background: white; border-radius: 16px; padding: 22px 18px 18px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  display: none; animation: fadeIn 0.3s ease;
+}
+.question-card.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.q-number { font-size: 0.67rem; font-weight: 700; color: #718096; margin-bottom: 6px; }
+.q-cat { display: inline-block; font-size: 0.63rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; margin-bottom: 10px; }
+.cat-camera { background: #ebf8ff; color: #2b6cb0; }
+.cat-edit   { background: #f0fff4; color: #276749; }
+.cat-shot   { background: #fff5f5; color: #c53030; }
+.q-text { font-size: 0.93rem; font-weight: 600; line-height: 1.55; margin-bottom: 16px; color: #2d3748; }
+
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s; background: white;
+  text-align: left; width: 100%; font-size: 0.86rem; line-height: 1.45;
+  color: #2d3748; font-family: inherit;
+}
+.option:hover { border-color: #90cdf4; background: #ebf8ff; }
+.option.selected { border-color: #4299e1; background: #ebf8ff; }
+/* 채점자 결과 화면에서만 사용 */
+.option.correct { border-color: #48bb78; background: #f0fff4; color: #276749; }
+.option.wrong   { border-color: #fc8181; background: #fff5f5; color: #c53030; }
+.option.reveal  { border-color: #48bb78; background: #f0fff4; color: #276749; }
+.opt-label {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  background: #edf2f7; display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: #4a5568;
+}
+.option.selected .opt-label { background: #4299e1; color: white; }
+.option.correct  .opt-label { background: #48bb78; color: white; }
+.option.wrong    .opt-label { background: #fc8181; color: white; }
+.option.reveal   .opt-label { background: #48bb78; color: white; }
+
+.q-nav { display: flex; gap: 10px; margin-top: 16px; }
+.btn-qprev { flex: 0 0 52px; padding: 12px; background: #edf2f7; color: #4a5568; border: none; border-radius: 12px; font-size: 0.9rem; cursor: pointer; font-family: inherit; }
+.btn-qprev:hover { background: #e2e8f0; }
+.btn-qnext { display: none; } /* 옵션 클릭으로 대체 — 숨김 */
+.btn-submit-final {
+  display: none; /* 마지막 문제 선택 후에만 표시 */
+  width: 100%; padding: 14px; background: #e53e3e; color: white;
+  border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; font-family: inherit; margin-top: 14px;
+}
+.btn-submit-final:hover { background: #c53030; }
+
+/* ── 제출 완료 (응시자) ── */
+.code-box {
+  background: #edf2f7; border-radius: 12px; padding: 14px;
+  font-family: monospace; font-size: 0.75rem; word-break: break-all;
+  color: #2d3748; text-align: left; line-height: 1.6; margin-top: 14px;
+  max-height: 120px; overflow-y: auto; border: 2px dashed #cbd5e0;
+}
+.guide-steps { text-align: left; margin-top: 16px; }
+.guide-steps li {
+  font-size: 0.83rem; color: #4a5568; padding: 8px 0;
+  border-bottom: 1px solid #f0f4f8; line-height: 1.5;
+  list-style: none; display: flex; gap: 8px; align-items: flex-start;
+}
+.guide-steps li:last-child { border-bottom: none; }
+.step-num {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: #4299e1; color: white; font-size: 0.7rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── 채점자 모드 ── */
+.pw-hint { font-size: 0.72rem; color: #a0aec0; margin-top: 6px; text-align: left; }
+.error-msg { color: #e53e3e; font-size: 0.8rem; margin-top: 8px; display: none; }
+.error-msg.show { display: block; }
+
+/* ── 채점 결과표 ── */
+.result-summary {
+  background: white; border-radius: 16px; padding: 24px 20px;
+  margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.score-big { font-size: 2.8rem; font-weight: 800; color: #2d3748; margin: 6px 0; }
+.score-bar-wrap { background: #e2e8f0; border-radius: 99px; height: 8px; overflow: hidden; margin: 12px 0; }
+.score-bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+.score-table-wrap { background: white; border-radius: 16px; padding: 18px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.score-table-wrap h3 { font-size: 0.88rem; font-weight: 700; margin-bottom: 12px; }
+.score-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.score-table th { background: #edf2f7; padding: 8px 8px; text-align: left; font-weight: 700; color: #4a5568; border-bottom: 2px solid #e2e8f0; }
+.score-table td { padding: 8px 8px; border-bottom: 1px solid #f0f4f8; vertical-align: top; }
+.score-table tr:last-child td { border-bottom: none; }
+.row-correct { background: #f0fff4; }
+.row-wrong   { background: #fff5f5; }
+.tag { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+.tag-o { background: #c6f6d5; color: #276749; }
+.tag-x { background: #fed7d7; color: #c53030; }
+.tag-skip { background: #e2e8f0; color: #718096; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.dot-cam { background: #4299e1; } .dot-edi { background: #48bb78; } .dot-sho { background: #fc8181; }
+
+/* ── Floating ── */
+#floating { position: fixed; bottom: 18px; right: 18px; background: #2d3748; color: white; border-radius: 99px; padding: 8px 16px; font-size: 0.78rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 200; pointer-events: none; display: none; }
+
+/* ── Toast ── */
+#toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); background: #2d3748; color: white; padding: 9px 20px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+#toast.show { opacity: 1; }
+
+@media print {
+  header, #floating, #toast, #start-page, #quiz-page, #submit-page, #examiner-page { display: none !important; }
+  #result-page { display: block !important; padding: 0 !important; }
+  .card, .result-summary, .score-table-wrap { box-shadow: none !important; border: 1px solid #e2e8f0; }
+  .btn-primary, .btn-secondary, .btn-dark, .btn-purple { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header id="main-header">
+  <h1>🎬 애니메이션 용어 예상문제</h1>
+  <p id="header-sub">2024 | 카메라·편집·샷&앵글</p>
+  <div class="progress-bar-wrap" id="prog-wrap" style="display:none">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="prog-label"></div>
+</header>
+
+<!-- ══════════════════════════════════════
+     PAGE 1 : 시작 (응시자)
+══════════════════════════════════════ -->
+<div class="page active" id="start-page">
+  <div class="card">
+    <div class="big-emoji">🎬</div>
+    <h2>애니메이션 용어 시험</h2>
+    <p>카메라 기법, 편집 용어, 샷&앵글에 관한<br>20문항 객관식 시험입니다.</p>
+    <div class="chips">
+      <span class="chip">📋 20문항</span>
+      <span class="chip">⏱ 제한없음</span>
+      <span class="chip">🔒 점수 비공개</span>
+    </div>
+    <div class="field-label">이름 / 학번</div>
+    <input type="text" id="student-name" placeholder="홍길동 또는 2024001" maxlength="20">
+    <button class="btn-primary" onclick="startQuiz()">시험 시작하기 ▶</button>
+    <span class="examiner-link" onclick="goExaminer()">🔐 채점자 모드</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 2 : 퀴즈
+══════════════════════════════════════ -->
+<div class="page" id="quiz-page">
+
+  <div class="question-card" data-answer="1" data-cat="camera">
+    <div class="q-number">문제 1 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">카메라의 위치는 고정된 채, 축을 중심으로 <strong>좌우</strong>로 회전하는 카메라워크는?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>트럭 인/아웃(Truck In/Out)</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>팬(PAN)</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>틸트(Tilt)</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>로테이션(Rotation)</button>
+    </div>
+    <div class="q-nav"><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="camera">
+    <div class="q-number">문제 2 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">A지점에서 B지점으로 카메라를 <strong>매우 빠르게</strong> 이동시켜 속도감을 주며, 장소 전환 트랜지션으로도 쓰이는 팬 기법은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>드리프트 팬(Drift Pan)</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>팔로우 팬(Follow Pan)</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>집 팬(Zip Pan / Whip Pan)</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>일반 팬(Normal Pan)</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="camera">
+    <div class="q-number">문제 3 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">랜덤하게 움직이는 피사체를 따라가는 카메라워크로, <strong>초케 팬</strong> 또는 <strong>메모리 팬</strong>이라고도 불리는 기법은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>집 팬(Zip Pan)</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>팔로우 팬(Follow Pan)</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>드리프트 팬(Drift Pan)</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>고정 카메라(Static)</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="0" data-cat="camera">
+    <div class="q-number">문제 4 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">카메라 자체가 피사체에서 <strong>멀어지는</strong> 트럭 아웃(Truck Out)의 연출 효과로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>피사체와의 단절, 또는 가려진 부분을 드러내는 UNVEIL 효과</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>피사체를 강조하는 효과</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>카메라 축을 중심으로 회전하는 효과</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>피사체를 클로즈업하여 심리를 묘사하는 효과</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="camera">
+    <div class="q-number">문제 5 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">로테이트/로테이션(Rotate/Rotation)으로 표현할 수 있는 이미지의 조합으로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>속도감 / 공간의 확장</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>시간의 흐름 / 장소 전환</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>인물의 불안정한 심리 / 영웅적 이미지</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>피사체의 고립감 / 원근감 강조</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="3" data-cat="camera">
+    <div class="q-number">문제 6 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">이즈 인/아웃(Ease In/Out)을 <strong>사용하지 않아도 되는</strong> 상황은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>고정 카메라로 시작하여 PAN을 시작할 때</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>TRUCK IN/OUT을 멈추어 다시 고정 카메라를 유지할 때</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>PAN을 멈추어 고정 카메라로 전환할 때</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>씬 처음부터 끝까지 드리프트 팬 기법을 사용할 때</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="camera">
+    <div class="q-number">문제 7 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">포커스 인/아웃(Focus In/Out)이 주로 활용되는 상황으로 가장 적절한 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>카메라가 피사체를 향해 직접 이동할 때</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>인물이 의식을 잃거나 회복할 때, POV 샷 등에서</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>두 인물이 대화를 나눌 때 교차 편집하는 경우</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>빠른 속도감을 표현하는 액션 장면에서</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="0" data-cat="camera">
+    <div class="q-number">문제 8 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">심도(Depth of Field)에 영향을 주는 세 가지 요소로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>조리개 / 초점거리 / 피사체와의 거리</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>셔터속도 / 화이트밸런스 / ISO</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>렌즈 종류 / 필터 / 조명</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>카메라 이동 속도 / 피사체 크기 / 배경색</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="camera">
+    <div class="q-number">문제 9 / 20</div><span class="q-cat cat-camera">📷 카메라 용어</span>
+    <p class="q-text">광각렌즈(Wide Angle Lens)의 특성으로 <strong>틀린</strong> 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>넓은 화각의 이미지를 만든다</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>원근감을 강조하여 가까운 물체는 더 가깝게, 먼 물체는 더 멀리 보인다</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>멀리 있는 피사체를 당겨 배경을 압축하는 효과가 있다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>피사 심도를 넓게 표현하여 화면 전체가 초점이 맞은 듯 선명하다</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="3" data-cat="edit">
+    <div class="q-number">문제 10 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">시퀀스(Sequence), 씬(Scene), 컷(Cut) 중 <strong>가장 작은</strong> 편집 단위는?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>시퀀스(Sequence)</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>씬(Scene)</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>시퀀스와 씬은 동일한 단위이다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>컷(Cut)</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="edit">
+    <div class="q-number">문제 11 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">점프 컷(Jump Cut)에 대한 설명으로 <strong>틀린</strong> 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>급격한 장면전환으로 연속성을 깨뜨리는 편집 방식이다</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>시각적으로 유사한 두 장면을 이어 붙여 연속성을 강조하는 기법이다</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>피사체가 갑자기 등장하거나 사라지는 효과를 낼 수 있다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>장 뤽 고다르가 즐겨 사용했으며 &lt;네 멋대로 해라&gt;가 대표작이다</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="edit">
+    <div class="q-number">문제 12 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">점프 컷(Jump Cut)과 <strong>상반되는</strong> 기법으로, 시각적으로 유사한 두 장면을 이어 붙이는 편집 기법은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>크로스컷(Cross cut)</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>스매쉬컷(Smash cut)</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>매치컷(Match cut)</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>액션컷(Action cut)</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="0" data-cat="edit">
+    <div class="q-number">문제 13 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">롱테이크(Long Take)에 대한 설명으로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>일반 상업영화 쇼트(10초 내외)와 달리, 1~2분 이상의 쇼트가 편집 없이 진행되는 것</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>동시간에 일어나는 두 사건을 교차하여 보여주는 편집 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>화면이 사진처럼 정지되는 편집 효과</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>과거 장면으로 전환하는 편집 기법</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="3" data-cat="edit">
+    <div class="q-number">문제 14 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">크로스컷(Cross Cut)의 정의로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>내용 단위로 끊어주는 가장 일반적인 컷</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>동작이 이어지도록 연결하는 편집 기법</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>하나의 쇼트를 컷 없이 길게 촬영하는 기법</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>동시간에 일어나고 있는 다른 사건을 교차하여 동시에 보여주는 편집 기법</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="edit">
+    <div class="q-number">문제 15 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">프리즈 프레임(Freeze Frame)이 주로 사용되는 상황은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>두 인물이 동시에 등장하는 장면 전환 시</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>한 시퀀스의 끝이나 영화의 엔딩을 마무리할 때</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>과거 회상 장면으로 넘어갈 때</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>카메라가 빠르게 이동하는 액션 장면에서</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="edit">
+    <div class="q-number">문제 16 / 20</div><span class="q-cat cat-edit">✂️ 편집 용어</span>
+    <p class="q-text">플래시백(Flashback)에 대한 설명으로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>이야기가 진행되다가 갑자기 미래 장면으로 전환되는 기법</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>화면이 순간적으로 밝아지며 장면을 전환하는 시각 효과</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>이야기 진행 중 갑자기 과거 장면으로 전환되는 기법이며, 반대 개념은 플래시포워드이다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>두 개의 서로 다른 시간대 장면을 동시에 보여주는 기법</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="0" data-cat="shot">
+    <div class="q-number">문제 17 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">마스터 샷(Master Shot)과 이스태블리싱 샷(Establishing Shot)의 <strong>결정적 차이</strong>는?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>이스태블리싱 샷은 배경 중심, 마스터 샷은 배우를 포함하며, 차이는 중심 배우의 유무이다</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>마스터 샷은 클로즈업으로, 이스태블리싱 샷은 롱 샷으로만 촬영된다</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>마스터 샷은 실내에서, 이스태블리싱 샷은 실외에서만 사용된다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>이스태블리싱 샷은 편집 없이 긴 시간 지속되는 샷이다</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="1" data-cat="shot">
+    <div class="q-number">문제 18 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">다음 샷을 화면 크기가 <strong>넓은 것 → 좁은 것</strong> 순으로 올바르게 나열한 것은?<br><small style="color:#718096;font-weight:400">① 미디엄 클로즈업 ② 익스트림 롱 샷 ③ 풀 샷 ④ 익스트림 클로즈업 ⑤ 카우보이 샷</small></p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>③ → ② → ⑤ → ① → ④</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>② → ③ → ⑤ → ① → ④</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>② → ③ → ① → ⑤ → ④</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>② → ⑤ → ③ → ① → ④</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="3" data-cat="shot">
+    <div class="q-number">문제 19 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">카우보이 샷(Cowboy Shot)에 대한 설명으로 올바른 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>인물의 발끝까지 보이는 샷으로 풀 샷(Full Shot)과 동일하다</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>카메라를 매우 낮은 위치에서 위를 향해 촬영하는 앵글 기법이다</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>인물의 얼굴만 극단적으로 클로즈업하는 기법이다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>인물의 허리 둘레까지 포착하는 미디엄 풀 샷의 일종으로, 총이나 칼의 움직임을 보여줄 때 활용된다</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" onclick="recordAndNext(this)">다음 ▶</button></div>
+  </div>
+
+  <div class="question-card" data-answer="2" data-cat="shot">
+    <div class="q-number">문제 20 / 20</div><span class="q-cat cat-shot">🎯 샷 & 앵글</span>
+    <p class="q-text">시점 샷(POV Shot, Point of View)에 대한 설명으로 <strong>틀린</strong> 것은?</p>
+    <div class="options">
+      <button class="option" data-idx="0"><span class="opt-label">A</span>사건 참여자인 인물의 눈에 보이는 주관적인 장면이다</button>
+      <button class="option" data-idx="1"><span class="opt-label">B</span>관객이 등장인물의 시선으로 다른 인물과 배경을 보며 등장인물과 동일시된다</button>
+      <button class="option" data-idx="2"><span class="opt-label">C</span>객관적인 시점으로 사건 전체를 조망하는 기법이다</button>
+      <button class="option" data-idx="3"><span class="opt-label">D</span>인물이 의식을 잃을 때 포커스 인/아웃과 함께 사용되기도 한다</button>
+    </div>
+    <div class="q-nav"><button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-submit-final" onclick="finalSubmit()">📤 제출하기</button></div>
+  </div>
+
+</div><!-- /quiz-page -->
+
+<!-- ══════════════════════════════════════
+     PAGE 3 : 제출 완료 (응시자)
+══════════════════════════════════════ -->
+<div class="page" id="submit-page">
+  <div class="card">
+    <div class="big-emoji">✅</div>
+    <h2>제출이 완료되었습니다</h2>
+    <p>점수는 채점자만 확인할 수 있습니다.<br>아래 <strong>결과코드</strong>를 복사해서 채점자에게 전달해 주세요.</p>
+    <div id="result-code-box" class="code-box"></div>
+    <button class="btn-purple" onclick="copyCode()">📋 결과코드 복사</button>
+    <ul class="guide-steps" style="margin-top:20px">
+      <li><span class="step-num">1</span>위 <strong>결과코드 복사</strong> 버튼을 누르세요</li>
+      <li><span class="step-num">2</span>카카오톡·문자 등으로 채점자에게 전송하세요</li>
+      <li><span class="step-num">3</span>채점자는 같은 파일에서 <strong>채점자 모드</strong>로 확인합니다</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 4 : 채점자 모드 입장
+══════════════════════════════════════ -->
+<div class="page" id="examiner-page">
+  <div class="card">
+    <div class="big-emoji">🔐</div>
+    <h2>채점자 모드</h2>
+    <p>채점자 비밀번호를 입력하고<br>응시자에게 받은 결과코드를 붙여넣으세요.</p>
+    <div class="field-label">채점자 비밀번호</div>
+    <input type="password" id="pw-input" placeholder="비밀번호 입력" onkeydown="if(e.key==='Enter')checkPw()">
+    <div class="pw-hint">※ 기본 비밀번호: <strong>1234</strong></div>
+    <div class="field-label" style="margin-top:16px">결과코드 붙여넣기</div>
+    <textarea id="code-input" rows="4" placeholder="응시자에게 받은 결과코드를 여기에 붙여넣으세요"></textarea>
+    <div class="error-msg" id="pw-error">비밀번호가 올바르지 않습니다.</div>
+    <div class="error-msg" id="code-error">결과코드가 올바르지 않습니다.</div>
+    <button class="btn-primary" onclick="checkPw()">채점 결과 확인 →</button>
+    <button class="btn-secondary" onclick="goPage('start-page')">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 5 : 채점 결과 (채점자)
+══════════════════════════════════════ -->
+<div class="page" id="result-page">
+
+  <div class="result-summary">
+    <div style="font-size:0.8rem;color:#718096;margin-bottom:4px">채점 결과</div>
+    <div style="font-size:1rem;font-weight:700" id="res-name"></div>
+    <div class="score-big" id="res-score"></div>
+    <div style="font-size:0.85rem;color:#718096" id="res-label"></div>
+    <div class="score-bar-wrap"><div class="score-bar-fill" id="res-bar" style="width:0%"></div></div>
+    <div style="font-size:1.1rem;font-weight:700;margin-bottom:4px" id="res-grade"></div>
+    <div style="font-size:0.82rem;color:#4a5568" id="res-msg"></div>
+    <div style="font-size:0.72rem;color:#a0aec0;margin-top:10px" id="res-time"></div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:14px">
+    <button class="btn-dark" style="margin:0;flex:1" onclick="window.print()">🖨️ 인쇄/저장</button>
+    <button class="btn-secondary" style="margin:0;flex:1" onclick="goPage('examiner-page')">← 다른 결과 확인</button>
+  </div>
+
+  <div class="score-table-wrap">
+    <h3>📊 문항별 정오표</h3>
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th style="width:34px">번호</th>
+          <th style="width:56px">영역</th>
+          <th>응시자 선택</th>
+          <th style="width:40px;text-align:center">결과</th>
+        </tr>
+      </thead>
+      <tbody id="res-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div id="floating">📝 0 / 20 완료</div>
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────
+//  데이터
+// ─────────────────────────────────────
+const TOTAL   = 20;
+const PASS_WD = '5798';   // ← 채점자 비밀번호 (여기서 변경 가능)
+const LABELS  = ['A','B','C','D'];
+const CAT_LABEL = { camera:'카메라', edit:'편집', shot:'샷&앵글' };
+const CAT_DOT   = { camera:'dot-cam', edit:'dot-edi', shot:'dot-sho' };
+
+const ANSWERS = [1,2,1,0,2,3,1,0,2,3,1,2,0,3,1,2,0,1,3,2]; // 20문항 정답 인덱스
+
+const OPT_TEXTS = [
+  ['트럭 인/아웃(Truck In/Out)','팬(PAN)','틸트(Tilt)','로테이션(Rotation)'],
+  ['드리프트 팬(Drift Pan)','팔로우 팬(Follow Pan)','집 팬(Zip Pan / Whip Pan)','일반 팬(Normal Pan)'],
+  ['집 팬(Zip Pan)','팔로우 팬(Follow Pan)','드리프트 팬(Drift Pan)','고정 카메라(Static)'],
+  ['피사체와의 단절·UNVEIL 효과','피사체 강조 효과','카메라 축 회전 효과','클로즈업 심리 묘사 효과'],
+  ['속도감/공간 확장','시간 흐름/장소 전환','불안정한 심리/영웅적 이미지','고립감/원근감 강조'],
+  ['PAN 시작 시','Truck 멈추어 고정 전환 시','PAN 멈추어 고정 전환 시','씬 전체 드리프트 팬 사용 시'],
+  ['카메라 직접 이동 시','의식 상실/회복 시, POV 샷 등','교차 편집 시','액션 장면에서'],
+  ['조리개/초점거리/피사체와의 거리','셔터속도/화이트밸런스/ISO','렌즈종류/필터/조명','이동속도/피사체크기/배경색'],
+  ['넓은 화각 이미지 생성','원근감 강조(가까운→더가까이, 먼→더멀리)','배경 압축 효과(망원렌즈 특성)','피사 심도 넓게 표현'],
+  ['시퀀스(Sequence)','씬(Scene)','시퀀스=씬 동일 단위','컷(Cut)'],
+  ['연속성을 깨뜨리는 편집 방식','유사 장면을 이어 붙여 연속성 강조(매치컷)','갑작스런 등장/소멸 효과 가능','장 뤽 고다르 대표 기법'],
+  ['크로스컷(Cross cut)','스매쉬컷(Smash cut)','매치컷(Match cut)','액션컷(Action cut)'],
+  ['편집 없는 1~2분 이상의 쇼트','두 사건 교차 편집 기법','화면 정지 효과','과거 장면 전환 기법'],
+  ['내용단위 컷','동작 연결 편집','컷 없이 길게 촬영','동시간 다른 사건 교차 편집'],
+  ['두 인물 동시 등장 전환 시','시퀀스 끝·영화 엔딩 마무리 시','과거 회상 장면 전환 시','액션 장면에서'],
+  ['미래 장면 전환 기법','화면 밝아짐 시각 효과','과거 장면 전환, 반대=플래시포워드','다른 시간대 동시 표시'],
+  ['배경 중심 vs 배우 포함(배우 유무 차이)','마스터=클로즈업, 이스태블리싱=롱샷','마스터=실내, 이스태블리싱=실외','이스태블리싱=긴 지속 샷'],
+  ['③→②→⑤→①→④','②→③→⑤→①→④','②→③→①→⑤→④','②→⑤→③→①→④'],
+  ['풀 샷(Full Shot)과 동일','낮은 위치에서 위를 향한 앵글','얼굴만 극단 클로즈업','허리 둘레 포착 미디엄 풀 샷, 총/칼 행동 표현'],
+  ['사건 참여자 주관적 시점','관객=등장인물과 동일시','객관적 시점으로 전체 조망(틀림)','의식 잃을 때 포커스 인/아웃과 사용'],
+];
+
+// ─────────────────────────────────────
+//  상태
+// ─────────────────────────────────────
+let current = 0;
+let chosen  = new Array(TOTAL).fill(null);
+let studentName = '';
+let resultCode  = '';
+
+const cards = document.querySelectorAll('.question-card');
+
+// ─────────────────────────────────────
+//  페이지 전환
+// ─────────────────────────────────────
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const inQuiz = id === 'quiz-page';
+  document.getElementById('prog-wrap').style.display  = inQuiz ? 'block' : 'none';
+  document.getElementById('floating').style.display   = inQuiz ? 'block' : 'none';
+  window.scrollTo(0,0);
+}
+
+// ─────────────────────────────────────
+//  시작
+// ─────────────────────────────────────
+function startQuiz() {
+  studentName = document.getElementById('student-name').value.trim() || '(미입력)';
+  chosen = new Array(TOTAL).fill(null);
+  current = 0;
+  cards.forEach(c => {
+    c.querySelectorAll('.option').forEach(o => {
+      o.classList.remove('selected');
+      o.style.pointerEvents = '';
+    });
+    const nb = c.querySelector('.btn-qnext, .btn-submit-final');
+    if (nb && nb.classList.contains('btn-submit-final')) { /* keep */ }
+    else if (nb) { nb.textContent = '다음 ▶'; nb.onclick = function(){ recordAndNext(this); }; }
+  });
+  goPage('quiz-page');
+  showCard(0);
+  updateFloating();
+}
+
+document.getElementById('student-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startQuiz();
+});
+
+// ─────────────────────────────────────
+//  카드 이동
+// ─────────────────────────────────────
+function showCard(idx) {
+  cards.forEach((c,i) => c.classList.toggle('active', i === idx));
+  current = idx;
+  const pct = Math.round(((idx+1)/TOTAL)*100);
+  document.getElementById('prog-fill').style.width  = pct+'%';
+  document.getElementById('prog-label').textContent = (idx+1)+' / '+TOTAL;
+}
+
+function prevQ() { if (current > 0) showCard(current-1); }
+
+// ─────────────────────────────────────
+//  선택 → 즉시 다음으로 (1회 터치/클릭)
+// ─────────────────────────────────────
+document.querySelectorAll('.option').forEach(o => {
+  o.addEventListener('click', () => {
+    const card = o.closest('.question-card');
+    if (card.dataset.locked) return;
+    card.querySelectorAll('.option').forEach(x => x.classList.remove('selected'));
+    o.classList.add('selected');
+
+    const qi = Array.from(cards).indexOf(card);
+    chosen[qi] = parseInt(o.dataset.idx);
+    card.dataset.locked = '1';
+    card.querySelectorAll('.option').forEach(x => x.style.pointerEvents = 'none');
+    updateFloating();
+
+    if (qi < TOTAL - 1) {
+      // 약간의 딜레이로 선택 표시 확인 후 이동
+      setTimeout(() => showCard(qi + 1), 180);
+    } else {
+      // 마지막 문제: 제출 버튼 활성화
+      const submitBtn = card.querySelector('.btn-submit-final');
+      if (submitBtn) {
+        submitBtn.style.display = 'block';
+        submitBtn.style.animation = 'fadeIn 0.3s ease';
+      }
+    }
+  });
+});
+
+// ─────────────────────────────────────
+//  다음 버튼 (하위 호환 — 실제론 미사용)
+// ─────────────────────────────────────
+function recordAndNext(btn) { /* 옵션 클릭으로 대체됨 */ }
+
+// ─────────────────────────────────────
+//  최종 제출
+// ─────────────────────────────────────
+function finalSubmit() {
+  const card = cards[TOTAL-1];
+  if (chosen[TOTAL-1] === null) { showToast('보기를 선택해 주세요'); return; }
+
+  // 결과코드 생성 (base64)
+  const payload = { n: studentName, a: chosen, t: Date.now() };
+  resultCode = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+  document.getElementById('result-code-box').textContent = resultCode;
+  goPage('submit-page');
+}
+
+function updateFloating() {
+  const done = chosen.filter(v => v !== null).length;
+  document.getElementById('floating').textContent = '📝 '+done+' / '+TOTAL+' 완료';
+}
+
+// ─────────────────────────────────────
+//  결과코드 복사
+// ─────────────────────────────────────
+function copyCode() {
+  navigator.clipboard.writeText(resultCode).then(() => {
+    showToast('결과코드가 복사되었습니다!');
+  }).catch(() => {
+    showToast('복사 실패 — 직접 선택 후 복사해 주세요');
+  });
+}
+
+// ─────────────────────────────────────
+//  채점자 모드
+// ─────────────────────────────────────
+function goExaminer() { goPage('examiner-page'); }
+
+function checkPw() {
+  const pw   = document.getElementById('pw-input').value;
+  const code = document.getElementById('code-input').value.trim();
+  document.getElementById('pw-error').classList.remove('show');
+  document.getElementById('code-error').classList.remove('show');
+
+  if (pw !== PASS_WD) {
+    document.getElementById('pw-error').classList.add('show');
+    return;
+  }
+  if (!code) { showToast('결과코드를 붙여넣어 주세요'); return; }
+
+  let payload;
+  try {
+    payload = JSON.parse(decodeURIComponent(escape(atob(code))));
+    if (!Array.isArray(payload.a) || payload.a.length !== TOTAL) throw new Error();
+  } catch(e) {
+    document.getElementById('code-error').classList.add('show');
+    return;
+  }
+
+  showResult(payload);
+}
+
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPw();
+});
+
+// ─────────────────────────────────────
+//  결과 화면 렌더
+// ─────────────────────────────────────
+function showResult(payload) {
+  const name   = payload.n || '(미입력)';
+  const ans    = payload.a;
+  const ts     = payload.t ? new Date(payload.t).toLocaleString('ko-KR') : '';
+  const correct = ans.reduce((s,v,i) => s + (v === ANSWERS[i] ? 1 : 0), 0);
+  const pct    = Math.round(correct/TOTAL*100);
+
+  document.getElementById('res-name').textContent  = '응시자: '+name;
+  document.getElementById('res-score').textContent = pct+'점';
+  document.getElementById('res-label').textContent = '20문제 중 '+correct+'개 정답';
+  document.getElementById('res-time').textContent  = ts ? '제출 일시: '+ts : '';
+
+  const bar = document.getElementById('res-bar');
+  bar.style.background = pct>=80 ? '#48bb78' : pct>=60 ? '#ed8936' : '#fc8181';
+  setTimeout(() => bar.style.width = pct+'%', 100);
+
+  let grade, msg;
+  if      (pct===100) { grade='만점! 🏆';       msg='모든 용어를 완벽히 이해하고 있습니다.'; }
+  else if (pct>=80)   { grade='우수 (A) 🎖️';   msg='대부분의 용어를 잘 알고 있습니다.'; }
+  else if (pct>=60)   { grade='보통 (B) 📚';    msg='기본 개념은 이해했습니다. 틀린 항목을 복습하세요.'; }
+  else                 { grade='재도전 필요 💪'; msg='용어 자료를 다시 확인하고 재응시를 권장합니다.'; }
+
+  document.getElementById('res-grade').textContent = grade;
+  document.getElementById('res-msg').textContent   = msg;
+
+  // 정오표
+  const tbody = document.getElementById('res-tbody');
+  tbody.innerHTML = '';
+  const catList = ['camera','camera','camera','camera','camera','camera','camera','camera','camera',
+                   'edit','edit','edit','edit','edit','edit','edit','shot','shot','shot','shot'];
+
+  ans.forEach((v, i) => {
+    const isRight = v === ANSWERS[i];
+    const tr = document.createElement('tr');
+    tr.className = isRight ? 'row-correct' : 'row-wrong';
+    const chosen_text = v !== null ? LABELS[v]+'. '+OPT_TEXTS[i][v] : '—';
+    const correct_text = LABELS[ANSWERS[i]]+'. '+OPT_TEXTS[i][ANSWERS[i]];
+    const tag = isRight
+      ? '<span class="tag tag-o">✅ 정답</span>'
+      : '<span class="tag tag-x">❌ 오답</span>';
+    tr.innerHTML = `
+      <td style="font-weight:700;text-align:center">${i+1}</td>
+      <td><span class="dot ${CAT_DOT[catList[i]]}"></span>${CAT_LABEL[catList[i]]}</td>
+      <td>
+        <div style="color:#2d3748">${chosen_text}</div>
+        ${!isRight ? `<div style="color:#276749;font-size:0.73rem;margin-top:3px">정답: ${correct_text}</div>` : ''}
+      </td>
+      <td style="text-align:center">${tag}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('pw-input').value   = '';
+  document.getElementById('code-input').value = '';
+  goPage('result-page');
+}
+
+// ─────────────────────────────────────
+//  Toast
+// ─────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
