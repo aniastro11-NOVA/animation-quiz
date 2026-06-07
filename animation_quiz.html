@@ -124,7 +124,8 @@ input:focus, textarea:focus { border-color: #4299e1; }
 .q-nav { display: flex; gap: 10px; margin-top: 16px; }
 .btn-qprev { flex: 0 0 52px; padding: 12px; background: #edf2f7; color: #4a5568; border: none; border-radius: 12px; font-size: 0.9rem; cursor: pointer; font-family: inherit; }
 .btn-qprev:hover { background: #e2e8f0; }
-.btn-qnext { display: none; } /* 옵션 클릭으로 대체 — 숨김 */
+.btn-qnext { flex: 0 0 52px; padding: 12px; background: #edf2f7; color: #4a5568; border: none; border-radius: 12px; font-size: 0.9rem; cursor: pointer; font-family: inherit; display: none; }
+.btn-qnext:hover { background: #e2e8f0; }
 .btn-submit-final {
   display: none; /* 마지막 문제 선택 후에만 표시 */
   width: 100%; padding: 14px; background: #e53e3e; color: white;
@@ -403,17 +404,15 @@ function renderCards() {
       `<button class="option" data-idx="${oi}"><span class="opt-label">${LABELS[oi]}</span>${opt}</button>`
     ).join('');
 
-    const navHtml = (qi < TOTAL - 1)
-      ? `<button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-qnext" style="display:none">다음 ▶</button>`
-      : `<button class="btn-qprev" onclick="prevQ()">◀</button><button class="btn-submit-final" onclick="finalSubmit()">📤 제출하기</button>`;
-    const prevBtn = (qi === 0) ? '' : `<button class="btn-qprev" onclick="prevQ()">◀</button>`;
-    const lastBtn = (qi < TOTAL - 1) ? '' : `<button class="btn-submit-final" onclick="finalSubmit()">📤 제출하기</button>`;
+    const prevBtn   = (qi === 0)        ? '' : `<button class="btn-qprev" onclick="prevQ()">◀</button>`;
+    const nextBtn   = (qi < TOTAL - 1) ? `<button class="btn-qnext" onclick="nextQ()">▶</button>` : '';
+    const submitBtn = (qi === TOTAL-1)  ? `<button class="btn-submit-final" onclick="finalSubmit()">📤 제출하기</button>` : '';
 
     card.innerHTML = `
       <div class="q-number">문제 ${qi+1} / ${TOTAL}</div><span class="q-cat cat-${q.cat}">${CAT_EMOJI[q.cat]}</span>
       <p class="q-text">${q.q}</p>
       <div class="options">${optsHtml}</div>
-      <div class="q-nav">${prevBtn}${lastBtn}</div>`;
+      <div class="q-nav">${prevBtn}${nextBtn}${submitBtn}</div>`;
     wrap.appendChild(card);
   });
 
@@ -470,7 +469,37 @@ function showCard(idx) {
   document.getElementById('prog-label').textContent = (idx+1)+' / '+TOTAL;
 }
 
-function prevQ() { if (current > 0) showCard(current-1); }
+function prevQ() {
+  if (current > 0) {
+    enterReviewMode(cards[current - 1]);
+    showCard(current - 1);
+  }
+}
+
+function nextQ() {
+  if (current < TOTAL - 1) {
+    const next = cards[current + 1];
+    if (chosen[current + 1] !== null) enterReviewMode(next);
+    showCard(current + 1);
+  }
+}
+
+function enterReviewMode(card) {
+  const qi = Array.from(cards).indexOf(card);
+  delete card.dataset.locked;
+  card.dataset.reviewing = '1';
+  card.querySelectorAll('.option').forEach((o, i) => {
+    o.style.pointerEvents = '';
+    o.classList.toggle('selected', i === chosen[qi]);
+  });
+  if (qi < TOTAL - 1) {
+    const fwd = card.querySelector('.btn-qnext');
+    if (fwd) fwd.style.display = '';
+  } else {
+    const sub = card.querySelector('.btn-submit-final');
+    if (sub && chosen[qi] !== null) sub.style.display = 'block';
+  }
+}
 
 // ─────────────────────────────────────
 //  선택 → 즉시 다음으로 (1회 터치/클릭)
@@ -485,9 +514,18 @@ function attachOptionHandlers() {
 
       const qi = Array.from(cards).indexOf(card);
       chosen[qi] = parseInt(o.dataset.idx);
+      updateFloating();
+
+      if (card.dataset.reviewing) {
+        if (qi === TOTAL - 1) {
+          const sub = card.querySelector('.btn-submit-final');
+          if (sub) sub.style.display = 'block';
+        }
+        return;
+      }
+
       card.dataset.locked = '1';
       card.querySelectorAll('.option').forEach(x => x.style.pointerEvents = 'none');
-      updateFloating();
 
       if (qi < TOTAL - 1) {
         setTimeout(() => showCard(qi + 1), 180);
