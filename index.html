@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>단추 배식 관리</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      background: #fdf6ee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .dog-emoji { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #3d2b1f;
+    }
+
+    header p {
+      font-size: 13px;
+      color: #a0856a;
+      margin-top: 4px;
+    }
+
+    /* 오늘 날짜 */
+    .date-bar {
+      background: #fff;
+      border: 1.5px solid #e8d5c0;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #7a5c3e;
+      margin-bottom: 24px;
+      text-align: center;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* 배식 카드 */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .card {
+      background: #fff;
+      border: 2px solid #e8d5c0;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .card-icon { font-size: 32px; }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #3d2b1f;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: #a0856a;
+      margin-top: 2px;
+    }
+
+    /* 상태 배지 */
+    .status-badge {
+      margin-left: auto;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-badge.ok {
+      background: #fff0e0;
+      color: #d4733a;
+    }
+
+    .status-badge.done {
+      background: #e6f4ea;
+      color: #2e7d32;
+    }
+
+    /* 배식 기록 목록 */
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+      min-height: 40px;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fdf6ee;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 14px;
+    }
+
+    .log-item .who {
+      font-weight: 700;
+      color: #3d2b1f;
+    }
+
+    .log-item .when {
+      font-size: 12px;
+      color: #a0856a;
+    }
+
+    .log-item .delete-btn {
+      background: none;
+      border: none;
+      color: #c9a07a;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 0 0 8px;
+      line-height: 1;
+    }
+
+    .log-item .delete-btn:hover { color: #c0392b; }
+
+    .empty-msg {
+      color: #c9a07a;
+      font-size: 13px;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* 배식하기 버튼 그룹 */
+    .member-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .member-btn {
+      padding: 10px 0;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      color: #fff;
+    }
+
+    .member-btn:active { transform: scale(.96); }
+    .member-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .member-btn.m0 { background: #e07b39; border-color: #c96b2a; }
+    .member-btn.m1 { background: #4f8edc; border-color: #3a72b8; }
+    .member-btn.m2 { background: #5cb87a; border-color: #3e9c5c; }
+    .member-btn.m3 { background: #a67cc4; border-color: #8c5eaa; }
+
+    /* 초기화 버튼 */
+    .reset-section {
+      width: 100%;
+      max-width: 420px;
+      margin-top: 24px;
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: 2px solid #e8d5c0;
+      background: #fff;
+      color: #a0856a;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .reset-btn:hover { background: #fdf0e4; }
+
+    /* 오늘 히스토리 */
+    .history-section {
+      width: 100%;
+      max-width: 420px;
+      margin-top: 24px;
+    }
+
+    .history-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #7a5c3e;
+      margin-bottom: 10px;
+      padding-left: 4px;
+    }
+
+    .history-table {
+      background: #fff;
+      border: 1.5px solid #e8d5c0;
+      border-radius: 14px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    .history-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th {
+      background: #fdf0e4;
+      color: #7a5c3e;
+      font-weight: 700;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .history-table td {
+      padding: 9px 14px;
+      border-top: 1px solid #f0e4d4;
+      color: #3d2b1f;
+    }
+
+    .history-table tr:last-child td { border-bottom: none; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tag.food { background: #fff0e0; color: #d4733a; }
+    .tag.water { background: #e0f0ff; color: #2176ae; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="dog-emoji">🐾</div>
+  <h1>단추 배식 관리</h1>
+  <p>비바티즈 · 3.2kg · 식구 4명</p>
+</header>
+
+<div class="date-bar" id="dateBar"></div>
+
+<div class="cards">
+  <!-- 사료 카드 -->
+  <div class="card" id="card-food">
+    <div class="card-header">
+      <span class="card-icon">🍖</span>
+      <div>
+        <div class="card-title">사료</div>
+        <div class="card-subtitle">하루 권장 횟수: 2회</div>
+      </div>
+      <span class="status-badge" id="badge-food">대기중</span>
+    </div>
+    <div class="log-list" id="log-food"></div>
+    <div class="member-buttons" id="btns-food"></div>
+  </div>
+
+  <!-- 물 카드 -->
+  <div class="card" id="card-water">
+    <div class="card-header">
+      <span class="card-icon">💧</span>
+      <div>
+        <div class="card-title">물</div>
+        <div class="card-subtitle">신선한 물 상시 제공</div>
+      </div>
+      <span class="status-badge" id="badge-water">대기중</span>
+    </div>
+    <div class="log-list" id="log-water"></div>
+    <div class="member-buttons" id="btns-water"></div>
+  </div>
+</div>
+
+<div class="reset-section">
+  <button class="reset-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
+</div>
+
+<div class="history-section">
+  <div class="history-title">📋 오늘 전체 배식 기록</div>
+  <div class="history-table">
+    <table>
+      <thead>
+        <tr>
+          <th>시간</th>
+          <th>구분</th>
+          <th>담당</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const MEMBERS = ['엄마', '아빠', '첫째', '둘째'];
+  const STORAGE_KEY = 'danchu_feeding';
+  const MAX_FOOD_PER_DAY = 2;
+
+  // ── 날짜 표시 ──────────────────────────────────────────
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatDate(d) {
+    const days = ['일','월','화','수','목','금','토'];
+    return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  }
+
+  document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+
+  // ── 저장소 ─────────────────────────────────────────────
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const data = raw ? JSON.parse(raw) : {};
+      const key = todayKey();
+      if (data.date !== key) {
+        // 날짜가 바뀌면 초기화
+        return { date: key, food: [], water: [] };
+      }
+      return data;
+    } catch { return { date: todayKey(), food: [], water: [] }; }
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  // ── 렌더링 ─────────────────────────────────────────────
+  function timeStr() {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function render() {
+    const data = loadData();
+    renderCard('food', data, MAX_FOOD_PER_DAY);
+    renderCard('water', data, Infinity);
+    renderHistory(data);
+  }
+
+  function renderCard(type, data, maxCount) {
+    const logs = data[type];
+    const logEl = document.getElementById('log-' + type);
+    const btnsEl = document.getElementById('btns-' + type);
+    const badge = document.getElementById('badge-' + type);
+
+    // 로그 목록
+    if (logs.length === 0) {
+      logEl.innerHTML = '<div class="empty-msg">아직 배식 기록이 없습니다</div>';
+    } else {
+      logEl.innerHTML = logs.map((entry, i) =>
+        `<div class="log-item">
+          <span class="who">${entry.who}</span>
+          <span class="when">${entry.time}</span>
+          <button class="delete-btn" onclick="deleteEntry('${type}',${i})" title="취소">✕</button>
+        </div>`
+      ).join('');
+    }
+
+    // 배지
+    const isFull = logs.length >= maxCount;
+    badge.textContent = isFull ? `완료 (${logs.length}회)` : `${logs.length}회 완료`;
+    badge.className = 'status-badge ' + (logs.length > 0 ? 'done' : 'ok');
+
+    // 멤버 버튼 — 이미 오늘 준 사람은 비활성화
+    const fedNames = new Set(logs.map(l => l.who));
+    btnsEl.innerHTML = MEMBERS.map((name, idx) => {
+      const alreadyFed = fedNames.has(name);
+      const tooMany = isFull;
+      const disabled = (alreadyFed || tooMany) ? 'disabled' : '';
+      const title = alreadyFed
+        ? `${name}: 이미 ${type === 'food' ? '사료' : '물'} 줬어요`
+        : tooMany ? `오늘 ${type === 'food' ? '사료' : '물'} 배식 완료` : '';
+      return `<button class="member-btn m${idx}" ${disabled} title="${title}"
+                onclick="feed('${type}','${name}')">${name}${alreadyFed ? ' ✓' : ''}</button>`;
+    }).join('');
+  }
+
+  function renderHistory(data) {
+    const all = [
+      ...data.food.map(e => ({...e, type: 'food'})),
+      ...data.water.map(e => ({...e, type: 'water'})),
+    ].sort((a, b) => a.time.localeCompare(b.time));
+
+    const tbody = document.getElementById('historyBody');
+    if (all.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>';
+    } else {
+      tbody.innerHTML = all.map(e =>
+        `<tr>
+          <td>${e.time}</td>
+          <td><span class="tag ${e.type}">${e.type === 'food' ? '🍖 사료' : '💧 물'}</span></td>
+          <td>${e.who}</td>
+        </tr>`
+      ).join('');
+    }
+  }
+
+  // ── 액션 ───────────────────────────────────────────────
+  function feed(type, who) {
+    const data = loadData();
+    const logs = data[type];
+
+    if (logs.some(l => l.who === who)) {
+      alert(`${who}는 이미 오늘 ${type === 'food' ? '사료' : '물'}을 줬어요! 🐾`);
+      return;
+    }
+
+    if (type === 'food' && logs.length >= MAX_FOOD_PER_DAY) {
+      alert(`오늘 사료 배식 횟수(${MAX_FOOD_PER_DAY}회)를 초과했어요.`);
+      return;
+    }
+
+    data[type].push({ who, time: timeStr() });
+    saveData(data);
+    render();
+  }
+
+  function deleteEntry(type, index) {
+    const data = loadData();
+    data[type].splice(index, 1);
+    saveData(data);
+    render();
+  }
+
+  function resetDay() {
+    if (!confirm('오늘 배식 기록을 모두 초기화할까요?')) return;
+    const fresh = { date: todayKey(), food: [], water: [] };
+    saveData(fresh);
+    render();
+  }
+
+  // 최초 렌더
+  render();
+
+  // 자정 자동 초기화 (탭을 오래 열어둔 경우)
+  setInterval(() => {
+    const data = loadData();
+    if (data.date !== todayKey()) render();
+  }, 60 * 1000);
+</script>
+</body>
+</html>
