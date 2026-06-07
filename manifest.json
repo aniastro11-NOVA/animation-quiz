@@ -1,0 +1,15 @@
+{
+  "name": "단추 배식 관리",
+  "short_name": "단추밥",
+  "description": "비바티즈 단추의 사료·물 이중 배식 방지 앱",
+  "start_url": "/animation-quiz/index.html",
+  "display": "standalone",
+  "background_color": "#fdf6ee",
+  "theme_color": "#e07b39",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
