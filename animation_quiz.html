@@ -236,6 +236,8 @@ input:focus, textarea:focus { border-color: #4299e1; }
     </div>
     <div class="field-label">이름 / 학번</div>
     <input type="text" id="student-name" placeholder="홍길동 또는 2024001" maxlength="20">
+    <div class="field-label" style="margin-top:12px">세트 코드 <span style="font-weight:400;color:#a0aec0;font-size:0.75rem">(선택 — 채점자가 지정한 경우만 입력)</span></div>
+    <input type="text" id="set-code-input" placeholder="예: 7392" maxlength="4" style="text-align:center;font-size:1.2rem;letter-spacing:0.15em">
     <button class="btn-primary" onclick="startQuiz()">퀴즈 시작하기 ▶</button>
     <span class="examiner-link" onclick="goExaminer()">🔐 채점자 모드</span>
   </div>
@@ -286,6 +288,16 @@ input:focus, textarea:focus { border-color: #4299e1; }
     <div class="error-msg" id="pw-error">비밀번호가 올바르지 않습니다.</div>
     <div class="error-msg" id="code-error">결과코드가 올바르지 않습니다.</div>
     <button class="btn-primary" onclick="checkPw()">채점 결과 확인 →</button>
+    <div style="margin-top:20px;border-top:1px solid #e2e8f0;padding-top:16px">
+      <div class="field-label">퀴즈 새로 고침</div>
+      <p style="font-size:0.82rem;color:#718096;margin:4px 0 12px">버튼을 누르면 새로운 랜덤 20문항 세트가 만들어집니다.<br>생성된 세트 코드를 응시자에게 알려주세요.</p>
+      <button class="btn-dark" onclick="generateNewSet()">🔄 새 문제 세트 생성</button>
+      <div id="new-set-code-wrap" style="display:none;margin-top:12px;background:#edf2f7;border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:0.75rem;color:#718096;margin-bottom:6px">세트 코드 (응시자에게 전달)</div>
+        <div style="font-size:2.4rem;font-weight:800;letter-spacing:0.18em;color:#2d3748" id="new-set-code"></div>
+        <button class="btn-secondary" style="margin-top:10px" onclick="copySetCode()">📋 세트 코드 복사</button>
+      </div>
+    </div>
     <button class="btn-secondary" onclick="goPage('start-page')">← 돌아가기</button>
   </div>
 </div>
@@ -456,15 +468,17 @@ function goPage(id) {
 // ─────────────────────────────────────
 function startQuiz() {
   studentName = document.getElementById('student-name').value.trim() || '(미입력)';
+  const setCodeInput = document.getElementById('set-code-input').value.trim();
 
-  // 혹시 자정을 넘겨 대기 중이었다면 오늘 날짜 기준으로 세트 재확정
-  dailyKey     = todayKey();
-  questionIdx  = pickDailyIndices(dailyKey);
-  shuffledData = computeShuffledData(dailyKey, questionIdx);
+  dailyKey = todayKey();
+  const seedKey = setCodeInput ? 'set-' + setCodeInput : dailyKey;
+
+  questionIdx  = pickDailyIndices(seedKey);
+  shuffledData = computeShuffledData(seedKey, questionIdx);
   ANSWERS      = shuffledData.map(d => d.ans);
   OPT_TEXTS    = shuffledData.map(d => d.opts);
   catList      = questionIdx.map(i => BANK[i].cat);
-  document.getElementById('today-date').textContent = dailyKey;
+  document.getElementById('today-date').textContent = setCodeInput ? '세트 #' + setCodeInput : dailyKey;
 
   chosen = new Array(TOTAL).fill(null);
   current = 0;
@@ -688,6 +702,31 @@ function showResult(payload) {
   document.getElementById('pw-input').value   = '';
   document.getElementById('code-input').value = '';
   goPage('result-page');
+}
+
+// ─────────────────────────────────────
+//  채점자 — 새 문제 세트 생성
+// ─────────────────────────────────────
+function generateNewSet() {
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const seedKey = 'set-' + code;
+  questionIdx  = pickDailyIndices(seedKey);
+  shuffledData = computeShuffledData(seedKey, questionIdx);
+  ANSWERS      = shuffledData.map(d => d.ans);
+  OPT_TEXTS    = shuffledData.map(d => d.opts);
+  catList      = questionIdx.map(i => BANK[i].cat);
+  document.getElementById('new-set-code').textContent = code;
+  document.getElementById('new-set-code-wrap').style.display = 'block';
+  showToast('새 문제 세트가 생성되었습니다!');
+}
+
+function copySetCode() {
+  const code = document.getElementById('new-set-code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('세트 코드가 복사되었습니다!');
+  }).catch(() => {
+    showToast('복사 실패 — 직접 복사해 주세요');
+  });
 }
 
 // ─────────────────────────────────────
