@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>애니메이션 용어 예상문제</title>
+<link rel="manifest" href="manifest-quiz.json">
+<meta name="theme-color" content="#2d3748">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw-quiz.js');
+  }
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f4f8; color: #1a202c; min-height: 100vh; }
