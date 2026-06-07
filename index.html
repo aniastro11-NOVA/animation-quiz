@@ -203,6 +203,48 @@
 
     .reset-btn:hover { background: #fdf0e4; }
 
+    /* QR코드 */
+    .qr-section {
+      width: 100%;
+      max-width: 420px;
+      margin-top: 24px;
+    }
+
+    .qr-toggle-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: 2px solid #e8d5c0;
+      background: #fff;
+      color: #a0856a;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .qr-toggle-btn:hover { background: #fdf0e4; }
+
+    .qr-box {
+      display: none;
+      background: #fff;
+      border: 1.5px solid #e8d5c0;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .qr-box.open { display: block; }
+
+    .qr-box p {
+      font-size: 13px;
+      color: #7a5c3e;
+      margin-bottom: 14px;
+    }
+
+    #qrcode { display: inline-block; }
+
     /* 오늘 히스토리 */
     .history-section {
       width: 100%;
@@ -299,6 +341,14 @@
   </div>
 </div>
 
+<div class="qr-section">
+  <button class="qr-toggle-btn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
+  <div class="qr-box" id="qrBox">
+    <p>카메라로 찍으면 단추 배식 앱이 열립니다</p>
+    <div id="qrcode"></div>
+  </div>
+</div>
+
 <div class="reset-section">
   <button class="reset-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
 </div>
@@ -319,6 +369,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const MEMBERS = ['엄마', '아빠', '첫째', '둘째'];
   const STORAGE_KEY = 'danchu_feeding';
@@ -458,6 +509,25 @@
     const fresh = { date: todayKey(), food: [], water: [] };
     saveData(fresh);
     render();
+  }
+
+  // QR코드
+  const APP_URL = 'https://raw.githack.com/aniastro11-NOVA/animation-quiz/main/index.html';
+  let qrGenerated = false;
+
+  function toggleQR() {
+    const box = document.getElementById('qrBox');
+    box.classList.toggle('open');
+    if (box.classList.contains('open') && !qrGenerated) {
+      new QRCode(document.getElementById('qrcode'), {
+        text: APP_URL,
+        width: 200,
+        height: 200,
+        colorDark: '#3d2b1f',
+        colorLight: '#ffffff',
+      });
+      qrGenerated = true;
+    }
   }
 
   // 최초 렌더
