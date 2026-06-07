@@ -494,7 +494,7 @@ function enterReviewMode(card) {
   });
   if (qi < TOTAL - 1) {
     const fwd = card.querySelector('.btn-qnext');
-    if (fwd) fwd.style.display = '';
+    if (fwd) fwd.style.display = 'block';
   } else {
     const sub = card.querySelector('.btn-submit-final');
     if (sub && chosen[qi] !== null) sub.style.display = 'block';
