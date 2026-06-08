@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js');
 
 // ★ Firebase 콘솔에서 복사한 값으로 교체하세요
 const FIREBASE_CONFIG = {
