@@ -3,12 +3,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-com
 
 // ★ Firebase 콘솔에서 복사한 값으로 교체하세요
 const FIREBASE_CONFIG = {
-  apiKey:            "REPLACE_API_KEY",
-  authDomain:        "REPLACE_AUTH_DOMAIN",
-  projectId:         "REPLACE_PROJECT_ID",
-  storageBucket:     "REPLACE_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_SENDER_ID",
-  appId:             "REPLACE_APP_ID",
+  apiKey:            "AIzaSyDPR7zOjALkx0qlW6lZ3uHskZmFP1QzDtU",
+  authDomain:        "danchu-feeding.firebaseapp.com",
+  projectId:         "danchu-feeding",
+  storageBucket:     "danchu-feeding.firebasestorage.app",
+  messagingSenderId: "1081324392813",
+  appId:             "1:1081324392813:web:299bb2f67314aeb0bf8a64",
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
