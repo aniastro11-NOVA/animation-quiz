@@ -289,9 +289,9 @@
   <div class="dog-emoji">🐾</div>
   <h1>단추 배식 관리</h1>
   <p>비바티즈 · 3.2kg · <span id="memberCount"></span>명</p>
-  <div id="profileChip" class="profile-chip" onclick="openProfileModal()" style="display:none">
+  <div id="profileChip" class="profile-chip" onclick="openProfileModal()">
     <div id="profileChipDot" class="profile-chip-dot"></div>
-    <span id="profileChipName"></span> ✏️
+    <span id="profileChipName">👤 프로필 설정</span> ✏️
   </div>
 </header>
 
@@ -539,7 +539,9 @@ function updateProfileUI() {
       document.getElementById('settingsProfileName').textContent = profile;
     }
   } else {
-    chip.style.display = 'none';
+    document.getElementById('profileChipDot').style.background = '#ccc';
+    document.getElementById('profileChipName').textContent = '👤 프로필 설정';
+    chip.style.display = 'inline-flex';
   }
 }
 
@@ -668,21 +670,17 @@ function feed(type, who) {
   }
   const entry = { who, time: timeStr() };
   data[type].push(entry);
+  cachedData = data;
+  render(data);
 
   if (db) {
     const update = {
       [type]: data[type],
       [`last${type.charAt(0).toUpperCase()+type.slice(1)}Ts`]: firebase.firestore.FieldValue.serverTimestamp(),
     };
-    todayDocRef().set(update, { merge: true }).catch(() => {
-      saveLocalData(data);
-      cachedData = data;
-      render(data);
-    });
+    todayDocRef().set(update, { merge: true }).catch(() => saveLocalData(data));
   } else {
     saveLocalData(data);
-    cachedData = data;
-    render(data);
   }
 }
 
@@ -985,15 +983,23 @@ function toggleQR() {
 
 // ── 시작 ─────────────────────────────────────────────────
 (async function init() {
-  // Firestore에서 멤버 동기화
+  // Firestore에서 멤버 및 프로필 복원
   if (db) {
     try {
-      const snap = await db.doc('config/members').get();
-      if (snap.exists && snap.data().list) {
-        localStorage.setItem(MEMBERS_KEY, JSON.stringify(snap.data().list));
+      const [membersSnap, tokenSnap] = await Promise.all([
+        db.doc('config/members').get(),
+        db.doc(`tokens/${getDeviceId()}`).get(),
+      ]);
+      if (membersSnap.exists && membersSnap.data().list) {
+        localStorage.setItem(MEMBERS_KEY, JSON.stringify(membersSnap.data().list));
+      }
+      if (!getProfile() && tokenSnap.exists && tokenSnap.data().owner) {
+        localStorage.setItem(PROFILE_KEY, tokenSnap.data().owner);
       }
     } catch(e) {}
   }
+
+  updateProfileUI();
 
   // 프로필 미설정이면 선택 모달
   if (!getProfile()) {
