@@ -493,7 +493,8 @@ document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date()
 function loadMembers() {
   try {
     const raw = localStorage.getItem(MEMBERS_KEY);
-    return raw ? JSON.parse(raw) : [...DEFAULT_MEMBERS];
+    const list = raw ? JSON.parse(raw) : null;
+    return (list && list.length > 0) ? list : [...DEFAULT_MEMBERS];
   } catch { return [...DEFAULT_MEMBERS]; }
 }
 
@@ -990,8 +991,12 @@ function toggleQR() {
         db.doc('config/members').get(),
         db.doc(`tokens/${getDeviceId()}`).get(),
       ]);
-      if (membersSnap.exists && membersSnap.data().list) {
-        localStorage.setItem(MEMBERS_KEY, JSON.stringify(membersSnap.data().list));
+      const firestoreList = membersSnap.exists ? membersSnap.data().list : null;
+      if (firestoreList && firestoreList.length > 0) {
+        localStorage.setItem(MEMBERS_KEY, JSON.stringify(firestoreList));
+      } else {
+        // Firestore에 멤버가 없으면 현재 멤버(기본값)를 저장
+        db.doc('config/members').set({ list: loadMembers() }).catch(() => {});
       }
       if (!getProfile() && tokenSnap.exists && tokenSnap.data().owner) {
         localStorage.setItem(PROFILE_KEY, tokenSnap.data().owner);
