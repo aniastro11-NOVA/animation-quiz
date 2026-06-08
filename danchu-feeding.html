@@ -940,6 +940,13 @@ async function nudge(toMember, btn) {
       }
     );
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const result = await resp.json();
+    if (result.reason === 'no_tokens') {
+      btn.disabled = false;
+      btn.textContent = origText;
+      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!');
+      return;
+    }
     btn.textContent = '✅ 전송됨!';
     setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
   } catch(e) {
