@@ -932,7 +932,7 @@ async function nudge(toMember, btn) {
   try {
     if (!IS_FIREBASE) throw new Error('no firebase');
     const resp = await fetch(
-      'https://us-central1-danchu-feeding.cloudfunctions.net/sendNudge',
+      'https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

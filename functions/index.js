@@ -53,7 +53,7 @@ exports.checkFeedingAlert = onSchedule(
 );
 
 // 밥 부탁 알림 — 특정 멤버에게 부탁했다고 모든 가족에게 알림
-exports.sendNudge = onRequest({ cors: true }, async (req, res) => {
+exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
