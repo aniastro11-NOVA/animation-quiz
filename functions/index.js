@@ -1,5 +1,5 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const { onCall } = require('firebase-functions/v2/https');
+const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
@@ -53,9 +53,17 @@ exports.checkFeedingAlert = onSchedule(
 );
 
 // 밥 부탁 알림 — 특정 멤버에게 부탁했다고 모든 가족에게 알림
-exports.sendNudge = onCall(async (request) => {
-  const { from, to } = request.data || {};
-  if (!to) throw new Error('to is required');
+exports.sendNudge = onRequest({ cors: true }, async (req, res) => {
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  const { from, to } = req.body || {};
+  if (!to) {
+    res.status(400).json({ error: 'to is required' });
+    return;
+  }
 
   const db = admin.firestore();
   const tokensSnap = await db.collection('tokens')
@@ -64,7 +72,10 @@ exports.sendNudge = onCall(async (request) => {
     .map(d => d.data().token)
     .filter(Boolean);
 
-  if (tokens.length === 0) return { success: false, reason: 'no_tokens' };
+  if (tokens.length === 0) {
+    res.json({ success: false, reason: 'no_tokens' });
+    return;
+  }
 
   const fromStr = from ? `${from}가 ` : '';
   await admin.messaging().sendEachForMulticast({
@@ -86,5 +97,5 @@ exports.sendNudge = onCall(async (request) => {
     },
   });
 
-  return { success: true };
+  res.json({ success: true });
 });
