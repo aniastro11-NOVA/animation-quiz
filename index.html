@@ -569,11 +569,12 @@ function saveLocalData(data) {
 }
 
 function initDataListener() {
-  if (!db) {
-    cachedData = loadLocalData();
-    render(cachedData);
-    return;
-  }
+  // 즉시 로컬 데이터로 렌더 (Firestore 응답 전에도 UI 보이게)
+  cachedData = loadLocalData();
+  render(cachedData);
+
+  if (!db) return;
+
   if (unsubscribeFirestore) unsubscribeFirestore();
   const ref = todayDocRef();
   unsubscribeFirestore = ref.onSnapshot(snap => {
