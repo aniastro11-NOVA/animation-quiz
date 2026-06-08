@@ -75,6 +75,8 @@
       margin-top: 8px;
     }
     .profile-chip-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .profile-chip.unset { border-color: #e07b39; background: #fff7f0; animation: pulse-border 1.5s infinite; }
+    @keyframes pulse-border { 0%,100% { border-color: #e07b39; } 50% { border-color: #f5a96e; } }
 
     /* ── 날짜바 ── */
     .date-bar {
@@ -531,7 +533,7 @@ function updateProfileUI() {
     const c = idx >= 0 ? COLORS[idx % COLORS.length] : COLORS[0];
     document.getElementById('profileChipDot').style.background = c.bg;
     document.getElementById('profileChipName').textContent = profile;
-    chip.style.display = 'inline-flex';
+    chip.classList.remove('unset');
 
     // 설정 모달 프로필 행
     const settingsDot = document.getElementById('settingsProfileDot');
@@ -540,9 +542,9 @@ function updateProfileUI() {
       document.getElementById('settingsProfileName').textContent = profile;
     }
   } else {
-    document.getElementById('profileChipDot').style.background = '#ccc';
+    document.getElementById('profileChipDot').style.background = '#e07b39';
     document.getElementById('profileChipName').textContent = '👤 프로필 설정';
-    chip.style.display = 'inline-flex';
+    chip.classList.add('unset');
   }
 }
 
@@ -1006,11 +1008,6 @@ function toggleQR() {
   }
 
   updateProfileUI();
-
-  // 프로필 미설정이면 선택 모달
-  if (!getProfile()) {
-    openProfileModal();
-  }
 
   // 데이터 리스너 시작 (Firestore 실시간 or localStorage)
   initDataListener();
