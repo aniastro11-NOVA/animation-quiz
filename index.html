@@ -1012,6 +1012,14 @@ function toggleQR() {
   // 데이터 리스너 시작 (Firestore 실시간 or localStorage)
   initDataListener();
 
+  // 알림 탭 등으로 앱이 포그라운드로 돌아올 때 화면 갱신
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      render(cachedData || loadLocalData());
+      if (db) initDataListener();
+    }
+  });
+
   // 자정 자동 초기화
   setInterval(() => {
     const data = cachedData || loadLocalData();

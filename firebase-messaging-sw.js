@@ -16,5 +16,15 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || 'https://aniastro11-nova.github.io/animation-quiz/';
-  event.waitUntil(clients.openWindow(url));
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if (client.url.startsWith('https://aniastro11-nova.github.io/animation-quiz') && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });
