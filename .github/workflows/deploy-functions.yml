@@ -30,4 +30,4 @@ jobs:
         run: |
           echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > /tmp/sa_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa_key.json
-          firebase deploy --only functions --project danchu-feeding
+          firebase deploy --only functions --project danchu-feeding --force
