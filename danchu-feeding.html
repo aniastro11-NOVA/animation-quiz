@@ -781,7 +781,8 @@ async function toggleNotification(enabled) {
       return;
     }
 
-    const swReg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    const swReg = await navigator.serviceWorker.ready;
     const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
 
     if (db && token) {
