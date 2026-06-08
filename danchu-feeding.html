@@ -796,7 +796,8 @@ async function toggleNotification(enabled) {
     localStorage.setItem(NOTIF_KEY, 'on');
     statusEl.textContent = '✅ 알림이 등록됐습니다!';
   } catch(e) {
-    statusEl.textContent = '알림 설정 중 오류가 발생했습니다.';
+    const msg = e?.message || e?.code || String(e);
+    statusEl.textContent = '알림 오류: ' + msg;
     document.getElementById('notifToggle').checked = false;
     console.error(e);
   }
