@@ -411,8 +411,6 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
@@ -426,7 +424,7 @@ const FIREBASE_CONFIG = {
   appId:             "1:1081324392813:web:299bb2f67314aeb0bf8a64",
 };
 // ★★★ 프로젝트 설정 → 클라우드 메시징 → 웹 푸시 인증서(VAPID 키) ★★★
-const VAPID_KEY = "BChO4G4FCJravnSCVsPYvMsNkPBgaAj53zgaNKV2BArrzpsf7m_YzLRoGT4gIcrwc5oLOYfVK3yy_NO7oORs7yE";
+const VAPID_KEY = "BN_SLFzFsA6TntXjvdJm12VhkXo37pOXHhe8BpWYWF06Yo3AtEdeB2e3MBUURA40lJ9IK8COHvusWuMXkxOKVdQ";
 
 // ─────────────────────────────────────────────────────────
 const IS_FIREBASE = !Object.values(FIREBASE_CONFIG).some(v => v.startsWith('REPLACE'));
@@ -450,18 +448,22 @@ const COLORS = [
 ];
 
 // ── Firebase 초기화 ───────────────────────────────────────
-let db = null, messaging = null;
+let db = null;
 
 if (IS_FIREBASE) {
   try {
-    const app = firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.firestore();
-    if ('Notification' in window) {
-      try { messaging = firebase.messaging(); } catch(e) {}
-    }
   } catch(e) {
     console.warn('Firebase 초기화 실패:', e);
   }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 // ── 기기 ID ───────────────────────────────────────────────
@@ -768,7 +770,7 @@ async function toggleNotification(enabled) {
     return;
   }
 
-  if (!messaging) {
+  if (!('PushManager' in window)) {
     statusEl.textContent = '이 브라우저는 푸시 알림을 지원하지 않습니다.';
     document.getElementById('notifToggle').checked = false;
     return;
@@ -782,16 +784,16 @@ async function toggleNotification(enabled) {
       return;
     }
 
-    if (!firebase.auth().currentUser) {
-      await firebase.auth().signInAnonymously();
-    }
     await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     const swReg = await navigator.serviceWorker.ready;
-    const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+    const subscription = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+    });
 
-    if (db && token) {
+    if (db) {
       await db.doc(`tokens/${getDeviceId()}`).set({
-        token,
+        subscription: subscription.toJSON(),
         owner: getProfile() || '',
         enabled: true,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
