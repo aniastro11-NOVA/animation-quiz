@@ -811,7 +811,7 @@ function showResult(payload) {
   const resCatList   = qi.map(i => BANK[i].cat);
   const resQTexts    = qi.map(i => BANK[i].q);
 
-  const correct = q.allCorrect ? ans.length : ans.reduce((s,v,i) => s + (v === resAnswers[i] ? 1 : 0), 0);
+  const correct = ans.reduce((s,v,i) => s + (BANK[qi[i]].allCorrect || v === resAnswers[i] ? 1 : 0), 0);
   const pct     = Math.round(correct/TOTAL*100);
 
   document.getElementById('res-name').textContent  = '응시자: '+name + (dKey ? '   (응시일: '+dKey+')' : '');
@@ -836,7 +836,7 @@ function showResult(payload) {
   tbody.innerHTML = '';
 
   ans.forEach((v, i) => {
-    const isRight = q.allCorrect || v === resAnswers[i];
+    const isRight = BANK[qi[i]].allCorrect || v === resAnswers[i];
     const tr = document.createElement('tr');
     tr.className = isRight ? 'row-correct' : 'row-wrong';
     const chosen_text  = (v !== null && v !== undefined) ? LABELS[v]+'. '+resOptTexts[i][v] : '—';
