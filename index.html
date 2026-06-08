@@ -786,6 +786,8 @@ async function toggleNotification(enabled) {
 
     await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     const swReg = await navigator.serviceWorker.ready;
+    const existingSub = await swReg.pushManager.getSubscription();
+    if (existingSub) await existingSub.unsubscribe();
     const subscription = await swReg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
