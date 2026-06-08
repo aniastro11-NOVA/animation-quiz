@@ -140,6 +140,22 @@
     .log-item .when {
       font-size: 12px;
       color: #a0856a;
+      cursor: pointer;
+      text-decoration: underline dotted;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    .log-item .when:hover { background: #f0e4d4; }
+
+    .log-item .time-input {
+      font-size: 12px;
+      color: #3d2b1f;
+      border: 1.5px solid #e07b39;
+      border-radius: 6px;
+      padding: 2px 4px;
+      background: #fff;
+      width: 80px;
     }
 
     .log-item .delete-btn {
@@ -438,7 +454,7 @@
       logEl.innerHTML = logs.map((entry, i) =>
         `<div class="log-item">
           <span class="who">${entry.who}</span>
-          <span class="when">${entry.time}</span>
+          <span class="when" onclick="editTime('${type}',${i},this)" title="탭하면 시간 수정">${entry.time}</span>
           <button class="delete-btn" onclick="deleteEntry('${type}',${i})" title="취소">✕</button>
         </div>`
       ).join('');
@@ -501,6 +517,29 @@
     data[type].push({ who, time: timeStr() });
     saveData(data);
     render();
+  }
+
+  function editTime(type, index, el) {
+    const data = loadData();
+    const current = data[type][index].time;
+
+    const input = document.createElement('input');
+    input.type = 'time';
+    input.className = 'time-input';
+    input.value = current;
+    el.replaceWith(input);
+    input.focus();
+
+    function save() {
+      if (input.value && input.value !== current) {
+        data[type][index].time = input.value;
+        saveData(data);
+      }
+      render();
+    }
+
+    input.addEventListener('change', save);
+    input.addEventListener('blur', save);
   }
 
   function deleteEntry(type, index) {
