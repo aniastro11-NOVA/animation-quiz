@@ -323,6 +323,17 @@
     <div class="log-list" id="log-water"></div>
     <div class="member-buttons" id="btns-water"></div>
   </div>
+
+  <div class="card" id="card-nudge">
+    <div class="card-header">
+      <span class="card-icon">📣</span>
+      <div>
+        <div class="card-title">밥 부탁하기</div>
+        <div class="card-subtitle">단추에게 밥을 주세요!</div>
+      </div>
+    </div>
+    <div class="member-buttons" id="btns-nudge"></div>
+  </div>
 </div>
 
 <div class="bottom-btn-group">
@@ -401,6 +412,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
@@ -588,6 +600,7 @@ function render(data) {
   updateProfileUI();
   renderCard('food',  data, MAX_FOOD,  members, profile);
   renderCard('water', data, Infinity,  members, profile);
+  renderNudgeButtons();
   renderHistory(data);
 }
 
@@ -892,6 +905,44 @@ function renameMember(index, newName) {
   members[index] = name;
   saveMembers(members);
   renderMemberSettings();
+}
+
+// ── 밥 부탁하기 ──────────────────────────────────────────
+function renderNudgeButtons() {
+  const members = loadMembers();
+  const btnsEl = document.getElementById('btns-nudge');
+  if (!btnsEl) return;
+  btnsEl.innerHTML = members.map((name, idx) => {
+    const c = COLORS[idx % COLORS.length];
+    return `<button class="member-btn"
+              style="background:${c.bg};border-color:${c.bd}"
+              onclick="nudge('${name}', this)"
+            >📣 ${name}</button>`;
+  }).join('');
+}
+
+async function nudge(toMember, btn) {
+  const from = getProfile();
+  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
+  if (!confirm(`${toMember}에게 "단추에게 밥을 주세요" 알림을\n모든 가족에게 보낼까요?`)) return;
+
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '전송 중...';
+
+  try {
+    if (!IS_FIREBASE) throw new Error('no firebase');
+    const fn = firebase.app().functions();
+    const sendNudgeFn = fn.httpsCallable('sendNudge');
+    await sendNudgeFn({ from, to: toMember });
+    btn.textContent = '✅ 전송됨!';
+    setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = origText;
+    alert('전송 중 오류가 발생했습니다.');
+  }
 }
 
 // ── QR코드 ───────────────────────────────────────────────

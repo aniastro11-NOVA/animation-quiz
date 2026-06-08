@@ -1,4 +1,5 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { onCall } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
@@ -50,3 +51,40 @@ exports.checkFeedingAlert = onSchedule(
     return null;
   }
 );
+
+// 밥 부탁 알림 — 특정 멤버에게 부탁했다고 모든 가족에게 알림
+exports.sendNudge = onCall(async (request) => {
+  const { from, to } = request.data || {};
+  if (!to) throw new Error('to is required');
+
+  const db = admin.firestore();
+  const tokensSnap = await db.collection('tokens')
+    .where('enabled', '==', true).get();
+  const tokens = tokensSnap.docs
+    .map(d => d.data().token)
+    .filter(Boolean);
+
+  if (tokens.length === 0) return { success: false, reason: 'no_tokens' };
+
+  const fromStr = from ? `${from}가 ` : '';
+  await admin.messaging().sendEachForMulticast({
+    tokens,
+    notification: {
+      title: '🐾 단추에게 밥을 주세요!',
+      body:  `${fromStr}${to}에게 부탁했어요`,
+    },
+    webpush: {
+      notification: {
+        icon:  'https://aniastro11-nova.github.io/animation-quiz/icon-192.png',
+        badge: 'https://aniastro11-nova.github.io/animation-quiz/icon-192.png',
+        requireInteraction: true,
+        vibrate: [200, 100, 200],
+      },
+      fcmOptions: {
+        link: 'https://aniastro11-nova.github.io/animation-quiz/',
+      },
+    },
+  });
+
+  return { success: true };
+});
