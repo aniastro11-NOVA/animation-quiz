@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>단추 배식 관리</title>
+  <title>한강이네</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="단추밥" />
+  <meta name="apple-mobile-web-app-title" content="한강이네" />
   <meta name="theme-color" content="#e07b39" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,533 +17,1141 @@
       font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
       background: #fdf6ee;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px 48px;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px 16px 48px;
     }
+
+    .alert-banner {
+      display: none; width: 100%; max-width: 420px;
+      background: #fff0e0; border: 2px solid #e07b39;
+      border-radius: 14px; padding: 12px 16px; margin-bottom: 12px;
+      font-size: 14px; font-weight: 700; color: #7a3a10;
+    }
+    .alert-banner.show { display: block; }
 
     header {
-      text-align: center;
-      margin-bottom: 28px;
+      text-align: center; margin-bottom: 16px;
+      position: relative; width: 100%; max-width: 420px;
     }
-
-    .dog-emoji { font-size: 64px; line-height: 1; margin-bottom: 8px; }
-
-    header h1 {
-      font-size: 26px;
-      font-weight: 800;
-      color: #3d2b1f;
+    .settings-btn {
+      position: absolute; top: 0; right: 0;
+      background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; line-height: 1;
     }
+    .dog-emoji { font-size: 56px; line-height: 1; margin-bottom: 6px; }
+    header h1 { font-size: 24px; font-weight: 800; color: #3d2b1f; }
+    header p  { font-size: 13px; color: #a0856a; margin-top: 4px; }
 
-    header p {
-      font-size: 13px;
-      color: #a0856a;
-      margin-top: 4px;
+    .profile-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fff; border: 1.5px solid #e8d5c0; border-radius: 999px;
+      padding: 5px 12px 5px 8px; font-size: 13px; font-weight: 700;
+      color: #3d2b1f; cursor: pointer; margin-top: 8px;
     }
+    .profile-chip-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .profile-chip.unset { border-color: #e07b39; background: #fff7f0; animation: pulse-border 1.5s infinite; }
+    @keyframes pulse-border { 0%,100% { border-color: #e07b39; } 50% { border-color: #f5a96e; } }
 
-    /* 오늘 날짜 */
+    /* ── 탭 네비게이션 ── */
+    .tab-nav {
+      display: flex; gap: 6px; width: 100%; max-width: 420px;
+      overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0; padding: 8px 16px; border-radius: 999px;
+      border: 2px solid #e8d5c0; background: #fff;
+      font-size: 13px; font-weight: 700; color: #7a5c3e;
+      cursor: pointer; white-space: nowrap; transition: all .15s;
+    }
+    .tab-btn.active { background: #e07b39; border-color: #e07b39; color: #fff; }
+    .tab-btn:hover:not(.active) { background: #fdf0e4; }
+
+    .tab-panel { width: 100%; max-width: 420px; }
+
     .date-bar {
-      background: #fff;
-      border: 1.5px solid #e8d5c0;
-      border-radius: 12px;
-      padding: 10px 20px;
-      font-size: 13px;
-      color: #7a5c3e;
-      margin-bottom: 24px;
-      text-align: center;
-      width: 100%;
-      max-width: 420px;
+      background: #fff; border: 1.5px solid #e8d5c0; border-radius: 12px;
+      padding: 10px 20px; font-size: 13px; color: #7a5c3e;
+      margin-bottom: 20px; text-align: center; width: 100%; max-width: 420px;
     }
 
-    /* 배식 카드 */
-    .cards {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      max-width: 420px;
-    }
+    .cards { display: flex; flex-direction: column; gap: 16px; width: 100%; }
 
     .card {
-      background: #fff;
-      border: 2px solid #e8d5c0;
-      border-radius: 18px;
-      padding: 20px;
+      background: #fff; border: 2px solid #e8d5c0;
+      border-radius: 18px; padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .card-icon { font-size: 30px; }
+    .card-title { font-size: 17px; font-weight: 700; color: #3d2b1f; }
+    .card-subtitle { font-size: 12px; color: #a0856a; margin-top: 2px; }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
+    .status-badge { margin-left: auto; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .status-badge.ok   { background: #fff0e0; color: #d4733a; }
+    .status-badge.done { background: #e6f4ea; color: #2e7d32; }
 
-    .card-icon { font-size: 32px; }
-
-    .card-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #3d2b1f;
-    }
-
-    .card-subtitle {
-      font-size: 12px;
-      color: #a0856a;
-      margin-top: 2px;
-    }
-
-    /* 상태 배지 */
-    .status-badge {
-      margin-left: auto;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .status-badge.ok {
-      background: #fff0e0;
-      color: #d4733a;
-    }
-
-    .status-badge.done {
-      background: #e6f4ea;
-      color: #2e7d32;
-    }
-
-    /* 배식 기록 목록 */
-    .log-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 14px;
-      min-height: 40px;
-    }
+    .log-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; min-height: 36px; }
 
     .log-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #fdf6ee;
-      border-radius: 10px;
-      padding: 8px 14px;
-      font-size: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fdf6ee; border-radius: 10px; padding: 8px 14px; font-size: 14px;
     }
-
-    .log-item .who {
-      font-weight: 700;
-      color: #3d2b1f;
-    }
-
+    .log-item .who { font-weight: 700; color: #3d2b1f; }
     .log-item .when {
-      font-size: 12px;
-      color: #a0856a;
+      font-size: 12px; color: #a0856a; cursor: pointer;
+      text-decoration: underline dotted; padding: 2px 4px; border-radius: 4px;
     }
-
+    .log-item .when:hover { background: #f0e4d4; }
+    .log-item .time-input {
+      font-size: 12px; color: #3d2b1f; border: 1.5px solid #e07b39;
+      border-radius: 6px; padding: 2px 4px; background: #fff; width: 80px;
+    }
     .log-item .delete-btn {
-      background: none;
-      border: none;
-      color: #c9a07a;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 0 0 0 8px;
-      line-height: 1;
+      background: none; border: none; color: #c9a07a;
+      cursor: pointer; font-size: 16px; padding: 0 0 0 8px; line-height: 1;
     }
-
     .log-item .delete-btn:hover { color: #c0392b; }
 
-    .empty-msg {
-      color: #c9a07a;
-      font-size: 13px;
-      text-align: center;
-      padding: 8px 0;
-    }
+    .empty-msg { color: #c9a07a; font-size: 13px; text-align: center; padding: 8px 0; }
 
-    /* 배식하기 버튼 그룹 */
-    .member-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
+    .member-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .member-btn {
-      padding: 10px 0;
-      border-radius: 12px;
-      border: 2px solid transparent;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity .15s, transform .1s;
-      color: #fff;
+      padding: 10px 0; border-radius: 12px; border: 2px solid transparent;
+      font-size: 14px; font-weight: 700; cursor: pointer; color: #fff;
+      transition: opacity .15s, transform .1s, box-shadow .1s;
     }
-
+    .member-btn.mine { box-shadow: 0 0 0 3px rgba(0,0,0,0.18); }
     .member-btn:active { transform: scale(.96); }
     .member-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    .member-btn.m0 { background: #e07b39; border-color: #c96b2a; }
-    .member-btn.m1 { background: #4f8edc; border-color: #3a72b8; }
-    .member-btn.m2 { background: #5cb87a; border-color: #3e9c5c; }
-    .member-btn.m3 { background: #a67cc4; border-color: #8c5eaa; }
-
-    /* 초기화 버튼 */
-    .reset-section {
-      width: 100%;
-      max-width: 420px;
-      margin-top: 24px;
+    /* ── 요청하기 멀티셀렉트 ── */
+    .member-btn.nudge-selected {
+      box-shadow: inset 0 0 0 2.5px rgba(255,255,255,0.85), 0 0 0 3px rgba(0,0,0,0.18);
+      transform: scale(1.04);
     }
-
-    .reset-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 14px;
-      border: 2px solid #e8d5c0;
-      background: #fff;
-      color: #a0856a;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .15s;
+    .nudge-send-btn {
+      width: 100%; margin-top: 10px; padding: 11px;
+      border-radius: 12px; border: none;
+      background: #e07b39; color: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s;
     }
+    .nudge-send-btn:disabled { background: #d0b8a8; cursor: default; }
+    .nudge-send-btn:not(:disabled):hover { background: #c96b2a; }
 
-    .reset-btn:hover { background: #fdf0e4; }
-
-    /* QR코드 */
-    .qr-section {
-      width: 100%;
-      max-width: 420px;
-      margin-top: 24px;
+    .bottom-btn-group {
+      width: 100%; max-width: 420px; margin-top: 16px;
+      display: flex; flex-direction: column; gap: 10px;
     }
-
-    .qr-toggle-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 14px;
-      border: 2px solid #e8d5c0;
-      background: #fff;
-      color: #a0856a;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .15s;
+    .flat-btn {
+      width: 100%; padding: 12px; border-radius: 14px;
+      border: 2px solid #e8d5c0; background: #fff;
+      color: #a0856a; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background .15s; text-align: center;
     }
-
-    .qr-toggle-btn:hover { background: #fdf0e4; }
+    .flat-btn:hover { background: #fdf0e4; }
 
     .qr-box {
-      display: none;
-      background: #fff;
-      border: 1.5px solid #e8d5c0;
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 12px;
-      text-align: center;
+      display: none; background: #fff; border: 1.5px solid #e8d5c0;
+      border-radius: 16px; padding: 20px; text-align: center;
     }
-
     .qr-box.open { display: block; }
-
-    .qr-box p {
-      font-size: 13px;
-      color: #7a5c3e;
-      margin-bottom: 14px;
-    }
-
+    .qr-box p { font-size: 13px; color: #7a5c3e; margin-bottom: 14px; }
     #qrcode { display: inline-block; }
 
-    /* 오늘 히스토리 */
-    .history-section {
-      width: 100%;
-      max-width: 420px;
-      margin-top: 24px;
-    }
-
-    .history-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #7a5c3e;
-      margin-bottom: 10px;
-      padding-left: 4px;
-    }
-
-    .history-table {
-      background: #fff;
-      border: 1.5px solid #e8d5c0;
-      border-radius: 14px;
-      overflow: hidden;
-      font-size: 13px;
-    }
-
-    .history-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .history-table th {
-      background: #fdf0e4;
-      color: #7a5c3e;
-      font-weight: 700;
-      padding: 10px 14px;
-      text-align: left;
-    }
-
-    .history-table td {
-      padding: 9px 14px;
-      border-top: 1px solid #f0e4d4;
-      color: #3d2b1f;
-    }
-
-    .history-table tr:last-child td { border-bottom: none; }
-
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .tag.food { background: #fff0e0; color: #d4733a; }
+    .history-section { width: 100%; margin-top: 24px; }
+    .history-title { font-size: 14px; font-weight: 700; color: #7a5c3e; margin-bottom: 10px; padding-left: 4px; }
+    .history-table { background: #fff; border: 1.5px solid #e8d5c0; border-radius: 14px; overflow: hidden; font-size: 13px; }
+    .history-table table { width: 100%; border-collapse: collapse; }
+    .history-table th { background: #fdf0e4; color: #7a5c3e; font-weight: 700; padding: 10px 14px; text-align: left; }
+    .history-table td { padding: 9px 14px; border-top: 1px solid #f0e4d4; color: #3d2b1f; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .tag.food  { background: #fff0e0; color: #d4733a; }
     .tag.water { background: #e0f0ff; color: #2176ae; }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 200;
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-overlay.center { align-items: center; }
+    .modal-panel {
+      background: #fff; border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 480px;
+      padding: 16px 20px 40px; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-panel.rounded { border-radius: 24px; padding: 32px 24px; max-width: 360px; }
+    .modal-handle { width: 40px; height: 4px; background: #e8d5c0; border-radius: 2px; margin: 0 auto 20px; }
+    .modal-title { font-size: 18px; font-weight: 800; color: #3d2b1f; margin-bottom: 16px; }
+    .modal-close-btn {
+      width: 100%; margin-top: 20px; padding: 13px;
+      background: #fdf0e4; border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 700; color: #a0856a; cursor: pointer;
+    }
+    .modal-close-btn:hover { background: #f5e0cc; }
+
+    .profile-select-title { font-size: 16px; font-weight: 800; color: #3d2b1f; margin: 12px 0 20px; text-align: center; }
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .profile-btn {
+      padding: 14px; border-radius: 14px; border: 2px solid transparent;
+      font-size: 15px; font-weight: 700; cursor: pointer; color: #fff; transition: transform .1s;
+    }
+    .profile-btn:active { transform: scale(.95); }
+
+    .settings-section { margin-bottom: 20px; }
+    .settings-section-title { font-size: 12px; font-weight: 700; color: #a0856a; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .member-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0e4d4; }
+    .member-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .member-name-input {
+      flex: 1; font-size: 15px; font-weight: 700; color: #3d2b1f;
+      border: 1.5px solid #e8d5c0; border-radius: 8px; padding: 7px 10px; background: #fdf6ee;
+    }
+    .member-name-input:focus { outline: none; border-color: #e07b39; background: #fff; }
+    .member-del-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px; color: #c9a07a; }
+    .member-del-btn:hover { color: #c0392b; }
+    .add-member-row { display: flex; gap: 8px; margin-top: 12px; }
+    .add-member-input {
+      flex: 1; font-size: 14px; border: 1.5px solid #e8d5c0;
+      border-radius: 10px; padding: 10px 12px; background: #fdf6ee; color: #3d2b1f;
+    }
+    .add-member-input:focus { outline: none; border-color: #e07b39; }
+    .add-member-btn { padding: 10px 18px; background: #e07b39; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+    .notif-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0e4d4; }
+    .notif-row span { font-size: 14px; font-weight: 700; color: #3d2b1f; }
+    .toggle-wrap { position: relative; width: 48px; height: 26px; }
+    .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 999px; cursor: pointer; transition: background .2s; }
+    .toggle-slider:before {
+      content: ''; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: transform .2s;
+    }
+    .toggle-wrap input:checked + .toggle-slider { background: #e07b39; }
+    .toggle-wrap input:checked + .toggle-slider:before { transform: translateX(22px); }
   </style>
 </head>
 <body>
 
+<div class="alert-banner" id="alertBanner"></div>
+
 <header>
-  <div class="dog-emoji">🐾</div>
-  <h1>단추 배식 관리</h1>
-  <p>비바티즈 · 3.2kg · 식구 4명</p>
+  <button class="settings-btn" onclick="openSettings()" title="설정">⚙️</button>
+  <div class="dog-emoji">🏠</div>
+  <h1>한강이네</h1>
+  <p>가족 생활 관리 · <span id="memberCount"></span>명</p>
+  <div id="profileChip" class="profile-chip" onclick="openProfileModal()">
+    <div id="profileChipDot" class="profile-chip-dot"></div>
+    <span id="profileChipName">👤 프로필 설정</span> ✏️
+  </div>
 </header>
+
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="danchu"    onclick="switchTab('danchu')">🐾 단추밥</button>
+  <button class="tab-btn"        data-tab="delivery"  onclick="switchTab('delivery')">📦 택배수령</button>
+  <button class="tab-btn"        data-tab="recycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
+  <button class="tab-btn"        data-tab="dishes"    onclick="switchTab('dishes')">🍽️ 설거지</button>
+  <button class="tab-btn"        data-tab="cleaning"  onclick="switchTab('cleaning')">🧹 청소</button>
+  <button class="tab-btn"        data-tab="laundry"   onclick="switchTab('laundry')">👕 빨래</button>
+</div>
 
 <div class="date-bar" id="dateBar"></div>
 
-<div class="cards">
-  <!-- 사료 카드 -->
-  <div class="card" id="card-food">
-    <div class="card-header">
-      <span class="card-icon">🍖</span>
-      <div>
-        <div class="card-title">사료</div>
-        <div class="card-subtitle">하루 권장 횟수: 2회</div>
+<!-- ── 단추밥 탭 ── -->
+<div class="tab-panel" id="panel-danchu">
+  <div class="cards">
+    <div class="card" id="card-food">
+      <div class="card-header">
+        <span class="card-icon">🍖</span>
+        <div>
+          <div class="card-title">사료</div>
+          <div class="card-subtitle">하루 권장 횟수: 2회</div>
+        </div>
+        <span class="status-badge" id="badge-food">대기중</span>
       </div>
-      <span class="status-badge" id="badge-food">대기중</span>
+      <div class="log-list" id="log-food"></div>
+      <div class="member-buttons" id="btns-food"></div>
     </div>
-    <div class="log-list" id="log-food"></div>
-    <div class="member-buttons" id="btns-food"></div>
+
+    <div class="card" id="card-water">
+      <div class="card-header">
+        <span class="card-icon">💧</span>
+        <div>
+          <div class="card-title">물</div>
+          <div class="card-subtitle">신선한 물 상시 제공</div>
+        </div>
+        <span class="status-badge" id="badge-water">대기중</span>
+      </div>
+      <div class="log-list" id="log-water"></div>
+      <div class="member-buttons" id="btns-water"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">밥 부탁하기</div>
+          <div class="card-subtitle">단추에게 밥을 주세요!</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-danchu"></div>
+      <button class="nudge-send-btn" id="send-nudge-danchu" disabled onclick="sendNudgeMulti('danchu')">📣 전송하기</button>
+    </div>
   </div>
 
-  <!-- 물 카드 -->
-  <div class="card" id="card-water">
-    <div class="card-header">
-      <span class="card-icon">💧</span>
-      <div>
-        <div class="card-title">물</div>
-        <div class="card-subtitle">신선한 물 상시 제공</div>
-      </div>
-      <span class="status-badge" id="badge-water">대기중</span>
+  <div class="history-section">
+    <div class="history-title">📋 오늘 전체 배식 기록</div>
+    <div class="history-table">
+      <table>
+        <thead><tr><th>시간</th><th>구분</th><th>담당</th></tr></thead>
+        <tbody id="historyBody-danchu"></tbody>
+      </table>
     </div>
-    <div class="log-list" id="log-water"></div>
-    <div class="member-buttons" id="btns-water"></div>
   </div>
 </div>
 
-<div class="qr-section">
-  <button class="qr-toggle-btn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
+<!-- ── 택배수령 탭 ── -->
+<div class="tab-panel" id="panel-delivery" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-delivery">
+      <div class="card-header">
+        <span class="card-icon">📦</span>
+        <div>
+          <div class="card-title">택배수령</div>
+          <div class="card-subtitle">오늘 택배 수령 담당</div>
+        </div>
+        <span class="status-badge" id="badge-delivery">대기중</span>
+      </div>
+      <div class="log-list" id="log-delivery"></div>
+      <div class="member-buttons" id="btns-delivery"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">택배수령 요청하기</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-delivery"></div>
+      <button class="nudge-send-btn" id="send-nudge-delivery" disabled onclick="sendNudgeMulti('delivery')">📣 전송하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 분리수거 탭 ── -->
+<div class="tab-panel" id="panel-recycling" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-recycling">
+      <div class="card-header">
+        <span class="card-icon">♻️</span>
+        <div>
+          <div class="card-title">분리수거</div>
+          <div class="card-subtitle">오늘 분리수거 담당</div>
+        </div>
+        <span class="status-badge" id="badge-recycling">대기중</span>
+      </div>
+      <div class="log-list" id="log-recycling"></div>
+      <div class="member-buttons" id="btns-recycling"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">분리수거 요청하기</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-recycling"></div>
+      <button class="nudge-send-btn" id="send-nudge-recycling" disabled onclick="sendNudgeMulti('recycling')">📣 전송하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 설거지 탭 ── -->
+<div class="tab-panel" id="panel-dishes" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-dishes">
+      <div class="card-header">
+        <span class="card-icon">🍽️</span>
+        <div>
+          <div class="card-title">설거지</div>
+          <div class="card-subtitle">오늘 설거지 담당</div>
+        </div>
+        <span class="status-badge" id="badge-dishes">대기중</span>
+      </div>
+      <div class="log-list" id="log-dishes"></div>
+      <div class="member-buttons" id="btns-dishes"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">설거지 요청하기</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-dishes"></div>
+      <button class="nudge-send-btn" id="send-nudge-dishes" disabled onclick="sendNudgeMulti('dishes')">📣 전송하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 청소 탭 ── -->
+<div class="tab-panel" id="panel-cleaning" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-cleaning">
+      <div class="card-header">
+        <span class="card-icon">🧹</span>
+        <div>
+          <div class="card-title">청소</div>
+          <div class="card-subtitle">오늘 청소 담당</div>
+        </div>
+        <span class="status-badge" id="badge-cleaning">대기중</span>
+      </div>
+      <div class="log-list" id="log-cleaning"></div>
+      <div class="member-buttons" id="btns-cleaning"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">청소 요청하기</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-cleaning"></div>
+      <button class="nudge-send-btn" id="send-nudge-cleaning" disabled onclick="sendNudgeMulti('cleaning')">📣 전송하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 빨래 탭 ── -->
+<div class="tab-panel" id="panel-laundry" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-laundry">
+      <div class="card-header">
+        <span class="card-icon">👕</span>
+        <div>
+          <div class="card-title">빨래</div>
+          <div class="card-subtitle">오늘 빨래 담당</div>
+        </div>
+        <span class="status-badge" id="badge-laundry">대기중</span>
+      </div>
+      <div class="log-list" id="log-laundry"></div>
+      <div class="member-buttons" id="btns-laundry"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">빨래 요청하기</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-laundry"></div>
+      <button class="nudge-send-btn" id="send-nudge-laundry" disabled onclick="sendNudgeMulti('laundry')">📣 전송하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-btn-group">
+  <button class="flat-btn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
   <div class="qr-box" id="qrBox">
-    <p>카메라로 찍으면 단추 배식 앱이 열립니다</p>
+    <p>카메라로 찍으면 한강이네 앱이 열립니다</p>
     <div id="qrcode"></div>
   </div>
+  <button class="flat-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
 </div>
 
-<div class="reset-section">
-  <button class="reset-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
-</div>
-
-<div class="history-section">
-  <div class="history-title">📋 오늘 전체 배식 기록</div>
-  <div class="history-table">
-    <table>
-      <thead>
-        <tr>
-          <th>시간</th>
-          <th>구분</th>
-          <th>담당</th>
-        </tr>
-      </thead>
-      <tbody id="historyBody"></tbody>
-    </table>
+<!-- 프로필 선택 모달 -->
+<div class="modal-overlay center" id="profileOverlay">
+  <div class="modal-panel rounded" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:8px">🏠</div>
+    <div class="profile-select-title">이 기기를 사용하는 분은<br>누구세요?</div>
+    <div class="profile-grid" id="profileGrid"></div>
   </div>
 </div>
 
+<!-- 설정 모달 -->
+<div class="modal-overlay" id="settingsOverlay" onclick="closeSettingsOutside(event)">
+  <div class="modal-panel">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ 설정</div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">내 프로필</div>
+      <div id="currentProfileRow" style="display:flex;align-items:center;gap:10px;padding:10px 0;">
+        <div id="settingsProfileDot" class="member-color-dot"></div>
+        <span id="settingsProfileName" style="font-size:15px;font-weight:700;color:#3d2b1f;flex:1"></span>
+        <button class="flat-btn" style="width:auto;padding:6px 14px;font-size:13px;margin:0" onclick="openProfileModal()">변경</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">알림</div>
+      <div class="notif-row">
+        <span>🔔 8시간 배식 없으면 알림</span>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="notifToggle" onchange="toggleNotification(this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div id="notifStatus" style="font-size:12px;color:#a0856a;padding:8px 0 0"></div>
+      <div id="notifDebug" style="font-size:11px;color:#b09080;padding:4px 0 0;word-break:break-all"></div>
+      <button id="notifTestBtn" onclick="testLocalNotif()"
+        style="margin-top:10px;padding:8px 14px;border-radius:10px;border:1.5px solid #e07b39;
+               background:#fff;color:#e07b39;font-size:13px;font-weight:700;cursor:pointer;width:100%">
+        🔔 브라우저 알림 테스트
+      </button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">가족 관리</div>
+      <div id="memberList"></div>
+      <div class="add-member-row">
+        <input class="add-member-input" id="newMemberInput" placeholder="이름 입력 후 추가" maxlength="6"
+               onkeydown="if(event.key==='Enter') addMember()" />
+        <button class="add-member-btn" onclick="addMember()">추가</button>
+      </div>
+    </div>
+
+    <button class="modal-close-btn" onclick="closeSettings()">완료</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
-  const MEMBERS = ['경희', '범이', '한이', '강이'];
-  const STORAGE_KEY = 'danchu_feeding';
-  const MAX_FOOD_PER_DAY = 2;
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDPR7zOjALkx0qlW6lZ3uHskZmFP1QzDtU",
+  authDomain:        "danchu-feeding.firebaseapp.com",
+  projectId:         "danchu-feeding",
+  storageBucket:     "danchu-feeding.firebasestorage.app",
+  messagingSenderId: "1081324392813",
+  appId:             "1:1081324392813:web:299bb2f67314aeb0bf8a64",
+};
+const VAPID_KEY = "BN_SLFzFsA6TntXjvdJm12VhkXo37pOXHhe8BpWYWF06Yo3AtEdeB2e3MBUURA40lJ9IK8COHvusWuMXkxOKVdQ";
 
-  // ── 날짜 표시 ──────────────────────────────────────────
-  function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const IS_FIREBASE = !Object.values(FIREBASE_CONFIG).some(v => v.startsWith('REPLACE'));
+
+const STORAGE_KEY = 'danchu_feeding';
+const MEMBERS_KEY = 'danchu_members';
+const PROFILE_KEY = 'danchu_profile';
+const NOTIF_KEY   = 'danchu_notif';
+const DEVICE_KEY  = 'danchu_device';
+const MAX_FOOD    = 2;
+const DEFAULT_MEMBERS = ['경희', '범이', '한이', '강이'];
+const COLORS = [
+  { bg: '#e07b39', bd: '#c96b2a' },
+  { bg: '#4f8edc', bd: '#3a72b8' },
+  { bg: '#5cb87a', bd: '#3e9c5c' },
+  { bg: '#a67cc4', bd: '#8c5eaa' },
+  { bg: '#e8a030', bd: '#c88020' },
+  { bg: '#e05c7a', bd: '#c04060' },
+  { bg: '#3bbcb8', bd: '#2a9a96' },
+  { bg: '#8b7355', bd: '#6b5535' },
+];
+
+const CHORE_CATEGORIES = [
+  { id: 'delivery',  label: '택배수령',  icon: '📦' },
+  { id: 'recycling', label: '분리수거',  icon: '♻️' },
+  { id: 'dishes',    label: '설거지',   icon: '🍽️' },
+  { id: 'cleaning',  label: '청소',     icon: '🧹' },
+  { id: 'laundry',   label: '빨래',     icon: '👕' },
+];
+const ALL_TYPES = ['food', 'water', ...CHORE_CATEGORIES.map(c => c.id)];
+
+// ── Firebase 초기화 ──────────────────────────────────────
+let db = null;
+if (IS_FIREBASE) {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+  } catch(e) { console.warn('Firebase 초기화 실패:', e); }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_KEY);
+  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2, 10); localStorage.setItem(DEVICE_KEY, id); }
+  return id;
+}
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function formatDate(d) {
+  const days = ['일','월','화','수','목','금','토'];
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+}
+document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+
+function loadMembers() {
+  try {
+    const raw = localStorage.getItem(MEMBERS_KEY);
+    const list = raw ? JSON.parse(raw) : null;
+    return (list && list.length > 0) ? list : [...DEFAULT_MEMBERS];
+  } catch { return [...DEFAULT_MEMBERS]; }
+}
+function saveMembers(members) {
+  localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+  if (db) db.doc('config/members').set({ list: members }).catch(() => {});
+}
+
+function getProfile() { return localStorage.getItem(PROFILE_KEY) || null; }
+function setProfile(name) {
+  localStorage.setItem(PROFILE_KEY, name);
+  updateProfileUI();
+  if (db) {
+    db.doc(`tokens/${getDeviceId()}`).set({
+      owner: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true }).catch(() => {});
   }
-
-  function formatDate(d) {
-    const days = ['일','월','화','수','목','금','토'];
-    return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+}
+function updateProfileUI() {
+  const profile = getProfile();
+  const members = loadMembers();
+  const chip = document.getElementById('profileChip');
+  if (profile) {
+    const idx = members.indexOf(profile);
+    const c = idx >= 0 ? COLORS[idx % COLORS.length] : COLORS[0];
+    document.getElementById('profileChipDot').style.background = c.bg;
+    document.getElementById('profileChipName').textContent = profile;
+    chip.classList.remove('unset');
+    const dot = document.getElementById('settingsProfileDot');
+    if (dot) { dot.style.background = c.bg; document.getElementById('settingsProfileName').textContent = profile; }
+  } else {
+    document.getElementById('profileChipDot').style.background = '#e07b39';
+    document.getElementById('profileChipName').textContent = '👤 프로필 설정';
+    chip.classList.add('unset');
   }
+}
 
-  document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+let cachedData = null;
+let unsubscribeFirestore = null;
+let activeTab = 'danchu';
 
-  // ── 저장소 ─────────────────────────────────────────────
-  function loadData() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const data = raw ? JSON.parse(raw) : {};
-      const key = todayKey();
-      if (data.date !== key) {
-        // 날짜가 바뀌면 초기화
-        return { date: key, food: [], water: [] };
-      }
-      return data;
-    } catch { return { date: todayKey(), food: [], water: [] }; }
-  }
+function todayDocRef() { return db ? db.doc(`feedings/${todayKey()}`) : null; }
 
-  function saveData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+function emptyData() {
+  const d = { date: todayKey() };
+  ALL_TYPES.forEach(t => { d[t] = []; });
+  return d;
+}
+function loadLocalData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : {};
+    if (data.date !== todayKey()) return emptyData();
+    ALL_TYPES.forEach(t => { if (!data[t]) data[t] = []; });
+    return data;
+  } catch { return emptyData(); }
+}
+function saveLocalData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-  // ── 렌더링 ─────────────────────────────────────────────
-  function timeStr() {
-    const d = new Date();
-    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  }
-
-  function render() {
-    const data = loadData();
-    renderCard('food', data, MAX_FOOD_PER_DAY);
-    renderCard('water', data, Infinity);
-    renderHistory(data);
-  }
-
-  function renderCard(type, data, maxCount) {
-    const logs = data[type];
-    const logEl = document.getElementById('log-' + type);
-    const btnsEl = document.getElementById('btns-' + type);
-    const badge = document.getElementById('badge-' + type);
-
-    // 로그 목록
-    if (logs.length === 0) {
-      logEl.innerHTML = '<div class="empty-msg">아직 배식 기록이 없습니다</div>';
+function initDataListener() {
+  cachedData = loadLocalData();
+  render(cachedData);
+  if (!db) return;
+  if (unsubscribeFirestore) unsubscribeFirestore();
+  const ref = todayDocRef();
+  unsubscribeFirestore = ref.onSnapshot(snap => {
+    if (snap.exists) {
+      const d = snap.data();
+      cachedData = { date: todayKey() };
+      ALL_TYPES.forEach(t => { cachedData[t] = d[t] || []; });
     } else {
-      logEl.innerHTML = logs.map((entry, i) =>
+      cachedData = emptyData();
+    }
+    render(cachedData);
+    checkFeedingAlert(cachedData);
+  }, () => { cachedData = loadLocalData(); render(cachedData); });
+}
+
+function timeStr() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ── 탭 전환 ─────────────────────────────────────────────
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.style.display = panel.id === `panel-${tabId}` ? '' : 'none';
+  });
+}
+
+// ── 렌더링 ──────────────────────────────────────────────
+function render(data) {
+  if (!data) data = cachedData || loadLocalData();
+  ALL_TYPES.forEach(t => { if (!data[t]) data[t] = []; });
+  const members = loadMembers();
+  const profile = getProfile();
+  document.getElementById('memberCount').textContent = members.length;
+  updateProfileUI();
+  renderCard('food',  data, MAX_FOOD,  members, profile);
+  renderCard('water', data, Infinity,  members, profile);
+  CHORE_CATEGORIES.forEach(cat => renderCard(cat.id, data, Infinity, members, profile));
+  renderNudgeButtons('danchu', members);
+  CHORE_CATEGORIES.forEach(cat => renderNudgeButtons(cat.id, members));
+  renderHistory(data);
+}
+
+function renderCard(type, data, maxCount, members, profile) {
+  const logs   = data[type] || [];
+  const logEl  = document.getElementById('log-'   + type);
+  const btnsEl = document.getElementById('btns-'  + type);
+  const badge  = document.getElementById('badge-' + type);
+  if (!logEl || !btnsEl || !badge) return;
+
+  logEl.innerHTML = logs.length === 0
+    ? '<div class="empty-msg">아직 기록이 없습니다</div>'
+    : logs.map((entry, i) =>
         `<div class="log-item">
           <span class="who">${entry.who}</span>
-          <span class="when">${entry.time}</span>
-          <button class="delete-btn" onclick="deleteEntry('${type}',${i})" title="취소">✕</button>
+          <span class="when" onclick="editTime('${type}',${i},this)" title="탭하면 시간 수정">${entry.time}</span>
+          <button class="delete-btn" onclick="deleteEntry('${type}',${i})">✕</button>
         </div>`
       ).join('');
-    }
 
-    // 배지
-    const isFull = logs.length >= maxCount;
-    badge.textContent = isFull ? `완료 (${logs.length}회)` : `${logs.length}회 완료`;
-    badge.className = 'status-badge ' + (logs.length > 0 ? 'done' : 'ok');
+  const isFull = logs.length >= maxCount;
+  badge.textContent = logs.length > 0 ? `${logs.length}회 완료` : '대기중';
+  badge.className   = 'status-badge ' + (logs.length > 0 ? 'done' : 'ok');
 
-    // 멤버 버튼 — 이미 오늘 준 사람은 비활성화
-    const fedNames = new Set(logs.map(l => l.who));
-    btnsEl.innerHTML = MEMBERS.map((name, idx) => {
-      const alreadyFed = fedNames.has(name);
-      const tooMany = isFull;
-      const disabled = (alreadyFed || tooMany) ? 'disabled' : '';
-      const title = alreadyFed
-        ? `${name}: 이미 ${type === 'food' ? '사료' : '물'} 줬어요`
-        : tooMany ? `오늘 ${type === 'food' ? '사료' : '물'} 배식 완료` : '';
-      return `<button class="member-btn m${idx}" ${disabled} title="${title}"
-                onclick="feed('${type}','${name}')">${name}${alreadyFed ? ' ✓' : ''}</button>`;
-    }).join('');
-  }
+  const doneNames = new Set(logs.map(l => l.who));
+  btnsEl.innerHTML = members.map((name, idx) => {
+    const c = COLORS[idx % COLORS.length];
+    const disabled = (doneNames.has(name) || isFull) ? 'disabled' : '';
+    const isMine = name === profile;
+    return `<button class="member-btn${isMine ? ' mine' : ''}"
+              style="background:${c.bg};border-color:${c.bd}"
+              ${disabled} onclick="feed('${type}','${name}')"
+            >${name}${doneNames.has(name) ? ' ✓' : ''}</button>`;
+  }).join('');
+}
 
-  function renderHistory(data) {
-    const all = [
-      ...data.food.map(e => ({...e, type: 'food'})),
-      ...data.water.map(e => ({...e, type: 'water'})),
-    ].sort((a, b) => a.time.localeCompare(b.time));
+function renderHistory(data) {
+  const all = [
+    ...data.food.map(e => ({...e, tagClass:'food', label:'🍖 사료'})),
+    ...data.water.map(e => ({...e, tagClass:'water', label:'💧 물'})),
+  ].sort((a,b) => a.time.localeCompare(b.time));
 
-    const tbody = document.getElementById('historyBody');
-    if (all.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>';
-    } else {
-      tbody.innerHTML = all.map(e =>
-        `<tr>
-          <td>${e.time}</td>
-          <td><span class="tag ${e.type}">${e.type === 'food' ? '🍖 사료' : '💧 물'}</span></td>
-          <td>${e.who}</td>
-        </tr>`
+  const tbody = document.getElementById('historyBody-danchu');
+  if (!tbody) return;
+  tbody.innerHTML = all.length === 0
+    ? '<tr><td colspan="3" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>'
+    : all.map(e =>
+        `<tr><td>${e.time}</td><td><span class="tag ${e.tagClass}">${e.label}</span></td><td>${e.who}</td></tr>`
       ).join('');
+}
+
+// ── 기록 액션 ────────────────────────────────────────────
+function feed(type, who) {
+  const data = cachedData || loadLocalData();
+  if (!data[type]) data[type] = [];
+  if (data[type].some(l => l.who === who)) {
+    const cat = CHORE_CATEGORIES.find(c => c.id === type);
+    const label = type === 'food' ? '사료' : type === 'water' ? '물' : (cat ? cat.label : type);
+    alert(`${who}는 이미 오늘 ${label}을 했어요!`);
+    return;
+  }
+  if (type === 'food' && data.food.length >= MAX_FOOD) {
+    alert(`오늘 사료 배식 횟수(${MAX_FOOD}회)를 초과했어요.`);
+    return;
+  }
+  const entry = { who, time: timeStr() };
+  data[type].push(entry);
+  cachedData = data;
+  render(data);
+  if (db) {
+    const update = { [type]: data[type] };
+    if (type === 'food') update.lastFoodTs = firebase.firestore.FieldValue.serverTimestamp();
+    if (type === 'water') update.lastWaterTs = firebase.firestore.FieldValue.serverTimestamp();
+    todayDocRef().set(update, { merge: true }).catch(() => saveLocalData(data));
+  } else {
+    saveLocalData(data);
+  }
+}
+
+function editTime(type, index, el) {
+  const data = cachedData || loadLocalData();
+  const current = data[type][index].time;
+  const input = document.createElement('input');
+  input.type = 'time'; input.className = 'time-input'; input.value = current;
+  el.replaceWith(input); input.focus();
+  function save() {
+    if (input.value && input.value !== current) {
+      data[type][index].time = input.value;
+      if (db) {
+        todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
+      } else { saveLocalData(data); }
+      cachedData = data;
+    }
+    render(data);
+  }
+  input.addEventListener('change', save);
+  input.addEventListener('blur', save);
+}
+
+function deleteEntry(type, index) {
+  const data = cachedData || loadLocalData();
+  data[type].splice(index, 1);
+  if (db) {
+    todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
+  } else { saveLocalData(data); }
+  cachedData = data;
+  render(data);
+}
+
+function resetDay() {
+  if (!confirm('오늘 전체 기록을 모두 초기화할까요?')) return;
+  const fresh = emptyData();
+  if (db) {
+    const update = {};
+    ALL_TYPES.forEach(t => { update[t] = []; });
+    update.lastFoodTs = null; update.lastWaterTs = null;
+    todayDocRef().set(update).catch(() => saveLocalData(fresh));
+  } else { saveLocalData(fresh); }
+  cachedData = fresh;
+  render(fresh);
+}
+
+// ── 알림 배너 ───────────────────────────────────────────
+function checkFeedingAlert(data) {
+  const banner = document.getElementById('alertBanner');
+  if (!data || !data.food || data.food.length === 0) {
+    if (new Date().getHours() >= 8) {
+      banner.textContent = '🚨 단추가 오늘 아직 밥을 못 먹었어요!';
+      banner.classList.add('show'); return;
+    }
+  } else {
+    const lastEntry = data.food[data.food.length - 1];
+    const [lh, lm] = lastEntry.time.split(':').map(Number);
+    const diffH = (Date.now() - new Date().setHours(lh, lm, 0, 0)) / 3600000;
+    if (diffH >= 8) {
+      banner.textContent = `🚨 단추가 마지막 배식 후 ${Math.floor(diffH)}시간이 지났어요!`;
+      banner.classList.add('show'); return;
     }
   }
+  banner.classList.remove('show');
+}
 
-  // ── 액션 ───────────────────────────────────────────────
-  function feed(type, who) {
-    const data = loadData();
-    const logs = data[type];
+// ── 알림 공통 전송 ───────────────────────────────────────
+async function sendNudgeApi(payload) {
+  if (!IS_FIREBASE) throw new Error('no firebase');
+  const resp = await fetch('https://nudgeall-ldf5zfstvq-uc.a.run.app', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  return resp.json();
+}
 
-    if (logs.some(l => l.who === who)) {
-      alert(`${who}는 이미 오늘 ${type === 'food' ? '사료' : '물'}을 줬어요! 🐾`);
-      return;
+// ── 요청하기 멀티셀렉트 ─────────────────────────────────
+const nudgeSelections = {};
+
+function getOrCreateSelection(cardKey) {
+  if (!nudgeSelections[cardKey]) nudgeSelections[cardKey] = new Set();
+  return nudgeSelections[cardKey];
+}
+
+function renderNudgeButtons(cardKey, members) {
+  if (!members) members = loadMembers();
+  const btnsEl = document.getElementById(`btns-nudge-${cardKey}`);
+  if (!btnsEl) return;
+  const sel = getOrCreateSelection(cardKey);
+  btnsEl.innerHTML = members.map((name, idx) => {
+    const c = COLORS[idx % COLORS.length];
+    const isSelected = sel.has(name);
+    return `<button class="member-btn${isSelected ? ' nudge-selected' : ''}"
+              style="background:${c.bg};border-color:${c.bd}"
+              onclick="toggleNudgeSelect('${cardKey}','${name}',this)">📣 ${name}</button>`;
+  }).join('');
+  const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
+  if (sendBtn) sendBtn.disabled = sel.size === 0;
+}
+
+function toggleNudgeSelect(cardKey, name, btn) {
+  const sel = getOrCreateSelection(cardKey);
+  if (sel.has(name)) { sel.delete(name); btn.classList.remove('nudge-selected'); }
+  else               { sel.add(name);    btn.classList.add('nudge-selected');    }
+  const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
+  if (sendBtn) sendBtn.disabled = sel.size === 0;
+}
+
+async function sendNudgeMulti(cardKey) {
+  const from = getProfile();
+  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
+  const sel = getOrCreateSelection(cardKey);
+  if (sel.size === 0) return;
+  const cat = CHORE_CATEGORIES.find(c => c.id === cardKey);
+  const task = cat ? cat.label : null;
+  const toList = [...sel];
+  const taskStr = task ? `"${task}"` : '"단추에게 밥을 주세요"';
+  if (!confirm(`${toList.join(', ')}에게\n${taskStr} 알림을 보낼까요?`)) return;
+  const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '전송 중...'; }
+  try {
+    for (const toMember of toList) {
+      const payload = { from, to: toMember };
+      if (task) payload.task = task;
+      const result = await sendNudgeApi(payload);
+      if (result.reason === 'no_tokens') {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '📣 전송하기'; }
+        alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!');
+        return;
+      }
     }
+    nudgeSelections[cardKey] = new Set();
+    renderNudgeButtons(cardKey, loadMembers());
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '✅ 전송됨!'; }
+    setTimeout(() => { if (sendBtn) sendBtn.textContent = '📣 전송하기'; }, 2000);
+  } catch(e) {
+    console.error(e);
+    if (sendBtn) { sendBtn.disabled = sel.size === 0; sendBtn.textContent = '📣 전송하기'; }
+    alert('전송 중 오류가 발생했습니다.');
+  }
+}
 
-    if (type === 'food' && logs.length >= MAX_FOOD_PER_DAY) {
-      alert(`오늘 사료 배식 횟수(${MAX_FOOD_PER_DAY}회)를 초과했어요.`);
-      return;
+// ── Web Push 알림 설정 ──────────────────────────────────
+async function toggleNotification(enabled) {
+  const statusEl = document.getElementById('notifStatus');
+  if (!enabled) {
+    localStorage.setItem(NOTIF_KEY, 'off');
+    if (db) db.doc(`tokens/${getDeviceId()}`).set({ enabled: false }, { merge: true }).catch(() => {});
+    statusEl.textContent = '알림이 꺼졌습니다.'; return;
+  }
+  if (!('PushManager' in window)) {
+    statusEl.textContent = '이 브라우저는 푸시 알림을 지원하지 않습니다.';
+    document.getElementById('notifToggle').checked = false; return;
+  }
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      statusEl.textContent = '알림 권한이 거부됐습니다. 브라우저 설정에서 허용해 주세요.';
+      document.getElementById('notifToggle').checked = false; return;
     }
-
-    data[type].push({ who, time: timeStr() });
-    saveData(data);
-    render();
-  }
-
-  function deleteEntry(type, index) {
-    const data = loadData();
-    data[type].splice(index, 1);
-    saveData(data);
-    render();
-  }
-
-  function resetDay() {
-    if (!confirm('오늘 배식 기록을 모두 초기화할까요?')) return;
-    const fresh = { date: todayKey(), food: [], water: [] };
-    saveData(fresh);
-    render();
-  }
-
-  // QR코드
-  const APP_URL = 'https://raw.githack.com/aniastro11-NOVA/animation-quiz/main/index.html';
-  let qrGenerated = false;
-
-  function toggleQR() {
-    const box = document.getElementById('qrBox');
-    box.classList.toggle('open');
-    if (box.classList.contains('open') && !qrGenerated) {
-      new QRCode(document.getElementById('qrcode'), {
-        text: APP_URL,
-        width: 200,
-        height: 200,
-        colorDark: '#3d2b1f',
-        colorLight: '#ffffff',
-      });
-      qrGenerated = true;
+    await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    const swReg = await navigator.serviceWorker.ready;
+    const existingSub = await swReg.pushManager.getSubscription();
+    if (existingSub) await existingSub.unsubscribe();
+    const subscription = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+    });
+    if (db) {
+      await db.doc(`tokens/${getDeviceId()}`).set({
+        subscription: subscription.toJSON(), owner: getProfile() || '',
+        enabled: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
     }
+    localStorage.setItem(NOTIF_KEY, 'on');
+    statusEl.textContent = '✅ 알림이 등록됐습니다!';
+  } catch(e) {
+    statusEl.textContent = '알림 오류: ' + (e?.message || String(e));
+    document.getElementById('notifToggle').checked = false; console.error(e);
+  }
+}
+
+function initNotifToggle() {
+  const toggle = document.getElementById('notifToggle');
+  const status = document.getElementById('notifStatus');
+  toggle.checked = (localStorage.getItem(NOTIF_KEY) === 'on');
+  if (!IS_FIREBASE) { status.textContent = 'Firebase 설정 후 사용 가능합니다.'; toggle.disabled = true; }
+  updateNotifDebug();
+}
+
+async function updateNotifDebug() {
+  const debugEl = document.getElementById('notifDebug');
+  if (!debugEl) return;
+  const perm = Notification.permission;
+  let subInfo = '구독 없음';
+  try {
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        const ep = sub.endpoint;
+        subInfo = '구독 있음 · ' + ep.slice(ep.lastIndexOf('/') + 1, ep.lastIndexOf('/') + 9) + '…';
+      }
+    }
+  } catch(e) {}
+  debugEl.textContent = `권한: ${perm} · ${subInfo}`;
+}
+
+async function testLocalNotif() {
+  const statusEl = document.getElementById('notifStatus');
+  if (Notification.permission !== 'granted') {
+    statusEl.textContent = '⚠️ 알림 권한이 없어요. 토글을 켜서 권한을 허용해 주세요.';
+    return;
+  }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification('🔔 한강이네 알림 테스트', {
+      body: '이 알림이 보이면 브라우저 알림은 정상이에요!',
+      icon: '/animation-quiz/icon-192.png',
+      badge: '/animation-quiz/icon-192.png',
+    });
+    statusEl.textContent = '✅ 테스트 알림을 전송했어요. 화면 오른쪽 아래를 확인하세요!';
+  } catch(e) {
+    statusEl.textContent = '❌ 알림 표시 실패: ' + (e?.message || String(e));
+  }
+}
+
+// ── 프로필 모달 ─────────────────────────────────────────
+function openProfileModal() {
+  const members = loadMembers();
+  document.getElementById('profileGrid').innerHTML = members.map((name, idx) => {
+    const c = COLORS[idx % COLORS.length];
+    return `<button class="profile-btn" style="background:${c.bg};border-color:${c.bd}"
+              onclick="selectProfile('${name}')">${name}</button>`;
+  }).join('');
+  document.getElementById('profileOverlay').classList.add('open');
+}
+function selectProfile(name) {
+  setProfile(name);
+  document.getElementById('profileOverlay').classList.remove('open');
+  render(cachedData);
+}
+
+// ── 설정 모달 ───────────────────────────────────────────
+function openSettings() {
+  renderMemberSettings(); initNotifToggle(); updateProfileUI();
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('open');
+  render(cachedData);
+}
+function closeSettingsOutside(e) { if (e.target === e.currentTarget) closeSettings(); }
+
+function renderMemberSettings() {
+  const members = loadMembers();
+  document.getElementById('memberList').innerHTML = members.map((name, i) => {
+    const c = COLORS[i % COLORS.length];
+    return `<div class="member-row">
+      <div class="member-color-dot" style="background:${c.bg}"></div>
+      <input class="member-name-input" value="${name}"
+             onblur="renameMember(${i}, this.value)"
+             onkeydown="if(event.key==='Enter') this.blur()" />
+      <button class="member-del-btn" onclick="deleteMember(${i})">🗑</button>
+    </div>`;
+  }).join('');
+}
+function addMember() {
+  const input = document.getElementById('newMemberInput');
+  const name = input.value.trim();
+  if (!name) return;
+  const members = loadMembers();
+  if (members.includes(name)) { alert('이미 있는 이름이에요.'); return; }
+  members.push(name); saveMembers(members); input.value = ''; renderMemberSettings();
+}
+function deleteMember(index) {
+  const members = loadMembers();
+  if (members.length <= 1) { alert('최소 1명은 있어야 해요.'); return; }
+  if (!confirm(`${members[index]}을(를) 삭제할까요?`)) return;
+  if (getProfile() === members[index]) localStorage.removeItem(PROFILE_KEY);
+  members.splice(index, 1); saveMembers(members); renderMemberSettings();
+}
+function renameMember(index, newName) {
+  const name = newName.trim(); if (!name) return;
+  const members = loadMembers();
+  if (members[index] === name) return;
+  if (getProfile() === members[index]) setProfile(name);
+  members[index] = name; saveMembers(members); renderMemberSettings();
+}
+
+// ── QR코드 ──────────────────────────────────────────────
+const APP_URL = 'https://aniastro11-nova.github.io/animation-quiz/';
+let qrGenerated = false;
+function toggleQR() {
+  const box = document.getElementById('qrBox');
+  box.classList.toggle('open');
+  if (box.classList.contains('open') && !qrGenerated) {
+    new QRCode(document.getElementById('qrcode'), {
+      text: APP_URL, width: 200, height: 200, colorDark: '#3d2b1f', colorLight: '#ffffff',
+    });
+    qrGenerated = true;
+  }
+}
+
+// ── 시작 ────────────────────────────────────────────────
+cachedData = loadLocalData();
+render(cachedData);
+updateProfileUI();
+
+(async function init() {
+  if (db) {
+    try {
+      const [membersSnap, tokenSnap] = await Promise.all([
+        db.doc('config/members').get(),
+        db.doc(`tokens/${getDeviceId()}`).get(),
+      ]);
+      const firestoreList = membersSnap.exists ? membersSnap.data().list : null;
+      if (firestoreList && firestoreList.length > 0) {
+        localStorage.setItem(MEMBERS_KEY, JSON.stringify(firestoreList));
+      } else {
+        db.doc('config/members').set({ list: loadMembers() }).catch(() => {});
+      }
+      if (!getProfile() && tokenSnap.exists && tokenSnap.data().owner) {
+        localStorage.setItem(PROFILE_KEY, tokenSnap.data().owner);
+      }
+    } catch(e) {}
   }
 
-  // 최초 렌더
-  render();
+  if (db && localStorage.getItem(NOTIF_KEY) === 'on' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(async reg => {
+      try {
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub && Notification.permission === 'granted') {
+          // 구독이 만료됐으면 자동 재구독
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+          });
+        }
+        if (sub) {
+          db.doc(`tokens/${getDeviceId()}`).set({
+            subscription: sub.toJSON(), enabled: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          }, { merge: true }).catch(() => {});
+        }
+      } catch(e) { console.warn('push subscription refresh failed', e); }
+    }).catch(() => {});
+  }
 
-  // 자정 자동 초기화 (탭을 오래 열어둔 경우)
+  updateProfileUI();
+  initDataListener();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      render(cachedData || loadLocalData());
+      if (db) initDataListener();
+    }
+  });
+
   setInterval(() => {
-    const data = loadData();
-    if (data.date !== todayKey()) render();
+    const data = cachedData || loadLocalData();
+    if (data.date !== todayKey()) {
+      cachedData = null; initDataListener();
+      document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+    }
   }, 60 * 1000);
+})();
 </script>
 </body>
 </html>
