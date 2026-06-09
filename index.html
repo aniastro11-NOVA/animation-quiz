@@ -853,7 +853,7 @@ function checkFeedingAlert(data) {
 // ── 알림 공통 전송 ───────────────────────────────────────
 async function sendNudgeApi(payload) {
   if (!IS_FIREBASE) throw new Error('no firebase');
-  const resp = await fetch('https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll', {
+  const resp = await fetch('https://nudgeall-ldf5zfstvq-uc.a.run.app', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
