@@ -988,6 +988,11 @@ function toggleQR() {
 }
 
 // ── 시작 ─────────────────────────────────────────────────
+// 비동기 대기 없이 즉시 렌더 (알림 탭 후에도 멤버 목록 바로 표시)
+cachedData = loadLocalData();
+render(cachedData);
+updateProfileUI();
+
 (async function init() {
   // Firestore에서 멤버 및 프로필 복원
   if (db) {
