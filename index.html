@@ -17,18 +17,15 @@
       font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
       background: #fdf6ee;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
       padding: 16px 16px 48px;
     }
 
     .alert-banner {
-      display: none;
-      width: 100%; max-width: 420px;
+      display: none; width: 100%; max-width: 420px;
       background: #fff0e0; border: 2px solid #e07b39;
-      border-radius: 14px; padding: 12px 16px;
-      margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #7a3a10;
+      border-radius: 14px; padding: 12px 16px; margin-bottom: 12px;
+      font-size: 14px; font-weight: 700; color: #7a3a10;
     }
     .alert-banner.show { display: block; }
 
@@ -56,8 +53,7 @@
 
     /* ── 탭 네비게이션 ── */
     .tab-nav {
-      display: flex; gap: 6px;
-      width: 100%; max-width: 420px;
+      display: flex; gap: 6px; width: 100%; max-width: 420px;
       overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px;
       scrollbar-width: none;
     }
@@ -101,7 +97,7 @@
       display: flex; align-items: center; justify-content: space-between;
       background: #fdf6ee; border-radius: 10px; padding: 8px 14px; font-size: 14px;
     }
-    .log-item .who  { font-weight: 700; color: #3d2b1f; }
+    .log-item .who { font-weight: 700; color: #3d2b1f; }
     .log-item .when {
       font-size: 12px; color: #a0856a; cursor: pointer;
       text-decoration: underline dotted; padding: 2px 4px; border-radius: 4px;
@@ -237,12 +233,12 @@
 </header>
 
 <div class="tab-nav">
-  <button class="tab-btn active" data-tab="danchu" onclick="switchTab('danchu')">🐾 단추밥</button>
-  <button class="tab-btn" data-tab="dishes" onclick="switchTab('dishes')">🍽️ 설거지</button>
-  <button class="tab-btn" data-tab="cleaning" onclick="switchTab('cleaning')">🧹 청소</button>
-  <button class="tab-btn" data-tab="laundry" onclick="switchTab('laundry')">👕 빨래</button>
-  <button class="tab-btn" data-tab="delivery" onclick="switchTab('delivery')">📦 택배수령</button>
-  <button class="tab-btn" data-tab="recycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
+  <button class="tab-btn active" data-tab="danchu"    onclick="switchTab('danchu')">🐾 단추밥</button>
+  <button class="tab-btn"        data-tab="delivery"  onclick="switchTab('delivery')">📦 택배수령</button>
+  <button class="tab-btn"        data-tab="recycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
+  <button class="tab-btn"        data-tab="dishes"    onclick="switchTab('dishes')">🍽️ 설거지</button>
+  <button class="tab-btn"        data-tab="cleaning"  onclick="switchTab('cleaning')">🧹 청소</button>
+  <button class="tab-btn"        data-tab="laundry"   onclick="switchTab('laundry')">👕 빨래</button>
 </div>
 
 <div class="date-bar" id="dateBar"></div>
@@ -299,6 +295,62 @@
   </div>
 </div>
 
+<!-- ── 택배수령 탭 ── -->
+<div class="tab-panel" id="panel-delivery" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-delivery">
+      <div class="card-header">
+        <span class="card-icon">📦</span>
+        <div>
+          <div class="card-title">택배수령</div>
+          <div class="card-subtitle">오늘 택배 수령 담당</div>
+        </div>
+        <span class="status-badge" id="badge-delivery">대기중</span>
+      </div>
+      <div class="log-list" id="log-delivery"></div>
+      <div class="member-buttons" id="btns-delivery"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">택배수령 요청하기</div>
+          <div class="card-subtitle">택배 수령을 부탁해요!</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-delivery"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 분리수거 탭 ── -->
+<div class="tab-panel" id="panel-recycling" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-recycling">
+      <div class="card-header">
+        <span class="card-icon">♻️</span>
+        <div>
+          <div class="card-title">분리수거</div>
+          <div class="card-subtitle">오늘 분리수거 담당</div>
+        </div>
+        <span class="status-badge" id="badge-recycling">대기중</span>
+      </div>
+      <div class="log-list" id="log-recycling"></div>
+      <div class="member-buttons" id="btns-recycling"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">분리수거 요청하기</div>
+          <div class="card-subtitle">분리수거를 부탁해요!</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-recycling"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── 설거지 탭 ── -->
 <div class="tab-panel" id="panel-dishes" style="display:none">
   <div class="cards">
@@ -313,6 +365,16 @@
       </div>
       <div class="log-list" id="log-dishes"></div>
       <div class="member-buttons" id="btns-dishes"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">설거지 요청하기</div>
+          <div class="card-subtitle">설거지를 부탁해요!</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-dishes"></div>
     </div>
   </div>
 </div>
@@ -332,6 +394,16 @@
       <div class="log-list" id="log-cleaning"></div>
       <div class="member-buttons" id="btns-cleaning"></div>
     </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">청소 요청하기</div>
+          <div class="card-subtitle">청소를 부탁해요!</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge-cleaning"></div>
+    </div>
   </div>
 </div>
 
@@ -350,41 +422,15 @@
       <div class="log-list" id="log-laundry"></div>
       <div class="member-buttons" id="btns-laundry"></div>
     </div>
-  </div>
-</div>
-
-<!-- ── 택배수령 탭 ── -->
-<div class="tab-panel" id="panel-delivery" style="display:none">
-  <div class="cards">
-    <div class="card" id="card-delivery">
+    <div class="card">
       <div class="card-header">
-        <span class="card-icon">📦</span>
+        <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">택배수령</div>
-          <div class="card-subtitle">오늘 택배 수령 담당</div>
+          <div class="card-title">빨래 요청하기</div>
+          <div class="card-subtitle">빨래를 부탁해요!</div>
         </div>
-        <span class="status-badge" id="badge-delivery">대기중</span>
       </div>
-      <div class="log-list" id="log-delivery"></div>
-      <div class="member-buttons" id="btns-delivery"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── 분리수거 탭 ── -->
-<div class="tab-panel" id="panel-recycling" style="display:none">
-  <div class="cards">
-    <div class="card" id="card-recycling">
-      <div class="card-header">
-        <span class="card-icon">♻️</span>
-        <div>
-          <div class="card-title">분리수거</div>
-          <div class="card-subtitle">오늘 분리수거 담당</div>
-        </div>
-        <span class="status-badge" id="badge-recycling">대기중</span>
-      </div>
-      <div class="log-list" id="log-recycling"></div>
-      <div class="member-buttons" id="btns-recycling"></div>
+      <div class="member-buttons" id="btns-nudge-laundry"></div>
     </div>
   </div>
 </div>
@@ -485,11 +531,11 @@ const COLORS = [
 ];
 
 const CHORE_CATEGORIES = [
+  { id: 'delivery',  label: '택배수령',  icon: '📦' },
+  { id: 'recycling', label: '분리수거',  icon: '♻️' },
   { id: 'dishes',    label: '설거지',   icon: '🍽️' },
   { id: 'cleaning',  label: '청소',     icon: '🧹' },
   { id: 'laundry',   label: '빨래',     icon: '👕' },
-  { id: 'delivery',  label: '택배수령',  icon: '📦' },
-  { id: 'recycling', label: '분리수거',  icon: '♻️' },
 ];
 const ALL_TYPES = ['food', 'water', ...CHORE_CATEGORIES.map(c => c.id)];
 
@@ -509,14 +555,12 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
-// ── 기기 ID ─────────────────────────────────────────────
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_KEY);
   if (!id) { id = 'dev_' + Math.random().toString(36).slice(2, 10); localStorage.setItem(DEVICE_KEY, id); }
   return id;
 }
 
-// ── 날짜 ────────────────────────────────────────────────
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -527,7 +571,6 @@ function formatDate(d) {
 }
 document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
 
-// ── 가족 구성원 ──────────────────────────────────────────
 function loadMembers() {
   try {
     const raw = localStorage.getItem(MEMBERS_KEY);
@@ -540,7 +583,6 @@ function saveMembers(members) {
   if (db) db.doc('config/members').set({ list: members }).catch(() => {});
 }
 
-// ── 프로필 ──────────────────────────────────────────────
 function getProfile() { return localStorage.getItem(PROFILE_KEY) || null; }
 function setProfile(name) {
   localStorage.setItem(PROFILE_KEY, name);
@@ -570,7 +612,6 @@ function updateProfileUI() {
   }
 }
 
-// ── 데이터 ──────────────────────────────────────────────
 let cachedData = null;
 let unsubscribeFirestore = null;
 let activeTab = 'danchu';
@@ -582,7 +623,6 @@ function emptyData() {
   ALL_TYPES.forEach(t => { d[t] = []; });
   return d;
 }
-
 function loadLocalData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -639,8 +679,11 @@ function render(data) {
   updateProfileUI();
   renderCard('food',  data, MAX_FOOD,  members, profile);
   renderCard('water', data, Infinity,  members, profile);
-  CHORE_CATEGORIES.forEach(cat => renderCard(cat.id, data, Infinity, members, profile));
-  renderNudgeButtons();
+  CHORE_CATEGORIES.forEach(cat => {
+    renderCard(cat.id, data, Infinity, members, profile);
+    renderChoreNudgeButtons(cat.id, members);
+  });
+  renderNudgeButtons(members);
   renderHistory(data);
 }
 
@@ -767,16 +810,14 @@ function resetDay() {
 function checkFeedingAlert(data) {
   const banner = document.getElementById('alertBanner');
   if (!data || !data.food || data.food.length === 0) {
-    const now = new Date();
-    if (now.getHours() >= 8) {
+    if (new Date().getHours() >= 8) {
       banner.textContent = '🚨 단추가 오늘 아직 밥을 못 먹었어요!';
       banner.classList.add('show'); return;
     }
   } else {
     const lastEntry = data.food[data.food.length - 1];
     const [lh, lm] = lastEntry.time.split(':').map(Number);
-    const lastMs = new Date().setHours(lh, lm, 0, 0);
-    const diffH = (Date.now() - lastMs) / 3600000;
+    const diffH = (Date.now() - new Date().setHours(lh, lm, 0, 0)) / 3600000;
     if (diffH >= 8) {
       banner.textContent = `🚨 단추가 마지막 배식 후 ${Math.floor(diffH)}시간이 지났어요!`;
       banner.classList.add('show'); return;
@@ -785,14 +826,89 @@ function checkFeedingAlert(data) {
   banner.classList.remove('show');
 }
 
-// ── 알림 (Web Push) ─────────────────────────────────────
+// ── 알림 공통 전송 ───────────────────────────────────────
+async function sendNudge(payload) {
+  if (!IS_FIREBASE) throw new Error('no firebase');
+  const resp = await fetch('https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  return resp.json();
+}
+
+// ── 단추밥 부탁하기 ─────────────────────────────────────
+function renderNudgeButtons(members) {
+  if (!members) members = loadMembers();
+  const btnsEl = document.getElementById('btns-nudge');
+  if (!btnsEl) return;
+  btnsEl.innerHTML = members.map((name, idx) => {
+    const c = COLORS[idx % COLORS.length];
+    return `<button class="member-btn" style="background:${c.bg};border-color:${c.bd}"
+              onclick="nudge('${name}', this)">📣 ${name}</button>`;
+  }).join('');
+}
+
+async function nudge(toMember, btn) {
+  const from = getProfile();
+  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
+  if (!confirm(`${toMember}에게 "단추에게 밥을 주세요" 알림을\n모든 가족에게 보낼까요?`)) return;
+  const origText = btn.textContent;
+  btn.disabled = true; btn.textContent = '전송 중...';
+  try {
+    const result = await sendNudge({ from, to: toMember });
+    if (result.reason === 'no_tokens') {
+      btn.disabled = false; btn.textContent = origText;
+      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!'); return;
+    }
+    btn.textContent = '✅ 전송됨!';
+    setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
+  } catch(e) {
+    console.error(e); btn.disabled = false; btn.textContent = origText;
+    alert('전송 중 오류가 발생했습니다.');
+  }
+}
+
+// ── 가사 요청하기 ────────────────────────────────────────
+function renderChoreNudgeButtons(catId, members) {
+  if (!members) members = loadMembers();
+  const btnsEl = document.getElementById(`btns-nudge-${catId}`);
+  if (!btnsEl) return;
+  btnsEl.innerHTML = members.map((name, idx) => {
+    const c = COLORS[idx % COLORS.length];
+    return `<button class="member-btn" style="background:${c.bg};border-color:${c.bd}"
+              onclick="nudgeChore('${catId}','${name}',this)">📣 ${name}</button>`;
+  }).join('');
+}
+
+async function nudgeChore(catId, toMember, btn) {
+  const from = getProfile();
+  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
+  const cat = CHORE_CATEGORIES.find(c => c.id === catId);
+  if (!confirm(`${toMember}에게 "${cat.label}" 알림을\n모든 가족에게 보낼까요?`)) return;
+  const origText = btn.textContent;
+  btn.disabled = true; btn.textContent = '전송 중...';
+  try {
+    const result = await sendNudge({ from, to: toMember, task: cat.label });
+    if (result.reason === 'no_tokens') {
+      btn.disabled = false; btn.textContent = origText;
+      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!'); return;
+    }
+    btn.textContent = '✅ 전송됨!';
+    setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
+  } catch(e) {
+    console.error(e); btn.disabled = false; btn.textContent = origText;
+    alert('전송 중 오류가 발생했습니다.');
+  }
+}
+
+// ── Web Push 알림 설정 ──────────────────────────────────
 async function toggleNotification(enabled) {
   const statusEl = document.getElementById('notifStatus');
   if (!enabled) {
     localStorage.setItem(NOTIF_KEY, 'off');
     if (db) db.doc(`tokens/${getDeviceId()}`).set({ enabled: false }, { merge: true }).catch(() => {});
-    statusEl.textContent = '알림이 꺼졌습니다.';
-    return;
+    statusEl.textContent = '알림이 꺼졌습니다.'; return;
   }
   if (!('PushManager' in window)) {
     statusEl.textContent = '이 브라우저는 푸시 알림을 지원하지 않습니다.';
@@ -814,18 +930,15 @@ async function toggleNotification(enabled) {
     });
     if (db) {
       await db.doc(`tokens/${getDeviceId()}`).set({
-        subscription: subscription.toJSON(),
-        owner: getProfile() || '',
-        enabled: true,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        subscription: subscription.toJSON(), owner: getProfile() || '',
+        enabled: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
     }
     localStorage.setItem(NOTIF_KEY, 'on');
     statusEl.textContent = '✅ 알림이 등록됐습니다!';
   } catch(e) {
     statusEl.textContent = '알림 오류: ' + (e?.message || String(e));
-    document.getElementById('notifToggle').checked = false;
-    console.error(e);
+    document.getElementById('notifToggle').checked = false; console.error(e);
   }
 }
 
@@ -892,49 +1005,11 @@ function deleteMember(index) {
   members.splice(index, 1); saveMembers(members); renderMemberSettings();
 }
 function renameMember(index, newName) {
-  const name = newName.trim();
-  if (!name) return;
+  const name = newName.trim(); if (!name) return;
   const members = loadMembers();
   if (members[index] === name) return;
   if (getProfile() === members[index]) setProfile(name);
   members[index] = name; saveMembers(members); renderMemberSettings();
-}
-
-// ── 밥 부탁하기 ─────────────────────────────────────────
-function renderNudgeButtons() {
-  const members = loadMembers();
-  const btnsEl = document.getElementById('btns-nudge');
-  if (!btnsEl) return;
-  btnsEl.innerHTML = members.map((name, idx) => {
-    const c = COLORS[idx % COLORS.length];
-    return `<button class="member-btn" style="background:${c.bg};border-color:${c.bd}"
-              onclick="nudge('${name}', this)">📣 ${name}</button>`;
-  }).join('');
-}
-async function nudge(toMember, btn) {
-  const from = getProfile();
-  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
-  if (!confirm(`${toMember}에게 "단추에게 밥을 주세요" 알림을\n모든 가족에게 보낼까요?`)) return;
-  const origText = btn.textContent;
-  btn.disabled = true; btn.textContent = '전송 중...';
-  try {
-    if (!IS_FIREBASE) throw new Error('no firebase');
-    const resp = await fetch('https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: toMember }),
-    });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const result = await resp.json();
-    if (result.reason === 'no_tokens') {
-      btn.disabled = false; btn.textContent = origText;
-      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!'); return;
-    }
-    btn.textContent = '✅ 전송됨!';
-    setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
-  } catch(e) {
-    console.error(e); btn.disabled = false; btn.textContent = origText;
-    alert('전송 중 오류가 발생했습니다.');
-  }
 }
 
 // ── QR코드 ──────────────────────────────────────────────
@@ -1001,8 +1076,7 @@ updateProfileUI();
   setInterval(() => {
     const data = cachedData || loadLocalData();
     if (data.date !== todayKey()) {
-      cachedData = null;
-      initDataListener();
+      cachedData = null; initDataListener();
       document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
     }
   }, 60 * 1000);

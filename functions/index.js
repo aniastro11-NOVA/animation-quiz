@@ -61,7 +61,7 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     return;
   }
 
-  const { from, to } = req.body || {};
+  const { from, to, task } = req.body || {};
   if (!to) {
     res.status(400).json({ error: 'to is required' });
     return;
@@ -76,9 +76,13 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
   }
 
   const fromStr = from ? `${from}가 ` : '';
+  const notifTitle = task ? `🏠 ${task} 부탁` : '🐾 단추에게 밥을 주세요!';
+  const notifBody  = task
+    ? `${fromStr}${to}에게 ${task} 부탁했어요`
+    : `${fromStr}${to}에게 부탁했어요`;
   await sendToAll(subscriptions, {
-    title: '🐾 단추에게 밥을 주세요!',
-    body:  `${fromStr}${to}에게 부탁했어요`,
+    title: notifTitle,
+    body:  notifBody,
     icon:  'https://aniastro11-nova.github.io/animation-quiz/icon-192.png',
     badge: 'https://aniastro11-nova.github.io/animation-quiz/icon-192.png',
     url:   'https://aniastro11-nova.github.io/animation-quiz/',
