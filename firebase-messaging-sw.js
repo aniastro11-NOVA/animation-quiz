@@ -1,3 +1,17 @@
+// 설치 즉시 활성화 (탭을 모두 닫을 필요 없이 새 SW로 교체)
+self.addEventListener('install', () => self.skipWaiting());
+
+// 활성화 시 모든 열린 창 새로고침 → 최신 코드 로드
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    clients.claim().then(() =>
+      clients.matchAll({ type: 'window' }).then(windowClients =>
+        Promise.all(windowClients.map(c => c.navigate(c.url)))
+      )
+    )
+  );
+});
+
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data.json(); } catch(e) {}

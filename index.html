@@ -602,6 +602,8 @@ function timeStr() {
 // ── 렌더링 ───────────────────────────────────────────────
 function render(data) {
   if (!data) data = cachedData || loadLocalData();
+  if (!data.food) data.food = [];
+  if (!data.water) data.water = [];
   const members = loadMembers();
   const profile = getProfile();
   document.getElementById('memberCount').textContent = members.length;
