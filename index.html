@@ -1009,6 +1009,21 @@ function toggleQR() {
     } catch(e) {}
   }
 
+  // 페이지 로드 시 push 구독이 살아있으면 Firestore enabled 복원
+  if (db && localStorage.getItem(NOTIF_KEY) === 'on' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg =>
+      reg.pushManager.getSubscription()
+    ).then(sub => {
+      if (sub) {
+        db.doc(`tokens/${getDeviceId()}`).set({
+          subscription: sub.toJSON(),
+          enabled: true,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true }).catch(() => {});
+      }
+    }).catch(() => {});
+  }
+
   updateProfileUI();
 
   // 데이터 리스너 시작 (Firestore 실시간 or localStorage)
