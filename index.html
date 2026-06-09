@@ -498,6 +498,12 @@
         </label>
       </div>
       <div id="notifStatus" style="font-size:12px;color:#a0856a;padding:8px 0 0"></div>
+      <div id="notifDebug" style="font-size:11px;color:#b09080;padding:4px 0 0;word-break:break-all"></div>
+      <button id="notifTestBtn" onclick="testLocalNotif()"
+        style="margin-top:10px;padding:8px 14px;border-radius:10px;border:1.5px solid #e07b39;
+               background:#fff;color:#e07b39;font-size:13px;font-weight:700;cursor:pointer;width:100%">
+        🔔 브라우저 알림 테스트
+      </button>
     </div>
 
     <div class="settings-section">
@@ -966,6 +972,44 @@ function initNotifToggle() {
   const status = document.getElementById('notifStatus');
   toggle.checked = (localStorage.getItem(NOTIF_KEY) === 'on');
   if (!IS_FIREBASE) { status.textContent = 'Firebase 설정 후 사용 가능합니다.'; toggle.disabled = true; }
+  updateNotifDebug();
+}
+
+async function updateNotifDebug() {
+  const debugEl = document.getElementById('notifDebug');
+  if (!debugEl) return;
+  const perm = Notification.permission;
+  let subInfo = '구독 없음';
+  try {
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        const ep = sub.endpoint;
+        subInfo = '구독 있음 · ' + ep.slice(ep.lastIndexOf('/') + 1, ep.lastIndexOf('/') + 9) + '…';
+      }
+    }
+  } catch(e) {}
+  debugEl.textContent = `권한: ${perm} · ${subInfo}`;
+}
+
+async function testLocalNotif() {
+  const statusEl = document.getElementById('notifStatus');
+  if (Notification.permission !== 'granted') {
+    statusEl.textContent = '⚠️ 알림 권한이 없어요. 토글을 켜서 권한을 허용해 주세요.';
+    return;
+  }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification('🔔 한강이네 알림 테스트', {
+      body: '이 알림이 보이면 브라우저 알림은 정상이에요!',
+      icon: '/animation-quiz/icon-192.png',
+      badge: '/animation-quiz/icon-192.png',
+    });
+    statusEl.textContent = '✅ 테스트 알림을 전송했어요. 화면 오른쪽 아래를 확인하세요!';
+  } catch(e) {
+    statusEl.textContent = '❌ 알림 표시 실패: ' + (e?.message || String(e));
+  }
 }
 
 // ── 프로필 모달 ─────────────────────────────────────────
