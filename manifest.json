@@ -1,7 +1,7 @@
 {
-  "name": "단추 배식 관리",
-  "short_name": "단추밥",
-  "description": "비바티즈 단추의 사료·물 이중 배식 방지 앱",
+  "name": "한강이네",
+  "short_name": "한강이네",
+  "description": "한강이네 가족 생활 관리 앱",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fdf6ee",

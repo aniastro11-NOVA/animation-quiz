@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>단추 배식 관리</title>
+  <title>한강이네</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="단추밥" />
+  <meta name="apple-mobile-web-app-title" content="한강이네" />
   <meta name="theme-color" content="#e07b39" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,114 +23,84 @@
       padding: 16px 16px 48px;
     }
 
-    /* ── 알림 배너 ── */
     .alert-banner {
       display: none;
-      width: 100%;
-      max-width: 420px;
-      background: #fff0e0;
-      border: 2px solid #e07b39;
-      border-radius: 14px;
-      padding: 12px 16px;
-      margin-bottom: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #7a3a10;
+      width: 100%; max-width: 420px;
+      background: #fff0e0; border: 2px solid #e07b39;
+      border-radius: 14px; padding: 12px 16px;
+      margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #7a3a10;
     }
     .alert-banner.show { display: block; }
 
-    /* ── 헤더 ── */
     header {
-      text-align: center;
-      margin-bottom: 20px;
-      position: relative;
-      width: 100%;
-      max-width: 420px;
+      text-align: center; margin-bottom: 16px;
+      position: relative; width: 100%; max-width: 420px;
     }
-
     .settings-btn {
-      position: absolute;
-      top: 0; right: 0;
-      background: none; border: none;
-      font-size: 24px; cursor: pointer;
-      padding: 4px; line-height: 1;
+      position: absolute; top: 0; right: 0;
+      background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; line-height: 1;
     }
-
     .dog-emoji { font-size: 56px; line-height: 1; margin-bottom: 6px; }
-
     header h1 { font-size: 24px; font-weight: 800; color: #3d2b1f; }
     header p  { font-size: 13px; color: #a0856a; margin-top: 4px; }
 
-    /* 프로필 칩 */
     .profile-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #fff;
-      border: 1.5px solid #e8d5c0;
-      border-radius: 999px;
-      padding: 5px 12px 5px 8px;
-      font-size: 13px; font-weight: 700;
-      color: #3d2b1f; cursor: pointer;
-      margin-top: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fff; border: 1.5px solid #e8d5c0; border-radius: 999px;
+      padding: 5px 12px 5px 8px; font-size: 13px; font-weight: 700;
+      color: #3d2b1f; cursor: pointer; margin-top: 8px;
     }
     .profile-chip-dot { width: 10px; height: 10px; border-radius: 50%; }
     .profile-chip.unset { border-color: #e07b39; background: #fff7f0; animation: pulse-border 1.5s infinite; }
     @keyframes pulse-border { 0%,100% { border-color: #e07b39; } 50% { border-color: #f5a96e; } }
 
-    /* ── 날짜바 ── */
-    .date-bar {
-      background: #fff;
-      border: 1.5px solid #e8d5c0;
-      border-radius: 12px;
-      padding: 10px 20px;
-      font-size: 13px; color: #7a5c3e;
-      margin-bottom: 20px;
-      text-align: center;
+    /* ── 탭 네비게이션 ── */
+    .tab-nav {
+      display: flex; gap: 6px;
       width: 100%; max-width: 420px;
+      overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0; padding: 8px 16px; border-radius: 999px;
+      border: 2px solid #e8d5c0; background: #fff;
+      font-size: 13px; font-weight: 700; color: #7a5c3e;
+      cursor: pointer; white-space: nowrap; transition: all .15s;
+    }
+    .tab-btn.active { background: #e07b39; border-color: #e07b39; color: #fff; }
+    .tab-btn:hover:not(.active) { background: #fdf0e4; }
+
+    .tab-panel { width: 100%; max-width: 420px; }
+
+    .date-bar {
+      background: #fff; border: 1.5px solid #e8d5c0; border-radius: 12px;
+      padding: 10px 20px; font-size: 13px; color: #7a5c3e;
+      margin-bottom: 20px; text-align: center; width: 100%; max-width: 420px;
     }
 
-    /* ── 카드 ── */
-    .cards {
-      display: flex; flex-direction: column; gap: 16px;
-      width: 100%; max-width: 420px;
-    }
+    .cards { display: flex; flex-direction: column; gap: 16px; width: 100%; }
 
     .card {
-      background: #fff;
-      border: 2px solid #e8d5c0;
+      background: #fff; border: 2px solid #e8d5c0;
       border-radius: 18px; padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-
-    .card-header {
-      display: flex; align-items: center;
-      gap: 10px; margin-bottom: 16px;
-    }
-
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
     .card-icon { font-size: 30px; }
     .card-title { font-size: 17px; font-weight: 700; color: #3d2b1f; }
     .card-subtitle { font-size: 12px; color: #a0856a; margin-top: 2px; }
 
-    .status-badge {
-      margin-left: auto; padding: 4px 12px;
-      border-radius: 999px; font-size: 12px; font-weight: 700;
-    }
+    .status-badge { margin-left: auto; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
     .status-badge.ok   { background: #fff0e0; color: #d4733a; }
     .status-badge.done { background: #e6f4ea; color: #2e7d32; }
 
-    .log-list {
-      display: flex; flex-direction: column;
-      gap: 8px; margin-bottom: 14px; min-height: 36px;
-    }
+    .log-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; min-height: 36px; }
 
     .log-item {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      background: #fdf6ee; border-radius: 10px;
-      padding: 8px 14px; font-size: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fdf6ee; border-radius: 10px; padding: 8px 14px; font-size: 14px;
     }
-
     .log-item .who  { font-weight: 700; color: #3d2b1f; }
     .log-item .when {
       font-size: 12px; color: #a0856a; cursor: pointer;
@@ -138,9 +108,8 @@
     }
     .log-item .when:hover { background: #f0e4d4; }
     .log-item .time-input {
-      font-size: 12px; color: #3d2b1f;
-      border: 1.5px solid #e07b39; border-radius: 6px;
-      padding: 2px 4px; background: #fff; width: 80px;
+      font-size: 12px; color: #3d2b1f; border: 1.5px solid #e07b39;
+      border-radius: 6px; padding: 2px 4px; background: #fff; width: 80px;
     }
     .log-item .delete-btn {
       background: none; border: none; color: #c9a07a;
@@ -151,24 +120,19 @@
     .empty-msg { color: #c9a07a; font-size: 13px; text-align: center; padding: 8px 0; }
 
     .member-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
     .member-btn {
-      padding: 10px 0; border-radius: 12px;
-      border: 2px solid transparent;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; color: #fff;
+      padding: 10px 0; border-radius: 12px; border: 2px solid transparent;
+      font-size: 14px; font-weight: 700; cursor: pointer; color: #fff;
       transition: opacity .15s, transform .1s;
     }
     .member-btn.mine { box-shadow: 0 0 0 3px rgba(0,0,0,0.18); }
     .member-btn:active { transform: scale(.96); }
     .member-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* ── 하단 버튼들 ── */
     .bottom-btn-group {
-      width: 100%; max-width: 420px;
-      margin-top: 16px; display: flex; flex-direction: column; gap: 10px;
+      width: 100%; max-width: 420px; margin-top: 16px;
+      display: flex; flex-direction: column; gap: 10px;
     }
-
     .flat-btn {
       width: 100%; padding: 12px; border-radius: 14px;
       border: 2px solid #e8d5c0; background: #fff;
@@ -178,27 +142,23 @@
     .flat-btn:hover { background: #fdf0e4; }
 
     .qr-box {
-      display: none; background: #fff;
-      border: 1.5px solid #e8d5c0; border-radius: 16px;
-      padding: 20px; text-align: center;
+      display: none; background: #fff; border: 1.5px solid #e8d5c0;
+      border-radius: 16px; padding: 20px; text-align: center;
     }
     .qr-box.open { display: block; }
     .qr-box p { font-size: 13px; color: #7a5c3e; margin-bottom: 14px; }
     #qrcode { display: inline-block; }
 
-    /* ── 히스토리 ── */
-    .history-section { width: 100%; max-width: 420px; margin-top: 24px; }
+    .history-section { width: 100%; margin-top: 24px; }
     .history-title { font-size: 14px; font-weight: 700; color: #7a5c3e; margin-bottom: 10px; padding-left: 4px; }
     .history-table { background: #fff; border: 1.5px solid #e8d5c0; border-radius: 14px; overflow: hidden; font-size: 13px; }
     .history-table table { width: 100%; border-collapse: collapse; }
     .history-table th { background: #fdf0e4; color: #7a5c3e; font-weight: 700; padding: 10px 14px; text-align: left; }
     .history-table td { padding: 9px 14px; border-top: 1px solid #f0e4d4; color: #3d2b1f; }
-    .history-table tr:last-child td { border-bottom: none; }
     .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
     .tag.food  { background: #fff0e0; color: #d4733a; }
     .tag.water { background: #e0f0ff; color: #2176ae; }
 
-    /* ── 공통 모달 ── */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.5); z-index: 200;
@@ -206,18 +166,13 @@
     }
     .modal-overlay.open { display: flex; }
     .modal-overlay.center { align-items: center; }
-
     .modal-panel {
       background: #fff; border-radius: 24px 24px 0 0;
       width: 100%; max-width: 480px;
       padding: 16px 20px 40px; max-height: 85vh; overflow-y: auto;
     }
     .modal-panel.rounded { border-radius: 24px; padding: 32px 24px; max-width: 360px; }
-
-    .modal-handle {
-      width: 40px; height: 4px; background: #e8d5c0;
-      border-radius: 2px; margin: 0 auto 20px;
-    }
+    .modal-handle { width: 40px; height: 4px; background: #e8d5c0; border-radius: 2px; margin: 0 auto 20px; }
     .modal-title { font-size: 18px; font-weight: 800; color: #3d2b1f; margin-bottom: 16px; }
     .modal-close-btn {
       width: 100%; margin-top: 20px; padding: 13px;
@@ -226,23 +181,16 @@
     }
     .modal-close-btn:hover { background: #f5e0cc; }
 
-    /* ── 프로필 선택 ── */
-    .profile-select-title {
-      font-size: 16px; font-weight: 800; color: #3d2b1f;
-      margin: 12px 0 20px; text-align: center;
-    }
+    .profile-select-title { font-size: 16px; font-weight: 800; color: #3d2b1f; margin: 12px 0 20px; text-align: center; }
     .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .profile-btn {
       padding: 14px; border-radius: 14px; border: 2px solid transparent;
-      font-size: 15px; font-weight: 700; cursor: pointer; color: #fff;
-      transition: transform .1s;
+      font-size: 15px; font-weight: 700; cursor: pointer; color: #fff; transition: transform .1s;
     }
     .profile-btn:active { transform: scale(.95); }
 
-    /* ── 설정 모달 내부 ── */
     .settings-section { margin-bottom: 20px; }
     .settings-section-title { font-size: 12px; font-weight: 700; color: #a0856a; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
-
     .member-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0e4d4; }
     .member-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
     .member-name-input {
@@ -252,7 +200,6 @@
     .member-name-input:focus { outline: none; border-color: #e07b39; background: #fff; }
     .member-del-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px; color: #c9a07a; }
     .member-del-btn:hover { color: #c0392b; }
-
     .add-member-row { display: flex; gap: 8px; margin-top: 12px; }
     .add-member-input {
       flex: 1; font-size: 14px; border: 1.5px solid #e8d5c0;
@@ -261,21 +208,13 @@
     .add-member-input:focus { outline: none; border-color: #e07b39; }
     .add-member-btn { padding: 10px 18px; background: #e07b39; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
 
-    /* 알림 토글 */
-    .notif-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; border-bottom: 1px solid #f0e4d4;
-    }
+    .notif-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0e4d4; }
     .notif-row span { font-size: 14px; font-weight: 700; color: #3d2b1f; }
     .toggle-wrap { position: relative; width: 48px; height: 26px; }
     .toggle-wrap input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider {
-      position: absolute; inset: 0; background: #ccc;
-      border-radius: 999px; cursor: pointer; transition: background .2s;
-    }
+    .toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 999px; cursor: pointer; transition: background .2s; }
     .toggle-slider:before {
-      content: ''; position: absolute;
-      width: 20px; height: 20px; left: 3px; bottom: 3px;
+      content: ''; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px;
       background: #fff; border-radius: 50%; transition: transform .2s;
     }
     .toggle-wrap input:checked + .toggle-slider { background: #e07b39; }
@@ -288,79 +227,181 @@
 
 <header>
   <button class="settings-btn" onclick="openSettings()" title="설정">⚙️</button>
-  <div class="dog-emoji">🐾</div>
-  <h1>단추 배식 관리</h1>
-  <p>비바티즈 · 3.2kg · <span id="memberCount"></span>명</p>
+  <div class="dog-emoji">🏠</div>
+  <h1>한강이네</h1>
+  <p>가족 생활 관리 · <span id="memberCount"></span>명</p>
   <div id="profileChip" class="profile-chip" onclick="openProfileModal()">
     <div id="profileChipDot" class="profile-chip-dot"></div>
     <span id="profileChipName">👤 프로필 설정</span> ✏️
   </div>
 </header>
 
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="danchu" onclick="switchTab('danchu')">🐾 단추밥</button>
+  <button class="tab-btn" data-tab="dishes" onclick="switchTab('dishes')">🍽️ 설거지</button>
+  <button class="tab-btn" data-tab="cleaning" onclick="switchTab('cleaning')">🧹 청소</button>
+  <button class="tab-btn" data-tab="laundry" onclick="switchTab('laundry')">👕 빨래</button>
+  <button class="tab-btn" data-tab="delivery" onclick="switchTab('delivery')">📦 택배수령</button>
+  <button class="tab-btn" data-tab="recycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
+</div>
+
 <div class="date-bar" id="dateBar"></div>
 
-<div class="cards">
-  <div class="card" id="card-food">
-    <div class="card-header">
-      <span class="card-icon">🍖</span>
-      <div>
-        <div class="card-title">사료</div>
-        <div class="card-subtitle">하루 권장 횟수: 2회</div>
+<!-- ── 단추밥 탭 ── -->
+<div class="tab-panel" id="panel-danchu">
+  <div class="cards">
+    <div class="card" id="card-food">
+      <div class="card-header">
+        <span class="card-icon">🍖</span>
+        <div>
+          <div class="card-title">사료</div>
+          <div class="card-subtitle">하루 권장 횟수: 2회</div>
+        </div>
+        <span class="status-badge" id="badge-food">대기중</span>
       </div>
-      <span class="status-badge" id="badge-food">대기중</span>
+      <div class="log-list" id="log-food"></div>
+      <div class="member-buttons" id="btns-food"></div>
     </div>
-    <div class="log-list" id="log-food"></div>
-    <div class="member-buttons" id="btns-food"></div>
+
+    <div class="card" id="card-water">
+      <div class="card-header">
+        <span class="card-icon">💧</span>
+        <div>
+          <div class="card-title">물</div>
+          <div class="card-subtitle">신선한 물 상시 제공</div>
+        </div>
+        <span class="status-badge" id="badge-water">대기중</span>
+      </div>
+      <div class="log-list" id="log-water"></div>
+      <div class="member-buttons" id="btns-water"></div>
+    </div>
+
+    <div class="card" id="card-nudge">
+      <div class="card-header">
+        <span class="card-icon">📣</span>
+        <div>
+          <div class="card-title">밥 부탁하기</div>
+          <div class="card-subtitle">단추에게 밥을 주세요!</div>
+        </div>
+      </div>
+      <div class="member-buttons" id="btns-nudge"></div>
+    </div>
   </div>
 
-  <div class="card" id="card-water">
-    <div class="card-header">
-      <span class="card-icon">💧</span>
-      <div>
-        <div class="card-title">물</div>
-        <div class="card-subtitle">신선한 물 상시 제공</div>
-      </div>
-      <span class="status-badge" id="badge-water">대기중</span>
+  <div class="history-section">
+    <div class="history-title">📋 오늘 전체 배식 기록</div>
+    <div class="history-table">
+      <table>
+        <thead><tr><th>시간</th><th>구분</th><th>담당</th></tr></thead>
+        <tbody id="historyBody-danchu"></tbody>
+      </table>
     </div>
-    <div class="log-list" id="log-water"></div>
-    <div class="member-buttons" id="btns-water"></div>
   </div>
+</div>
 
-  <div class="card" id="card-nudge">
-    <div class="card-header">
-      <span class="card-icon">📣</span>
-      <div>
-        <div class="card-title">밥 부탁하기</div>
-        <div class="card-subtitle">단추에게 밥을 주세요!</div>
+<!-- ── 설거지 탭 ── -->
+<div class="tab-panel" id="panel-dishes" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-dishes">
+      <div class="card-header">
+        <span class="card-icon">🍽️</span>
+        <div>
+          <div class="card-title">설거지</div>
+          <div class="card-subtitle">오늘 설거지 담당</div>
+        </div>
+        <span class="status-badge" id="badge-dishes">대기중</span>
       </div>
+      <div class="log-list" id="log-dishes"></div>
+      <div class="member-buttons" id="btns-dishes"></div>
     </div>
-    <div class="member-buttons" id="btns-nudge"></div>
+  </div>
+</div>
+
+<!-- ── 청소 탭 ── -->
+<div class="tab-panel" id="panel-cleaning" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-cleaning">
+      <div class="card-header">
+        <span class="card-icon">🧹</span>
+        <div>
+          <div class="card-title">청소</div>
+          <div class="card-subtitle">오늘 청소 담당</div>
+        </div>
+        <span class="status-badge" id="badge-cleaning">대기중</span>
+      </div>
+      <div class="log-list" id="log-cleaning"></div>
+      <div class="member-buttons" id="btns-cleaning"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 빨래 탭 ── -->
+<div class="tab-panel" id="panel-laundry" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-laundry">
+      <div class="card-header">
+        <span class="card-icon">👕</span>
+        <div>
+          <div class="card-title">빨래</div>
+          <div class="card-subtitle">오늘 빨래 담당</div>
+        </div>
+        <span class="status-badge" id="badge-laundry">대기중</span>
+      </div>
+      <div class="log-list" id="log-laundry"></div>
+      <div class="member-buttons" id="btns-laundry"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 택배수령 탭 ── -->
+<div class="tab-panel" id="panel-delivery" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-delivery">
+      <div class="card-header">
+        <span class="card-icon">📦</span>
+        <div>
+          <div class="card-title">택배수령</div>
+          <div class="card-subtitle">오늘 택배 수령 담당</div>
+        </div>
+        <span class="status-badge" id="badge-delivery">대기중</span>
+      </div>
+      <div class="log-list" id="log-delivery"></div>
+      <div class="member-buttons" id="btns-delivery"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 분리수거 탭 ── -->
+<div class="tab-panel" id="panel-recycling" style="display:none">
+  <div class="cards">
+    <div class="card" id="card-recycling">
+      <div class="card-header">
+        <span class="card-icon">♻️</span>
+        <div>
+          <div class="card-title">분리수거</div>
+          <div class="card-subtitle">오늘 분리수거 담당</div>
+        </div>
+        <span class="status-badge" id="badge-recycling">대기중</span>
+      </div>
+      <div class="log-list" id="log-recycling"></div>
+      <div class="member-buttons" id="btns-recycling"></div>
+    </div>
   </div>
 </div>
 
 <div class="bottom-btn-group">
   <button class="flat-btn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
   <div class="qr-box" id="qrBox">
-    <p>카메라로 찍으면 단추 배식 앱이 열립니다</p>
+    <p>카메라로 찍으면 한강이네 앱이 열립니다</p>
     <div id="qrcode"></div>
   </div>
   <button class="flat-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
 </div>
 
-<div class="history-section">
-  <div class="history-title">📋 오늘 전체 배식 기록</div>
-  <div class="history-table">
-    <table>
-      <thead><tr><th>시간</th><th>구분</th><th>담당</th></tr></thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-  </div>
-</div>
-
 <!-- 프로필 선택 모달 -->
 <div class="modal-overlay center" id="profileOverlay">
   <div class="modal-panel rounded" style="text-align:center">
-    <div style="font-size:48px;margin-bottom:8px">🐾</div>
+    <div style="font-size:48px;margin-bottom:8px">🏠</div>
     <div class="profile-select-title">이 기기를 사용하는 분은<br>누구세요?</div>
     <div class="profile-grid" id="profileGrid"></div>
   </div>
@@ -372,7 +413,6 @@
     <div class="modal-handle"></div>
     <div class="modal-title">⚙️ 설정</div>
 
-    <!-- 내 프로필 -->
     <div class="settings-section">
       <div class="settings-section-title">내 프로필</div>
       <div id="currentProfileRow" style="display:flex;align-items:center;gap:10px;padding:10px 0;">
@@ -382,7 +422,6 @@
       </div>
     </div>
 
-    <!-- 알림 -->
     <div class="settings-section">
       <div class="settings-section-title">알림</div>
       <div class="notif-row">
@@ -395,7 +434,6 @@
       <div id="notifStatus" style="font-size:12px;color:#a0856a;padding:8px 0 0"></div>
     </div>
 
-    <!-- 가족 관리 -->
     <div class="settings-section">
       <div class="settings-section-title">가족 관리</div>
       <div id="memberList"></div>
@@ -416,7 +454,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-// ★★★ Firebase 콘솔 → 프로젝트 설정 → 내 앱 → 구성에서 복사하세요 ★★★
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyDPR7zOjALkx0qlW6lZ3uHskZmFP1QzDtU",
   authDomain:        "danchu-feeding.firebaseapp.com",
@@ -425,18 +462,16 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "1081324392813",
   appId:             "1:1081324392813:web:299bb2f67314aeb0bf8a64",
 };
-// ★★★ 프로젝트 설정 → 클라우드 메시징 → 웹 푸시 인증서(VAPID 키) ★★★
 const VAPID_KEY = "BN_SLFzFsA6TntXjvdJm12VhkXo37pOXHhe8BpWYWF06Yo3AtEdeB2e3MBUURA40lJ9IK8COHvusWuMXkxOKVdQ";
 
-// ─────────────────────────────────────────────────────────
 const IS_FIREBASE = !Object.values(FIREBASE_CONFIG).some(v => v.startsWith('REPLACE'));
 
-const STORAGE_KEY  = 'danchu_feeding';
-const MEMBERS_KEY  = 'danchu_members';
-const PROFILE_KEY  = 'danchu_profile';
-const NOTIF_KEY    = 'danchu_notif';
-const DEVICE_KEY   = 'danchu_device';
-const MAX_FOOD     = 2;
+const STORAGE_KEY = 'danchu_feeding';
+const MEMBERS_KEY = 'danchu_members';
+const PROFILE_KEY = 'danchu_profile';
+const NOTIF_KEY   = 'danchu_notif';
+const DEVICE_KEY  = 'danchu_device';
+const MAX_FOOD    = 2;
 const DEFAULT_MEMBERS = ['경희', '범이', '한이', '강이'];
 const COLORS = [
   { bg: '#e07b39', bd: '#c96b2a' },
@@ -449,16 +484,22 @@ const COLORS = [
   { bg: '#8b7355', bd: '#6b5535' },
 ];
 
-// ── Firebase 초기화 ───────────────────────────────────────
-let db = null;
+const CHORE_CATEGORIES = [
+  { id: 'dishes',    label: '설거지',   icon: '🍽️' },
+  { id: 'cleaning',  label: '청소',     icon: '🧹' },
+  { id: 'laundry',   label: '빨래',     icon: '👕' },
+  { id: 'delivery',  label: '택배수령',  icon: '📦' },
+  { id: 'recycling', label: '분리수거',  icon: '♻️' },
+];
+const ALL_TYPES = ['food', 'water', ...CHORE_CATEGORIES.map(c => c.id)];
 
+// ── Firebase 초기화 ──────────────────────────────────────
+let db = null;
 if (IS_FIREBASE) {
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.firestore();
-  } catch(e) {
-    console.warn('Firebase 초기화 실패:', e);
-  }
+  } catch(e) { console.warn('Firebase 초기화 실패:', e); }
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -468,30 +509,25 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
-// ── 기기 ID ───────────────────────────────────────────────
+// ── 기기 ID ─────────────────────────────────────────────
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_KEY);
-  if (!id) {
-    id = 'dev_' + Math.random().toString(36).slice(2, 10);
-    localStorage.setItem(DEVICE_KEY, id);
-  }
+  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2, 10); localStorage.setItem(DEVICE_KEY, id); }
   return id;
 }
 
-// ── 날짜 ─────────────────────────────────────────────────
+// ── 날짜 ────────────────────────────────────────────────
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
 function formatDate(d) {
   const days = ['일','월','화','수','목','금','토'];
   return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
 }
-
 document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
 
-// ── 가족 구성원 ───────────────────────────────────────────
+// ── 가족 구성원 ──────────────────────────────────────────
 function loadMembers() {
   try {
     const raw = localStorage.getItem(MEMBERS_KEY);
@@ -499,48 +535,34 @@ function loadMembers() {
     return (list && list.length > 0) ? list : [...DEFAULT_MEMBERS];
   } catch { return [...DEFAULT_MEMBERS]; }
 }
-
 function saveMembers(members) {
   localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
-  if (db) {
-    db.doc('config/members').set({ list: members }).catch(() => {});
-  }
+  if (db) db.doc('config/members').set({ list: members }).catch(() => {});
 }
 
-// ── 프로필 ───────────────────────────────────────────────
-function getProfile() {
-  return localStorage.getItem(PROFILE_KEY) || null;
-}
-
+// ── 프로필 ──────────────────────────────────────────────
+function getProfile() { return localStorage.getItem(PROFILE_KEY) || null; }
 function setProfile(name) {
   localStorage.setItem(PROFILE_KEY, name);
   updateProfileUI();
   if (db) {
     db.doc(`tokens/${getDeviceId()}`).set({
-      owner: name,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      owner: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     }, { merge: true }).catch(() => {});
   }
 }
-
 function updateProfileUI() {
   const profile = getProfile();
   const members = loadMembers();
   const chip = document.getElementById('profileChip');
-
   if (profile) {
     const idx = members.indexOf(profile);
     const c = idx >= 0 ? COLORS[idx % COLORS.length] : COLORS[0];
     document.getElementById('profileChipDot').style.background = c.bg;
     document.getElementById('profileChipName').textContent = profile;
     chip.classList.remove('unset');
-
-    // 설정 모달 프로필 행
-    const settingsDot = document.getElementById('settingsProfileDot');
-    if (settingsDot) {
-      settingsDot.style.background = c.bg;
-      document.getElementById('settingsProfileName').textContent = profile;
-    }
+    const dot = document.getElementById('settingsProfileDot');
+    if (dot) { dot.style.background = c.bg; document.getElementById('settingsProfileName').textContent = profile; }
   } else {
     document.getElementById('profileChipDot').style.background = '#e07b39';
     document.getElementById('profileChipName').textContent = '👤 프로필 설정';
@@ -548,50 +570,47 @@ function updateProfileUI() {
   }
 }
 
-// ── 배식 데이터 ───────────────────────────────────────────
+// ── 데이터 ──────────────────────────────────────────────
 let cachedData = null;
 let unsubscribeFirestore = null;
+let activeTab = 'danchu';
 
-function todayDocRef() {
-  return db ? db.doc(`feedings/${todayKey()}`) : null;
+function todayDocRef() { return db ? db.doc(`feedings/${todayKey()}`) : null; }
+
+function emptyData() {
+  const d = { date: todayKey() };
+  ALL_TYPES.forEach(t => { d[t] = []; });
+  return d;
 }
 
 function loadLocalData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const data = raw ? JSON.parse(raw) : {};
-    const key = todayKey();
-    if (data.date !== key) return { date: key, food: [], water: [] };
+    if (data.date !== todayKey()) return emptyData();
+    ALL_TYPES.forEach(t => { if (!data[t]) data[t] = []; });
     return data;
-  } catch { return { date: todayKey(), food: [], water: [] }; }
+  } catch { return emptyData(); }
 }
-
-function saveLocalData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
+function saveLocalData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
 function initDataListener() {
-  // 즉시 로컬 데이터로 렌더 (Firestore 응답 전에도 UI 보이게)
   cachedData = loadLocalData();
   render(cachedData);
-
   if (!db) return;
-
   if (unsubscribeFirestore) unsubscribeFirestore();
   const ref = todayDocRef();
   unsubscribeFirestore = ref.onSnapshot(snap => {
     if (snap.exists) {
       const d = snap.data();
-      cachedData = { date: todayKey(), food: d.food || [], water: d.water || [] };
+      cachedData = { date: todayKey() };
+      ALL_TYPES.forEach(t => { cachedData[t] = d[t] || []; });
     } else {
-      cachedData = { date: todayKey(), food: [], water: [] };
+      cachedData = emptyData();
     }
     render(cachedData);
     checkFeedingAlert(cachedData);
-  }, () => {
-    cachedData = loadLocalData();
-    render(cachedData);
-  });
+  }, () => { cachedData = loadLocalData(); render(cachedData); });
 }
 
 function timeStr() {
@@ -599,29 +618,41 @@ function timeStr() {
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-// ── 렌더링 ───────────────────────────────────────────────
+// ── 탭 전환 ─────────────────────────────────────────────
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.style.display = panel.id === `panel-${tabId}` ? '' : 'none';
+  });
+}
+
+// ── 렌더링 ──────────────────────────────────────────────
 function render(data) {
   if (!data) data = cachedData || loadLocalData();
-  if (!data.food) data.food = [];
-  if (!data.water) data.water = [];
+  ALL_TYPES.forEach(t => { if (!data[t]) data[t] = []; });
   const members = loadMembers();
   const profile = getProfile();
   document.getElementById('memberCount').textContent = members.length;
   updateProfileUI();
   renderCard('food',  data, MAX_FOOD,  members, profile);
   renderCard('water', data, Infinity,  members, profile);
+  CHORE_CATEGORIES.forEach(cat => renderCard(cat.id, data, Infinity, members, profile));
   renderNudgeButtons();
   renderHistory(data);
 }
 
 function renderCard(type, data, maxCount, members, profile) {
-  const logs   = data[type];
-  const logEl  = document.getElementById('log-' + type);
-  const btnsEl = document.getElementById('btns-' + type);
+  const logs   = data[type] || [];
+  const logEl  = document.getElementById('log-'   + type);
+  const btnsEl = document.getElementById('btns-'  + type);
   const badge  = document.getElementById('badge-' + type);
+  if (!logEl || !btnsEl || !badge) return;
 
   logEl.innerHTML = logs.length === 0
-    ? '<div class="empty-msg">아직 배식 기록이 없습니다</div>'
+    ? '<div class="empty-msg">아직 기록이 없습니다</div>'
     : logs.map((entry, i) =>
         `<div class="log-item">
           <span class="who">${entry.who}</span>
@@ -634,43 +665,44 @@ function renderCard(type, data, maxCount, members, profile) {
   badge.textContent = logs.length > 0 ? `${logs.length}회 완료` : '대기중';
   badge.className   = 'status-badge ' + (logs.length > 0 ? 'done' : 'ok');
 
-  const fedNames = new Set(logs.map(l => l.who));
+  const doneNames = new Set(logs.map(l => l.who));
   btnsEl.innerHTML = members.map((name, idx) => {
     const c = COLORS[idx % COLORS.length];
-    const disabled = (fedNames.has(name) || isFull) ? 'disabled' : '';
+    const disabled = (doneNames.has(name) || isFull) ? 'disabled' : '';
     const isMine = name === profile;
     return `<button class="member-btn${isMine ? ' mine' : ''}"
               style="background:${c.bg};border-color:${c.bd}"
               ${disabled} onclick="feed('${type}','${name}')"
-            >${name}${fedNames.has(name) ? ' ✓' : ''}</button>`;
+            >${name}${doneNames.has(name) ? ' ✓' : ''}</button>`;
   }).join('');
 }
 
 function renderHistory(data) {
   const all = [
-    ...data.food.map(e => ({...e, type:'food'})),
-    ...data.water.map(e => ({...e, type:'water'})),
+    ...data.food.map(e => ({...e, tagClass:'food', label:'🍖 사료'})),
+    ...data.water.map(e => ({...e, tagClass:'water', label:'💧 물'})),
   ].sort((a,b) => a.time.localeCompare(b.time));
 
-  document.getElementById('historyBody').innerHTML = all.length === 0
+  const tbody = document.getElementById('historyBody-danchu');
+  if (!tbody) return;
+  tbody.innerHTML = all.length === 0
     ? '<tr><td colspan="3" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>'
     : all.map(e =>
-        `<tr>
-          <td>${e.time}</td>
-          <td><span class="tag ${e.type}">${e.type==='food'?'🍖 사료':'💧 물'}</span></td>
-          <td>${e.who}</td>
-        </tr>`
+        `<tr><td>${e.time}</td><td><span class="tag ${e.tagClass}">${e.label}</span></td><td>${e.who}</td></tr>`
       ).join('');
 }
 
-// ── 배식 액션 ────────────────────────────────────────────
+// ── 기록 액션 ────────────────────────────────────────────
 function feed(type, who) {
   const data = cachedData || loadLocalData();
+  if (!data[type]) data[type] = [];
   if (data[type].some(l => l.who === who)) {
-    alert(`${who}는 이미 오늘 ${type==='food'?'사료':'물'}을 줬어요! 🐾`);
+    const cat = CHORE_CATEGORIES.find(c => c.id === type);
+    const label = type === 'food' ? '사료' : type === 'water' ? '물' : (cat ? cat.label : type);
+    alert(`${who}는 이미 오늘 ${label}을 했어요!`);
     return;
   }
-  if (type === 'food' && data[type].length >= MAX_FOOD) {
+  if (type === 'food' && data.food.length >= MAX_FOOD) {
     alert(`오늘 사료 배식 횟수(${MAX_FOOD}회)를 초과했어요.`);
     return;
   }
@@ -678,12 +710,10 @@ function feed(type, who) {
   data[type].push(entry);
   cachedData = data;
   render(data);
-
   if (db) {
-    const update = {
-      [type]: data[type],
-      [`last${type.charAt(0).toUpperCase()+type.slice(1)}Ts`]: firebase.firestore.FieldValue.serverTimestamp(),
-    };
+    const update = { [type]: data[type] };
+    if (type === 'food') update.lastFoodTs = firebase.firestore.FieldValue.serverTimestamp();
+    if (type === 'water') update.lastWaterTs = firebase.firestore.FieldValue.serverTimestamp();
     todayDocRef().set(update, { merge: true }).catch(() => saveLocalData(data));
   } else {
     saveLocalData(data);
@@ -700,9 +730,7 @@ function editTime(type, index, el) {
     if (input.value && input.value !== current) {
       data[type][index].time = input.value;
       if (db) {
-        todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => {
-          saveLocalData(data);
-        });
+        todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
       } else { saveLocalData(data); }
       cachedData = data;
     }
@@ -723,71 +751,59 @@ function deleteEntry(type, index) {
 }
 
 function resetDay() {
-  if (!confirm('오늘 배식 기록을 모두 초기화할까요?')) return;
-  const fresh = { date: todayKey(), food: [], water: [] };
+  if (!confirm('오늘 전체 기록을 모두 초기화할까요?')) return;
+  const fresh = emptyData();
   if (db) {
-    todayDocRef().set({ food: [], water: [], lastFoodTs: null, lastWaterTs: null })
-      .catch(() => saveLocalData(fresh));
+    const update = {};
+    ALL_TYPES.forEach(t => { update[t] = []; });
+    update.lastFoodTs = null; update.lastWaterTs = null;
+    todayDocRef().set(update).catch(() => saveLocalData(fresh));
   } else { saveLocalData(fresh); }
   cachedData = fresh;
   render(fresh);
 }
 
-// ── 알림 배너 (앱 열릴 때 체크) ──────────────────────────
+// ── 알림 배너 ───────────────────────────────────────────
 function checkFeedingAlert(data) {
   const banner = document.getElementById('alertBanner');
   if (!data || !data.food || data.food.length === 0) {
     const now = new Date();
-    const h = now.getHours();
-    if (h >= 8) {
-      const hoursFromMidnight = h + now.getMinutes() / 60;
-      if (hoursFromMidnight >= 8) {
-        banner.textContent = `🚨 단추가 오늘 아직 밥을 못 먹었어요!`;
-        banner.classList.add('show');
-        return;
-      }
+    if (now.getHours() >= 8) {
+      banner.textContent = '🚨 단추가 오늘 아직 밥을 못 먹었어요!';
+      banner.classList.add('show'); return;
     }
   } else {
     const lastEntry = data.food[data.food.length - 1];
     const [lh, lm] = lastEntry.time.split(':').map(Number);
-    const now = new Date();
     const lastMs = new Date().setHours(lh, lm, 0, 0);
-    const diffH = (now - lastMs) / 3600000;
+    const diffH = (Date.now() - lastMs) / 3600000;
     if (diffH >= 8) {
       banner.textContent = `🚨 단추가 마지막 배식 후 ${Math.floor(diffH)}시간이 지났어요!`;
-      banner.classList.add('show');
-      return;
+      banner.classList.add('show'); return;
     }
   }
   banner.classList.remove('show');
 }
 
-// ── 알림 (FCM) ───────────────────────────────────────────
+// ── 알림 (Web Push) ─────────────────────────────────────
 async function toggleNotification(enabled) {
   const statusEl = document.getElementById('notifStatus');
   if (!enabled) {
     localStorage.setItem(NOTIF_KEY, 'off');
-    if (db) {
-      db.doc(`tokens/${getDeviceId()}`).set({ enabled: false }, { merge: true }).catch(() => {});
-    }
+    if (db) db.doc(`tokens/${getDeviceId()}`).set({ enabled: false }, { merge: true }).catch(() => {});
     statusEl.textContent = '알림이 꺼졌습니다.';
     return;
   }
-
   if (!('PushManager' in window)) {
     statusEl.textContent = '이 브라우저는 푸시 알림을 지원하지 않습니다.';
-    document.getElementById('notifToggle').checked = false;
-    return;
+    document.getElementById('notifToggle').checked = false; return;
   }
-
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
       statusEl.textContent = '알림 권한이 거부됐습니다. 브라우저 설정에서 허용해 주세요.';
-      document.getElementById('notifToggle').checked = false;
-      return;
+      document.getElementById('notifToggle').checked = false; return;
     }
-
     await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     const swReg = await navigator.serviceWorker.ready;
     const existingSub = await swReg.pushManager.getSubscription();
@@ -796,7 +812,6 @@ async function toggleNotification(enabled) {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
     });
-
     if (db) {
       await db.doc(`tokens/${getDeviceId()}`).set({
         subscription: subscription.toJSON(),
@@ -805,12 +820,10 @@ async function toggleNotification(enabled) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
     }
-
     localStorage.setItem(NOTIF_KEY, 'on');
     statusEl.textContent = '✅ 알림이 등록됐습니다!';
   } catch(e) {
-    const msg = e?.message || e?.code || String(e);
-    statusEl.textContent = '알림 오류: ' + msg;
+    statusEl.textContent = '알림 오류: ' + (e?.message || String(e));
     document.getElementById('notifToggle').checked = false;
     console.error(e);
   }
@@ -819,59 +832,36 @@ async function toggleNotification(enabled) {
 function initNotifToggle() {
   const toggle = document.getElementById('notifToggle');
   const status = document.getElementById('notifStatus');
-  const saved  = localStorage.getItem(NOTIF_KEY);
-  toggle.checked = (saved === 'on');
-  if (!IS_FIREBASE) {
-    status.textContent = 'Firebase 설정 후 사용 가능합니다.';
-    toggle.disabled = true;
-  }
+  toggle.checked = (localStorage.getItem(NOTIF_KEY) === 'on');
+  if (!IS_FIREBASE) { status.textContent = 'Firebase 설정 후 사용 가능합니다.'; toggle.disabled = true; }
 }
 
-// 포그라운드 메시지
-if (messaging) {
-  messaging.onMessage(payload => {
-    const { title, body } = payload.notification || {};
-    const banner = document.getElementById('alertBanner');
-    banner.textContent = `🔔 ${body || title}`;
-    banner.classList.add('show');
-  });
-}
-
-// ── 프로필 모달 ───────────────────────────────────────────
+// ── 프로필 모달 ─────────────────────────────────────────
 function openProfileModal() {
   const members = loadMembers();
-  const grid = document.getElementById('profileGrid');
-  grid.innerHTML = members.map((name, idx) => {
+  document.getElementById('profileGrid').innerHTML = members.map((name, idx) => {
     const c = COLORS[idx % COLORS.length];
-    return `<button class="profile-btn"
-              style="background:${c.bg};border-color:${c.bd}"
+    return `<button class="profile-btn" style="background:${c.bg};border-color:${c.bd}"
               onclick="selectProfile('${name}')">${name}</button>`;
   }).join('');
   document.getElementById('profileOverlay').classList.add('open');
 }
-
 function selectProfile(name) {
   setProfile(name);
   document.getElementById('profileOverlay').classList.remove('open');
   render(cachedData);
 }
 
-// ── 설정 모달 ─────────────────────────────────────────────
+// ── 설정 모달 ───────────────────────────────────────────
 function openSettings() {
-  renderMemberSettings();
-  initNotifToggle();
-  updateProfileUI();
+  renderMemberSettings(); initNotifToggle(); updateProfileUI();
   document.getElementById('settingsOverlay').classList.add('open');
 }
-
 function closeSettings() {
   document.getElementById('settingsOverlay').classList.remove('open');
   render(cachedData);
 }
-
-function closeSettingsOutside(e) {
-  if (e.target === e.currentTarget) closeSettings();
-}
+function closeSettingsOutside(e) { if (e.target === e.currentTarget) closeSettings(); }
 
 function renderMemberSettings() {
   const members = loadMembers();
@@ -886,115 +876,87 @@ function renderMemberSettings() {
     </div>`;
   }).join('');
 }
-
 function addMember() {
   const input = document.getElementById('newMemberInput');
-  const name  = input.value.trim();
+  const name = input.value.trim();
   if (!name) return;
   const members = loadMembers();
   if (members.includes(name)) { alert('이미 있는 이름이에요.'); return; }
-  members.push(name);
-  saveMembers(members);
-  input.value = '';
-  renderMemberSettings();
+  members.push(name); saveMembers(members); input.value = ''; renderMemberSettings();
 }
-
 function deleteMember(index) {
   const members = loadMembers();
   if (members.length <= 1) { alert('최소 1명은 있어야 해요.'); return; }
   if (!confirm(`${members[index]}을(를) 삭제할까요?`)) return;
   if (getProfile() === members[index]) localStorage.removeItem(PROFILE_KEY);
-  members.splice(index, 1);
-  saveMembers(members);
-  renderMemberSettings();
+  members.splice(index, 1); saveMembers(members); renderMemberSettings();
 }
-
 function renameMember(index, newName) {
   const name = newName.trim();
   if (!name) return;
   const members = loadMembers();
   if (members[index] === name) return;
   if (getProfile() === members[index]) setProfile(name);
-  members[index] = name;
-  saveMembers(members);
-  renderMemberSettings();
+  members[index] = name; saveMembers(members); renderMemberSettings();
 }
 
-// ── 밥 부탁하기 ──────────────────────────────────────────
+// ── 밥 부탁하기 ─────────────────────────────────────────
 function renderNudgeButtons() {
   const members = loadMembers();
   const btnsEl = document.getElementById('btns-nudge');
   if (!btnsEl) return;
   btnsEl.innerHTML = members.map((name, idx) => {
     const c = COLORS[idx % COLORS.length];
-    return `<button class="member-btn"
-              style="background:${c.bg};border-color:${c.bd}"
-              onclick="nudge('${name}', this)"
-            >📣 ${name}</button>`;
+    return `<button class="member-btn" style="background:${c.bg};border-color:${c.bd}"
+              onclick="nudge('${name}', this)">📣 ${name}</button>`;
   }).join('');
 }
-
 async function nudge(toMember, btn) {
   const from = getProfile();
   if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
   if (!confirm(`${toMember}에게 "단추에게 밥을 주세요" 알림을\n모든 가족에게 보낼까요?`)) return;
-
   const origText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '전송 중...';
-
+  btn.disabled = true; btn.textContent = '전송 중...';
   try {
     if (!IS_FIREBASE) throw new Error('no firebase');
-    const resp = await fetch(
-      'https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to: toMember }),
-      }
-    );
+    const resp = await fetch('https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: toMember }),
+    });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const result = await resp.json();
     if (result.reason === 'no_tokens') {
-      btn.disabled = false;
-      btn.textContent = origText;
-      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!');
-      return;
+      btn.disabled = false; btn.textContent = origText;
+      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!'); return;
     }
     btn.textContent = '✅ 전송됨!';
     setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
   } catch(e) {
-    console.error(e);
-    btn.disabled = false;
-    btn.textContent = origText;
+    console.error(e); btn.disabled = false; btn.textContent = origText;
     alert('전송 중 오류가 발생했습니다.');
   }
 }
 
-// ── QR코드 ───────────────────────────────────────────────
+// ── QR코드 ──────────────────────────────────────────────
 const APP_URL = 'https://aniastro11-nova.github.io/animation-quiz/';
 let qrGenerated = false;
-
 function toggleQR() {
   const box = document.getElementById('qrBox');
   box.classList.toggle('open');
   if (box.classList.contains('open') && !qrGenerated) {
     new QRCode(document.getElementById('qrcode'), {
-      text: APP_URL, width: 200, height: 200,
-      colorDark: '#3d2b1f', colorLight: '#ffffff',
+      text: APP_URL, width: 200, height: 200, colorDark: '#3d2b1f', colorLight: '#ffffff',
     });
     qrGenerated = true;
   }
 }
 
-// ── 시작 ─────────────────────────────────────────────────
-// 비동기 대기 없이 즉시 렌더 (알림 탭 후에도 멤버 목록 바로 표시)
+// ── 시작 ────────────────────────────────────────────────
 cachedData = loadLocalData();
 render(cachedData);
 updateProfileUI();
 
 (async function init() {
-  // Firestore에서 멤버 및 프로필 복원
   if (db) {
     try {
       const [membersSnap, tokenSnap] = await Promise.all([
@@ -1005,7 +967,6 @@ updateProfileUI();
       if (firestoreList && firestoreList.length > 0) {
         localStorage.setItem(MEMBERS_KEY, JSON.stringify(firestoreList));
       } else {
-        // Firestore에 멤버가 없으면 현재 멤버(기본값)를 저장
         db.doc('config/members').set({ list: loadMembers() }).catch(() => {});
       }
       if (!getProfile() && tokenSnap.exists && tokenSnap.data().owner) {
@@ -1014,27 +975,22 @@ updateProfileUI();
     } catch(e) {}
   }
 
-  // 페이지 로드 시 push 구독이 살아있으면 Firestore enabled 복원
   if (db && localStorage.getItem(NOTIF_KEY) === 'on' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(reg =>
-      reg.pushManager.getSubscription()
-    ).then(sub => {
-      if (sub) {
-        db.doc(`tokens/${getDeviceId()}`).set({
-          subscription: sub.toJSON(),
-          enabled: true,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true }).catch(() => {});
-      }
-    }).catch(() => {});
+    navigator.serviceWorker.ready
+      .then(reg => reg.pushManager.getSubscription())
+      .then(sub => {
+        if (sub) {
+          db.doc(`tokens/${getDeviceId()}`).set({
+            subscription: sub.toJSON(), enabled: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          }, { merge: true }).catch(() => {});
+        }
+      }).catch(() => {});
   }
 
   updateProfileUI();
-
-  // 데이터 리스너 시작 (Firestore 실시간 or localStorage)
   initDataListener();
 
-  // 알림 탭 등으로 앱이 포그라운드로 돌아올 때 화면 갱신
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       render(cachedData || loadLocalData());
@@ -1042,7 +998,6 @@ updateProfileUI();
     }
   });
 
-  // 자정 자동 초기화
   setInterval(() => {
     const data = cachedData || loadLocalData();
     if (data.date !== todayKey()) {
