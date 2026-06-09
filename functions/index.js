@@ -10,8 +10,10 @@ const VAPID_PRIVATE_KEY = 'qzfvwRo_Hwe9AntqSg0X9ErlvaAvaUusfiYgrY-iQl0';
 
 webpush.setVapidDetails('mailto:aniastro11@gmail.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-async function getSubscriptionDocs(db) {
-  const snap = await db.collection('tokens').where('enabled', '==', true).get();
+async function getSubscriptionDocs(db, owner) {
+  let query = db.collection('tokens').where('enabled', '==', true);
+  if (owner) query = query.where('owner', '==', owner);
+  const snap = await query.get();
   return snap.docs
     .map(d => ({ id: d.id, sub: d.data().subscription }))
     .filter(item => item.sub && item.sub.endpoint);
@@ -93,7 +95,7 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
   }
 
   const db = admin.firestore();
-  const subDocs = await getSubscriptionDocs(db);
+  const subDocs = await getSubscriptionDocs(db, to);
 
   if (subDocs.length === 0) {
     res.json({ success: false, reason: 'no_tokens' });
