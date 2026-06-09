@@ -119,11 +119,25 @@
     .member-btn {
       padding: 10px 0; border-radius: 12px; border: 2px solid transparent;
       font-size: 14px; font-weight: 700; cursor: pointer; color: #fff;
-      transition: opacity .15s, transform .1s;
+      transition: opacity .15s, transform .1s, box-shadow .1s;
     }
     .member-btn.mine { box-shadow: 0 0 0 3px rgba(0,0,0,0.18); }
     .member-btn:active { transform: scale(.96); }
     .member-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── 요청하기 멀티셀렉트 ── */
+    .member-btn.nudge-selected {
+      box-shadow: inset 0 0 0 2.5px rgba(255,255,255,0.85), 0 0 0 3px rgba(0,0,0,0.18);
+      transform: scale(1.04);
+    }
+    .nudge-send-btn {
+      width: 100%; margin-top: 10px; padding: 11px;
+      border-radius: 12px; border: none;
+      background: #e07b39; color: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s;
+    }
+    .nudge-send-btn:disabled { background: #d0b8a8; cursor: default; }
+    .nudge-send-btn:not(:disabled):hover { background: #c96b2a; }
 
     .bottom-btn-group {
       width: 100%; max-width: 420px; margin-top: 16px;
@@ -272,7 +286,7 @@
       <div class="member-buttons" id="btns-water"></div>
     </div>
 
-    <div class="card" id="card-nudge">
+    <div class="card">
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
@@ -280,7 +294,8 @@
           <div class="card-subtitle">단추에게 밥을 주세요!</div>
         </div>
       </div>
-      <div class="member-buttons" id="btns-nudge"></div>
+      <div class="member-buttons" id="btns-nudge-danchu"></div>
+      <button class="nudge-send-btn" id="send-nudge-danchu" disabled onclick="sendNudgeMulti('danchu')">📣 전송하기</button>
     </div>
   </div>
 
@@ -315,10 +330,11 @@
         <span class="card-icon">📣</span>
         <div>
           <div class="card-title">택배수령 요청하기</div>
-          <div class="card-subtitle">택배 수령을 부탁해요!</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-delivery"></div>
+      <button class="nudge-send-btn" id="send-nudge-delivery" disabled onclick="sendNudgeMulti('delivery')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -343,10 +359,11 @@
         <span class="card-icon">📣</span>
         <div>
           <div class="card-title">분리수거 요청하기</div>
-          <div class="card-subtitle">분리수거를 부탁해요!</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-recycling"></div>
+      <button class="nudge-send-btn" id="send-nudge-recycling" disabled onclick="sendNudgeMulti('recycling')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -371,10 +388,11 @@
         <span class="card-icon">📣</span>
         <div>
           <div class="card-title">설거지 요청하기</div>
-          <div class="card-subtitle">설거지를 부탁해요!</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-dishes"></div>
+      <button class="nudge-send-btn" id="send-nudge-dishes" disabled onclick="sendNudgeMulti('dishes')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -399,10 +417,11 @@
         <span class="card-icon">📣</span>
         <div>
           <div class="card-title">청소 요청하기</div>
-          <div class="card-subtitle">청소를 부탁해요!</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-cleaning"></div>
+      <button class="nudge-send-btn" id="send-nudge-cleaning" disabled onclick="sendNudgeMulti('cleaning')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -427,10 +446,11 @@
         <span class="card-icon">📣</span>
         <div>
           <div class="card-title">빨래 요청하기</div>
-          <div class="card-subtitle">빨래를 부탁해요!</div>
+          <div class="card-subtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-laundry"></div>
+      <button class="nudge-send-btn" id="send-nudge-laundry" disabled onclick="sendNudgeMulti('laundry')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -679,11 +699,9 @@ function render(data) {
   updateProfileUI();
   renderCard('food',  data, MAX_FOOD,  members, profile);
   renderCard('water', data, Infinity,  members, profile);
-  CHORE_CATEGORIES.forEach(cat => {
-    renderCard(cat.id, data, Infinity, members, profile);
-    renderChoreNudgeButtons(cat.id, members);
-  });
-  renderNudgeButtons(members);
+  CHORE_CATEGORIES.forEach(cat => renderCard(cat.id, data, Infinity, members, profile));
+  renderNudgeButtons('danchu', members);
+  CHORE_CATEGORIES.forEach(cat => renderNudgeButtons(cat.id, members));
   renderHistory(data);
 }
 
@@ -827,7 +845,7 @@ function checkFeedingAlert(data) {
 }
 
 // ── 알림 공통 전송 ───────────────────────────────────────
-async function sendNudge(payload) {
+async function sendNudgeApi(payload) {
   if (!IS_FIREBASE) throw new Error('no firebase');
   const resp = await fetch('https://us-central1-danchu-feeding.cloudfunctions.net/nudgeAll', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -837,67 +855,68 @@ async function sendNudge(payload) {
   return resp.json();
 }
 
-// ── 단추밥 부탁하기 ─────────────────────────────────────
-function renderNudgeButtons(members) {
+// ── 요청하기 멀티셀렉트 ─────────────────────────────────
+const nudgeSelections = {};
+
+function getOrCreateSelection(cardKey) {
+  if (!nudgeSelections[cardKey]) nudgeSelections[cardKey] = new Set();
+  return nudgeSelections[cardKey];
+}
+
+function renderNudgeButtons(cardKey, members) {
   if (!members) members = loadMembers();
-  const btnsEl = document.getElementById('btns-nudge');
+  const btnsEl = document.getElementById(`btns-nudge-${cardKey}`);
   if (!btnsEl) return;
+  const sel = getOrCreateSelection(cardKey);
   btnsEl.innerHTML = members.map((name, idx) => {
     const c = COLORS[idx % COLORS.length];
-    return `<button class="member-btn" style="background:${c.bg};border-color:${c.bd}"
-              onclick="nudge('${name}', this)">📣 ${name}</button>`;
+    const isSelected = sel.has(name);
+    return `<button class="member-btn${isSelected ? ' nudge-selected' : ''}"
+              style="background:${c.bg};border-color:${c.bd}"
+              onclick="toggleNudgeSelect('${cardKey}','${name}',this)">📣 ${name}</button>`;
   }).join('');
+  const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
+  if (sendBtn) sendBtn.disabled = sel.size === 0;
 }
 
-async function nudge(toMember, btn) {
+function toggleNudgeSelect(cardKey, name, btn) {
+  const sel = getOrCreateSelection(cardKey);
+  if (sel.has(name)) { sel.delete(name); btn.classList.remove('nudge-selected'); }
+  else               { sel.add(name);    btn.classList.add('nudge-selected');    }
+  const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
+  if (sendBtn) sendBtn.disabled = sel.size === 0;
+}
+
+async function sendNudgeMulti(cardKey) {
   const from = getProfile();
   if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
-  if (!confirm(`${toMember}에게 "단추에게 밥을 주세요" 알림을\n모든 가족에게 보낼까요?`)) return;
-  const origText = btn.textContent;
-  btn.disabled = true; btn.textContent = '전송 중...';
+  const sel = getOrCreateSelection(cardKey);
+  if (sel.size === 0) return;
+  const cat = CHORE_CATEGORIES.find(c => c.id === cardKey);
+  const task = cat ? cat.label : null;
+  const toList = [...sel];
+  const taskStr = task ? `"${task}"` : '"단추에게 밥을 주세요"';
+  if (!confirm(`${toList.join(', ')}에게\n${taskStr} 알림을 보낼까요?`)) return;
+  const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '전송 중...'; }
   try {
-    const result = await sendNudge({ from, to: toMember });
-    if (result.reason === 'no_tokens') {
-      btn.disabled = false; btn.textContent = origText;
-      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!'); return;
+    for (const toMember of toList) {
+      const payload = { from, to: toMember };
+      if (task) payload.task = task;
+      const result = await sendNudgeApi(payload);
+      if (result.reason === 'no_tokens') {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '📣 전송하기'; }
+        alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!');
+        return;
+      }
     }
-    btn.textContent = '✅ 전송됨!';
-    setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
+    nudgeSelections[cardKey] = new Set();
+    renderNudgeButtons(cardKey, loadMembers());
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '✅ 전송됨!'; }
+    setTimeout(() => { if (sendBtn) sendBtn.textContent = '📣 전송하기'; }, 2000);
   } catch(e) {
-    console.error(e); btn.disabled = false; btn.textContent = origText;
-    alert('전송 중 오류가 발생했습니다.');
-  }
-}
-
-// ── 가사 요청하기 ────────────────────────────────────────
-function renderChoreNudgeButtons(catId, members) {
-  if (!members) members = loadMembers();
-  const btnsEl = document.getElementById(`btns-nudge-${catId}`);
-  if (!btnsEl) return;
-  btnsEl.innerHTML = members.map((name, idx) => {
-    const c = COLORS[idx % COLORS.length];
-    return `<button class="member-btn" style="background:${c.bg};border-color:${c.bd}"
-              onclick="nudgeChore('${catId}','${name}',this)">📣 ${name}</button>`;
-  }).join('');
-}
-
-async function nudgeChore(catId, toMember, btn) {
-  const from = getProfile();
-  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
-  const cat = CHORE_CATEGORIES.find(c => c.id === catId);
-  if (!confirm(`${toMember}에게 "${cat.label}" 알림을\n모든 가족에게 보낼까요?`)) return;
-  const origText = btn.textContent;
-  btn.disabled = true; btn.textContent = '전송 중...';
-  try {
-    const result = await sendNudge({ from, to: toMember, task: cat.label });
-    if (result.reason === 'no_tokens') {
-      btn.disabled = false; btn.textContent = origText;
-      alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!'); return;
-    }
-    btn.textContent = '✅ 전송됨!';
-    setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 2000);
-  } catch(e) {
-    console.error(e); btn.disabled = false; btn.textContent = origText;
+    console.error(e);
+    if (sendBtn) { sendBtn.disabled = sel.size === 0; sendBtn.textContent = '📣 전송하기'; }
     alert('전송 중 오류가 발생했습니다.');
   }
 }
