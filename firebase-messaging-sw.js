@@ -35,12 +35,13 @@ self.addEventListener('notificationclick', (event) => {
   const url = event.notification.data?.url || 'https://aniastro11-nova.github.io/animation-quiz/';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // 앱이 이미 열려있으면 포커스만 (navigate X → 리셋 방지)
       for (const client of clientList) {
         if (client.url.startsWith('https://aniastro11-nova.github.io/animation-quiz') && 'focus' in client) {
-          client.navigate(url);
           return client.focus();
         }
       }
+      // 앱이 닫혀있으면 새로 열기
       return clients.openWindow(url);
     })
   );
