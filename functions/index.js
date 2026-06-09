@@ -10,16 +10,41 @@ const VAPID_PRIVATE_KEY = 'qzfvwRo_Hwe9AntqSg0X9ErlvaAvaUusfiYgrY-iQl0';
 
 webpush.setVapidDetails('mailto:aniastro11@gmail.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-async function getSubscriptions(db) {
+async function getSubscriptionDocs(db) {
   const snap = await db.collection('tokens').where('enabled', '==', true).get();
-  return snap.docs.map(d => d.data().subscription).filter(Boolean);
+  return snap.docs
+    .map(d => ({ id: d.id, sub: d.data().subscription }))
+    .filter(item => item.sub && item.sub.endpoint);
 }
 
-async function sendToAll(subscriptions, payload) {
+// 만료된 구독(410)은 Firestore에서 비활성화, 에러 로그 출력
+async function sendToAll(db, subDocs, payload) {
   const msg = JSON.stringify(payload);
-  await Promise.all(subscriptions.map(sub =>
-    webpush.sendNotification(sub, msg).catch(() => {})
-  ));
+  const results = await Promise.allSettled(
+    subDocs.map(({ sub }) => webpush.sendNotification(sub, msg))
+  );
+
+  let sent = 0;
+  const cleanups = [];
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled') {
+      sent++;
+    } else {
+      const status = r.reason?.statusCode;
+      console.error(`push failed for ${subDocs[i].id}: ${status} ${r.reason?.body}`);
+      if (status === 410 || status === 404) {
+        // 구독 만료 — Firestore에서 비활성화
+        cleanups.push(
+          db.doc(`tokens/${subDocs[i].id}`)
+            .set({ enabled: false }, { merge: true })
+            .catch(() => {})
+        );
+      }
+    }
+  });
+
+  if (cleanups.length > 0) await Promise.all(cleanups);
+  return { sent, failed: results.length - sent };
 }
 
 // 30분마다 실행 — 사료를 8시간 이상 안 줬으면 전체 푸시 알림
@@ -38,11 +63,11 @@ exports.checkFeedingAlert = onSchedule(
 
     if (hoursSince < 8) return null;
 
-    const subscriptions = await getSubscriptions(db);
-    if (subscriptions.length === 0) return null;
+    const subDocs = await getSubscriptionDocs(db);
+    if (subDocs.length === 0) return null;
 
     const h = Math.floor(hoursSince);
-    await sendToAll(subscriptions, {
+    await sendToAll(db, subDocs, {
       title: '🐾 단추 밥 알림',
       body:  `단추가 ${h}시간째 밥을 못 먹었어요!`,
       icon:  'https://aniastro11-nova.github.io/animation-quiz/icon-192.png',
@@ -54,7 +79,7 @@ exports.checkFeedingAlert = onSchedule(
   }
 );
 
-// 밥 부탁 알림
+// 부탁 알림
 exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -68,9 +93,9 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
   }
 
   const db = admin.firestore();
-  const subscriptions = await getSubscriptions(db);
+  const subDocs = await getSubscriptionDocs(db);
 
-  if (subscriptions.length === 0) {
+  if (subDocs.length === 0) {
     res.json({ success: false, reason: 'no_tokens' });
     return;
   }
@@ -80,7 +105,8 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
   const notifBody  = task
     ? `${fromStr}${to}에게 ${task} 부탁했어요`
     : `${fromStr}${to}에게 부탁했어요`;
-  await sendToAll(subscriptions, {
+
+  const { sent, failed } = await sendToAll(db, subDocs, {
     title: notifTitle,
     body:  notifBody,
     icon:  'https://aniastro11-nova.github.io/animation-quiz/icon-192.png',
@@ -88,5 +114,9 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     url:   'https://aniastro11-nova.github.io/animation-quiz/',
   });
 
-  res.json({ success: true });
+  if (sent === 0) {
+    res.json({ success: false, reason: 'no_tokens' });
+  } else {
+    res.json({ success: true, sent, failed });
+  }
 });

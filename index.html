@@ -1070,16 +1070,24 @@ updateProfileUI();
   }
 
   if (db && localStorage.getItem(NOTIF_KEY) === 'on' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker.ready
-      .then(reg => reg.pushManager.getSubscription())
-      .then(sub => {
+    navigator.serviceWorker.ready.then(async reg => {
+      try {
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub && Notification.permission === 'granted') {
+          // 구독이 만료됐으면 자동 재구독
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+          });
+        }
         if (sub) {
           db.doc(`tokens/${getDeviceId()}`).set({
             subscription: sub.toJSON(), enabled: true,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
           }, { merge: true }).catch(() => {});
         }
-      }).catch(() => {});
+      } catch(e) { console.warn('push subscription refresh failed', e); }
+    }).catch(() => {});
   }
 
   updateProfileUI();
