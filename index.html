@@ -673,6 +673,12 @@ function initDataListener() {
       ALL_TYPES.forEach(t => { cachedData[t] = d[t] || []; });
     } else {
       cachedData = emptyData();
+      // 오늘 문서가 없으면 자정 타임스탬프를 기록 — Cloud Function이 494751시간 오류 방지
+      ref.set({
+        lastFoodTs: firebase.firestore.Timestamp.fromDate(
+          new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00+09:00')
+        ),
+      }, { merge: true }).catch(() => {});
     }
     render(cachedData);
     checkFeedingAlert(cachedData);
