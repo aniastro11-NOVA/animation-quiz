@@ -60,7 +60,9 @@ exports.checkFeedingAlert = onSchedule(
     const snap = await db.doc(`feedings/${today}`).get();
     const data = snap.exists ? snap.data() : {};
 
-    const lastFoodMs = data.lastFoodTs ? data.lastFoodTs.toMillis() : 0;
+    // lastFoodTs 없으면 오늘 자정 기준 계산 (0 = 1970년 방지)
+    const midnightKst = new Date(kst.toISOString().slice(0, 10) + 'T00:00:00+09:00').getTime();
+    const lastFoodMs = data.lastFoodTs ? data.lastFoodTs.toMillis() : midnightKst;
     const hoursSince = (Date.now() - lastFoodMs) / 3600000;
 
     if (hoursSince < 8) return null;
