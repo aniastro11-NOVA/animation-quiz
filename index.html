@@ -168,6 +168,7 @@
     .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
     .tag.food  { background: #fff0e0; color: #d4733a; }
     .tag.water { background: #e0f0ff; color: #2176ae; }
+    .tag.chore { background: #f0e8d8; color: #7a5c3e; }
 
     .modal-overlay {
       display: none; position: fixed; inset: 0;
@@ -300,10 +301,10 @@
   </div>
 
   <div class="history-section">
-    <div class="history-title">📋 오늘 전체 배식 기록</div>
+    <div class="history-title">📋 최근 7일 전체 기록</div>
     <div class="history-table">
       <table>
-        <thead><tr><th>시간</th><th>구분</th><th>담당</th></tr></thead>
+        <thead><tr><th>날짜</th><th>시간</th><th>구분</th><th>담당</th></tr></thead>
         <tbody id="historyBody-danchu"></tbody>
       </table>
     </div>
@@ -714,7 +715,6 @@ function render(data) {
   CHORE_CATEGORIES.forEach(cat => renderCard(cat.id, data, Infinity, members, profile));
   renderNudgeButtons('danchu', members);
   CHORE_CATEGORIES.forEach(cat => renderNudgeButtons(cat.id, members));
-  renderHistory(data);
 }
 
 function renderCard(type, data, maxCount, members, profile) {
@@ -741,7 +741,7 @@ function renderCard(type, data, maxCount, members, profile) {
   const doneNames = new Set(logs.map(l => l.who));
   btnsEl.innerHTML = members.map((name, idx) => {
     const c = COLORS[idx % COLORS.length];
-    const disabled = (doneNames.has(name) || isFull) ? 'disabled' : '';
+    const disabled = isFull ? 'disabled' : '';
     const isMine = name === profile;
     return `<button class="member-btn${isMine ? ' mine' : ''}"
               style="background:${c.bg};border-color:${c.bd}"
@@ -750,18 +750,74 @@ function renderCard(type, data, maxCount, members, profile) {
   }).join('');
 }
 
-function renderHistory(data) {
-  const all = [
-    ...data.food.map(e => ({...e, tagClass:'food', label:'🍖 사료'})),
-    ...data.water.map(e => ({...e, tagClass:'water', label:'💧 물'})),
-  ].sort((a,b) => a.time.localeCompare(b.time));
+function typeLabel(type) {
+  if (type === 'food')  return '🍖 사료';
+  if (type === 'water') return '💧 물';
+  const cat = CHORE_CATEGORIES.find(c => c.id === type);
+  return cat ? `${cat.icon} ${cat.label}` : type;
+}
+function typeTagClass(type) {
+  return (type === 'food' || type === 'water') ? type : 'chore';
+}
+
+// 최근 7일치 날짜 key 배열 (오늘 포함, 오래된 순)
+function weekKeys() {
+  const keys = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    keys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
+  return keys;
+}
+function formatDateLabel(key) {
+  const days = ['일','월','화','수','목','금','토'];
+  const [y, m, d] = key.split('-').map(Number);
+  return `${m}/${d}(${days[new Date(y, m - 1, d).getDay()]})`;
+}
+
+let unsubscribeWeekHistory = null;
+
+function initWeekHistory() {
+  const keys = weekKeys();
+  if (!db) {
+    renderHistory({ [todayKey()]: cachedData || loadLocalData() }, keys);
+    return;
+  }
+  if (unsubscribeWeekHistory) unsubscribeWeekHistory();
+  unsubscribeWeekHistory = db.collection('feedings')
+    .where(firebase.firestore.FieldPath.documentId(), 'in', keys)
+    .onSnapshot(snap => {
+      const byDate = {};
+      snap.forEach(doc => { byDate[doc.id] = doc.data(); });
+      renderHistory(byDate, keys);
+    }, () => {
+      renderHistory({ [todayKey()]: cachedData || loadLocalData() }, keys);
+    });
+}
+
+function renderHistory(byDate, keys) {
+  const all = [];
+  (keys || Object.keys(byDate)).forEach(date => {
+    const d = byDate[date] || {};
+    ALL_TYPES.forEach(type => {
+      (d[type] || []).forEach(e => all.push({ ...e, type, date }));
+    });
+  });
+  all.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  all.reverse();
 
   const tbody = document.getElementById('historyBody-danchu');
   if (!tbody) return;
   tbody.innerHTML = all.length === 0
-    ? '<tr><td colspan="3" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>'
+    ? '<tr><td colspan="4" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>'
     : all.map(e =>
-        `<tr><td>${e.time}</td><td><span class="tag ${e.tagClass}">${e.label}</span></td><td>${e.who}</td></tr>`
+        `<tr>
+          <td>${formatDateLabel(e.date)}</td>
+          <td>${e.time}</td>
+          <td><span class="tag ${typeTagClass(e.type)}">${typeLabel(e.type)}</span></td>
+          <td>${e.who}</td>
+        </tr>`
       ).join('');
 }
 
@@ -769,12 +825,6 @@ function renderHistory(data) {
 function feed(type, who) {
   const data = cachedData || loadLocalData();
   if (!data[type]) data[type] = [];
-  if (data[type].some(l => l.who === who)) {
-    const cat = CHORE_CATEGORIES.find(c => c.id === type);
-    const label = type === 'food' ? '사료' : type === 'water' ? '물' : (cat ? cat.label : type);
-    alert(`${who}는 이미 오늘 ${label}을 했어요!`);
-    return;
-  }
   if (type === 'food' && data.food.length >= MAX_FOOD) {
     alert(`오늘 사료 배식 횟수(${MAX_FOOD}회)를 초과했어요.`);
     return;
@@ -1142,6 +1192,7 @@ updateProfileUI();
 
   updateProfileUI();
   initDataListener();
+  initWeekHistory();
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
@@ -1154,6 +1205,7 @@ updateProfileUI();
     const data = cachedData || loadLocalData();
     if (data.date !== todayKey()) {
       cachedData = null; initDataListener();
+      initWeekHistory();
       document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
     }
   }, 60 * 1000);
