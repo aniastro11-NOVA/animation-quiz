@@ -10,13 +10,15 @@ const VAPID_PRIVATE_KEY = 'qzfvwRo_Hwe9AntqSg0X9ErlvaAvaUusfiYgrY-iQl0';
 
 webpush.setVapidDetails('mailto:aniastro11@gmail.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-async function getSubscriptionDocs(db, owner) {
+async function getSubscriptionDocs(db, owner, category) {
   let query = db.collection('tokens').where('enabled', '==', true);
   if (owner) query = query.where('owner', '==', owner);
   const snap = await query.get();
   return snap.docs
-    .map(d => ({ id: d.id, sub: d.data().subscription }))
-    .filter(item => item.sub && item.sub.endpoint);
+    .map(d => ({ id: d.id, sub: d.data().subscription, categories: d.data().categories }))
+    .filter(item => item.sub && item.sub.endpoint)
+    // categories 맵이 없거나 해당 항목이 false가 아니면 기본적으로 알림 받음
+    .filter(item => !category || !item.categories || item.categories[category] !== false);
 }
 
 // 만료된 구독(410)은 Firestore에서 비활성화, 에러 로그 출력
@@ -67,7 +69,7 @@ exports.checkFeedingAlert = onSchedule(
 
     if (hoursSince < 8) return null;
 
-    const subDocs = await getSubscriptionDocs(db);
+    const subDocs = await getSubscriptionDocs(db, undefined, 'danchu');
     if (subDocs.length === 0) return null;
 
     const h = Math.floor(hoursSince);
@@ -90,14 +92,14 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     return;
   }
 
-  const { from, to, task } = req.body || {};
+  const { from, to, task, category } = req.body || {};
   if (!to) {
     res.status(400).json({ error: 'to is required' });
     return;
   }
 
   const db = admin.firestore();
-  const subDocs = await getSubscriptionDocs(db, to);
+  const subDocs = await getSubscriptionDocs(db, to, category);
 
   if (subDocs.length === 0) {
     res.json({ success: false, reason: 'no_tokens' });
