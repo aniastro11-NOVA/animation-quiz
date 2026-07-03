@@ -113,13 +113,15 @@
     }
     .log-item .delete-btn:hover { color: #c0392b; }
     .reaction-btn {
+      display: none; align-items: center; gap: 4px; white-space: nowrap;
       background: none; border: 1.5px solid #e8d5c0; border-radius: 999px;
       padding: 3px 10px; font-size: 12px; cursor: pointer; color: #a0856a;
-      display: flex; align-items: center; gap: 4px; white-space: nowrap;
       transition: background .15s, border-color .15s, color .15s;
     }
+    .reaction-btn.show { display: flex; }
     .reaction-btn.liked { background: #fff0e0; border-color: #e07b39; color: #e07b39; font-weight: 700; }
     .reaction-btn:active { transform: scale(.93); }
+    .log-item .who { -webkit-user-select: none; user-select: none; cursor: default; }
 
     .empty-msg { color: #c9a07a; font-size: 13px; text-align: center; padding: 8px 0; }
 
@@ -746,14 +748,19 @@ function renderCard(type, data, maxCount, members, profile) {
     : logs.map((entry, i) => {
         const reactions = entry.reactions || [];
         const liked = profile && reactions.includes(profile);
-        const label = reactions.length > 0
+        const hasReactions = reactions.length > 0;
+        const label = hasReactions
           ? (reactions.length <= 2 ? reactions.join(', ') : `${reactions.length}명`)
           : '';
+        const showCls = hasReactions ? ' show' : '';
         return `<div class="log-item">
-          <span class="who">${entry.who}</span>
+          <span class="who"
+            ontouchstart="lpStart('${type}',${i})" ontouchend="lpEnd()" ontouchcancel="lpEnd()"
+            onmousedown="lpStart('${type}',${i})" onmouseup="lpEnd()" onmouseleave="lpEnd()"
+          >${entry.who}</span>
           <input type="time" class="time-input" value="${entry.time}"
             onchange="saveTime('${type}',${i},this.value)" />
-          <button class="reaction-btn${liked ? ' liked' : ''}"
+          <button id="rbtn-${type}-${i}" class="reaction-btn${liked ? ' liked' : ''}${showCls}"
             onclick="toggleReaction('${type}',${i})">👍${label ? ' ' + label : ''}</button>
           <button class="delete-btn" onclick="deleteEntry('${type}',${i})">✕</button>
         </div>`;
@@ -876,6 +883,28 @@ function saveTime(type, index, newTime) {
     todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
   } else { saveLocalData(data); }
   cachedData = data;
+}
+
+// ── 길게 누르기 (좋아요 표시) ──────────────────────────
+let _lpTimer = null;
+function lpStart(type, index) {
+  _lpTimer = setTimeout(() => {
+    _lpTimer = null;
+    const btn = document.getElementById(`rbtn-${type}-${index}`);
+    if (btn) {
+      btn.classList.add('show');
+      // 반응 없으면 3초 후 자동 숨김
+      const entry = (cachedData || loadLocalData())[type]?.[index] || {};
+      if (!(entry.reactions || []).length) {
+        setTimeout(() => {
+          if (btn && !(entry.reactions || []).length) btn.classList.remove('show');
+        }, 3000);
+      }
+    }
+  }, 500);
+}
+function lpEnd() {
+  if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
 }
 
 function toggleReaction(type, index) {
