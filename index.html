@@ -112,6 +112,14 @@
       cursor: pointer; font-size: 16px; padding: 0 0 0 8px; line-height: 1;
     }
     .log-item .delete-btn:hover { color: #c0392b; }
+    .reaction-btn {
+      background: none; border: 1.5px solid #e8d5c0; border-radius: 999px;
+      padding: 3px 10px; font-size: 12px; cursor: pointer; color: #a0856a;
+      display: flex; align-items: center; gap: 4px; white-space: nowrap;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .reaction-btn.liked { background: #fff0e0; border-color: #e07b39; color: #e07b39; font-weight: 700; }
+    .reaction-btn:active { transform: scale(.93); }
 
     .empty-msg { color: #c9a07a; font-size: 13px; text-align: center; padding: 8px 0; }
 
@@ -735,14 +743,21 @@ function renderCard(type, data, maxCount, members, profile) {
 
   logEl.innerHTML = logs.length === 0
     ? '<div class="empty-msg">아직 기록이 없습니다</div>'
-    : logs.map((entry, i) =>
-        `<div class="log-item">
+    : logs.map((entry, i) => {
+        const reactions = entry.reactions || [];
+        const liked = profile && reactions.includes(profile);
+        const label = reactions.length > 0
+          ? (reactions.length <= 2 ? reactions.join(', ') : `${reactions.length}명`)
+          : '';
+        return `<div class="log-item">
           <span class="who">${entry.who}</span>
           <input type="time" class="time-input" value="${entry.time}"
             onchange="saveTime('${type}',${i},this.value)" />
+          <button class="reaction-btn${liked ? ' liked' : ''}"
+            onclick="toggleReaction('${type}',${i})">👍${label ? ' ' + label : ''}</button>
           <button class="delete-btn" onclick="deleteEntry('${type}',${i})">✕</button>
-        </div>`
-      ).join('');
+        </div>`;
+      }).join('');
 
   const isFull = logs.length >= maxCount;
   badge.textContent = logs.length > 0 ? `${logs.length}회 완료` : '대기중';
@@ -861,6 +876,25 @@ function saveTime(type, index, newTime) {
     todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
   } else { saveLocalData(data); }
   cachedData = data;
+}
+
+function toggleReaction(type, index) {
+  const profile = getProfile();
+  if (!profile) { alert('먼저 프로필을 설정해 주세요.'); return; }
+  const data = cachedData || loadLocalData();
+  const entry = data[type][index];
+  if (!entry.reactions) entry.reactions = [];
+  const pos = entry.reactions.indexOf(profile);
+  if (pos >= 0) {
+    entry.reactions.splice(pos, 1);
+  } else {
+    entry.reactions.push(profile);
+  }
+  if (db) {
+    todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
+  } else { saveLocalData(data); }
+  cachedData = data;
+  render(data);
 }
 
 function deleteEntry(type, index) {
