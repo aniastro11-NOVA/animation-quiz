@@ -738,7 +738,8 @@ function renderCard(type, data, maxCount, members, profile) {
     : logs.map((entry, i) =>
         `<div class="log-item">
           <span class="who">${entry.who}</span>
-          <span class="when" onclick="editTime('${type}',${i},this)" title="탭하면 시간 수정">${entry.time}</span>
+          <input type="time" class="time-input" value="${entry.time}"
+            onchange="saveTime('${type}',${i},this.value)" />
           <button class="delete-btn" onclick="deleteEntry('${type}',${i})">✕</button>
         </div>`
       ).join('');
@@ -852,24 +853,14 @@ function feed(type, who) {
   }
 }
 
-function editTime(type, index, el) {
+function saveTime(type, index, newTime) {
+  if (!newTime) return;
   const data = cachedData || loadLocalData();
-  const current = data[type][index].time;
-  const input = document.createElement('input');
-  input.type = 'time'; input.className = 'time-input'; input.value = current;
-  el.replaceWith(input); input.focus();
-  function save() {
-    if (input.value && input.value !== current) {
-      data[type][index].time = input.value;
-      if (db) {
-        todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
-      } else { saveLocalData(data); }
-      cachedData = data;
-    }
-    render(data);
-  }
-  input.addEventListener('change', save);
-  input.addEventListener('blur', save);
+  data[type][index].time = newTime;
+  if (db) {
+    todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
+  } else { saveLocalData(data); }
+  cachedData = data;
 }
 
 function deleteEntry(type, index) {
