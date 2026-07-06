@@ -247,10 +247,10 @@
 <div class="alert-banner" id="alertBanner"></div>
 
 <header>
-  <button class="settings-btn" onclick="openSettings()" title="설정">⚙️</button>
+  <button class="settings-btn" id="settingsBtn" onclick="openSettings()" title="설정">⚙️</button>
   <div class="dog-emoji">🏠</div>
-  <h1>패밀리로그</h1>
-  <p>가족 생활 관리 · <span id="memberCount"></span>명</p>
+  <h1 id="appTitleH1">패밀리로그</h1>
+  <p id="appSubtitleP">가족 생활 관리 · 0명</p>
   <div id="profileChip" class="profile-chip" onclick="openProfileModal()">
     <div id="profileChipDot" class="profile-chip-dot"></div>
     <span id="profileChipName">👤 프로필 설정</span> ✏️
@@ -258,12 +258,12 @@
 </header>
 
 <div class="tab-nav">
-  <button class="tab-btn active" data-tab="danchu"    onclick="switchTab('danchu')">🐾 단추밥</button>
-  <button class="tab-btn"        data-tab="delivery"  onclick="switchTab('delivery')">📦 택배수령</button>
-  <button class="tab-btn"        data-tab="recycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
-  <button class="tab-btn"        data-tab="dishes"    onclick="switchTab('dishes')">🍽️ 설거지</button>
-  <button class="tab-btn"        data-tab="cleaning"  onclick="switchTab('cleaning')">🧹 청소</button>
-  <button class="tab-btn"        data-tab="laundry"   onclick="switchTab('laundry')">👕 빨래</button>
+  <button class="tab-btn active" data-tab="danchu"    data-i18n="tabDanchu"    onclick="switchTab('danchu')">🐾 단추밥</button>
+  <button class="tab-btn"        data-tab="delivery"  data-i18n="tabDelivery"  onclick="switchTab('delivery')">📦 택배수령</button>
+  <button class="tab-btn"        data-tab="recycling" data-i18n="tabRecycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
+  <button class="tab-btn"        data-tab="dishes"    data-i18n="tabDishes"    onclick="switchTab('dishes')">🍽️ 설거지</button>
+  <button class="tab-btn"        data-tab="cleaning"  data-i18n="tabCleaning"  onclick="switchTab('cleaning')">🧹 청소</button>
+  <button class="tab-btn"        data-tab="laundry"   data-i18n="tabLaundry"   onclick="switchTab('laundry')">👕 빨래</button>
 </div>
 
 <div class="date-bar" id="dateBar"></div>
@@ -275,8 +275,8 @@
       <div class="card-header">
         <span class="card-icon">🍖</span>
         <div>
-          <div class="card-title">사료</div>
-          <div class="card-subtitle">하루 권장 횟수: 2회</div>
+          <div class="card-title" data-i18n="foodTitle">사료</div>
+          <div class="card-subtitle" data-i18n="foodSubtitle">하루 권장 횟수: 2회</div>
         </div>
         <span class="status-badge" id="badge-food">대기중</span>
       </div>
@@ -288,8 +288,8 @@
       <div class="card-header">
         <span class="card-icon">💧</span>
         <div>
-          <div class="card-title">물</div>
-          <div class="card-subtitle">신선한 물 상시 제공</div>
+          <div class="card-title" data-i18n="waterTitle">물</div>
+          <div class="card-subtitle" data-i18n="waterSubtitle">신선한 물 상시 제공</div>
         </div>
         <span class="status-badge" id="badge-water">대기중</span>
       </div>
@@ -301,20 +301,23 @@
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">밥 부탁하기</div>
-          <div class="card-subtitle">단추에게 밥을 주세요!</div>
+          <div class="card-title" data-i18n="nudgeDanchuTitle">밥 부탁하기</div>
+          <div class="card-subtitle" data-i18n="nudgeDanchuSubtitle">단추에게 밥을 주세요!</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-danchu"></div>
-      <button class="nudge-send-btn" id="send-nudge-danchu" disabled onclick="sendNudgeMulti('danchu')">📣 전송하기</button>
+      <button class="nudge-send-btn" id="send-nudge-danchu" data-i18n="nudgeSendBtn" disabled onclick="sendNudgeMulti('danchu')">📣 전송하기</button>
     </div>
   </div>
 
   <div class="history-section">
-    <div class="history-title">📋 최근 7일 전체 기록</div>
+    <div class="history-title" data-i18n="historyTitle">📋 최근 7일 전체 기록</div>
     <div class="history-table">
       <table>
-        <thead><tr><th>날짜</th><th>시간</th><th>구분</th><th>담당</th></tr></thead>
+        <thead><tr>
+          <th data-i18n="historyDate">날짜</th><th data-i18n="historyTime">시간</th>
+          <th data-i18n="historyType">구분</th><th data-i18n="historyWho">담당</th>
+        </tr></thead>
         <tbody id="historyBody-danchu"></tbody>
       </table>
     </div>
@@ -328,8 +331,8 @@
       <div class="card-header">
         <span class="card-icon">📦</span>
         <div>
-          <div class="card-title">택배수령</div>
-          <div class="card-subtitle">오늘 택배 수령 담당</div>
+          <div class="card-title" data-i18n="deliveryTitle">택배수령</div>
+          <div class="card-subtitle" data-i18n="deliverySubtitle">오늘 택배 수령 담당</div>
         </div>
         <span class="status-badge" id="badge-delivery">대기중</span>
       </div>
@@ -340,12 +343,12 @@
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">택배수령 요청하기</div>
-          <div class="card-subtitle">여러 명 선택 후 전송</div>
+          <div class="card-title" data-i18n="deliveryRequestTitle">택배수령 요청하기</div>
+          <div class="card-subtitle" data-i18n="choreRequestSubtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-delivery"></div>
-      <button class="nudge-send-btn" id="send-nudge-delivery" disabled onclick="sendNudgeMulti('delivery')">📣 전송하기</button>
+      <button class="nudge-send-btn" id="send-nudge-delivery" data-i18n="nudgeSendBtn" disabled onclick="sendNudgeMulti('delivery')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -357,8 +360,8 @@
       <div class="card-header">
         <span class="card-icon">♻️</span>
         <div>
-          <div class="card-title">분리수거</div>
-          <div class="card-subtitle">오늘 분리수거 담당</div>
+          <div class="card-title" data-i18n="recyclingTitle">분리수거</div>
+          <div class="card-subtitle" data-i18n="recyclingSubtitle">오늘 분리수거 담당</div>
         </div>
         <span class="status-badge" id="badge-recycling">대기중</span>
       </div>
@@ -369,12 +372,12 @@
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">분리수거 요청하기</div>
-          <div class="card-subtitle">여러 명 선택 후 전송</div>
+          <div class="card-title" data-i18n="recyclingRequestTitle">분리수거 요청하기</div>
+          <div class="card-subtitle" data-i18n="choreRequestSubtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-recycling"></div>
-      <button class="nudge-send-btn" id="send-nudge-recycling" disabled onclick="sendNudgeMulti('recycling')">📣 전송하기</button>
+      <button class="nudge-send-btn" id="send-nudge-recycling" data-i18n="nudgeSendBtn" disabled onclick="sendNudgeMulti('recycling')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -386,8 +389,8 @@
       <div class="card-header">
         <span class="card-icon">🍽️</span>
         <div>
-          <div class="card-title">설거지</div>
-          <div class="card-subtitle">오늘 설거지 담당</div>
+          <div class="card-title" data-i18n="dishesTitle">설거지</div>
+          <div class="card-subtitle" data-i18n="dishesSubtitle">오늘 설거지 담당</div>
         </div>
         <span class="status-badge" id="badge-dishes">대기중</span>
       </div>
@@ -398,12 +401,12 @@
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">설거지 요청하기</div>
-          <div class="card-subtitle">여러 명 선택 후 전송</div>
+          <div class="card-title" data-i18n="dishesRequestTitle">설거지 요청하기</div>
+          <div class="card-subtitle" data-i18n="choreRequestSubtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-dishes"></div>
-      <button class="nudge-send-btn" id="send-nudge-dishes" disabled onclick="sendNudgeMulti('dishes')">📣 전송하기</button>
+      <button class="nudge-send-btn" id="send-nudge-dishes" data-i18n="nudgeSendBtn" disabled onclick="sendNudgeMulti('dishes')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -415,8 +418,8 @@
       <div class="card-header">
         <span class="card-icon">🧹</span>
         <div>
-          <div class="card-title">청소</div>
-          <div class="card-subtitle">오늘 청소 담당</div>
+          <div class="card-title" data-i18n="cleaningTitle">청소</div>
+          <div class="card-subtitle" data-i18n="cleaningSubtitle">오늘 청소 담당</div>
         </div>
         <span class="status-badge" id="badge-cleaning">대기중</span>
       </div>
@@ -427,12 +430,12 @@
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">청소 요청하기</div>
-          <div class="card-subtitle">여러 명 선택 후 전송</div>
+          <div class="card-title" data-i18n="cleaningRequestTitle">청소 요청하기</div>
+          <div class="card-subtitle" data-i18n="choreRequestSubtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-cleaning"></div>
-      <button class="nudge-send-btn" id="send-nudge-cleaning" disabled onclick="sendNudgeMulti('cleaning')">📣 전송하기</button>
+      <button class="nudge-send-btn" id="send-nudge-cleaning" data-i18n="nudgeSendBtn" disabled onclick="sendNudgeMulti('cleaning')">📣 전송하기</button>
     </div>
   </div>
 </div>
@@ -444,8 +447,8 @@
       <div class="card-header">
         <span class="card-icon">👕</span>
         <div>
-          <div class="card-title">빨래</div>
-          <div class="card-subtitle">오늘 빨래 담당</div>
+          <div class="card-title" data-i18n="laundryTitle">빨래</div>
+          <div class="card-subtitle" data-i18n="laundrySubtitle">오늘 빨래 담당</div>
         </div>
         <span class="status-badge" id="badge-laundry">대기중</span>
       </div>
@@ -456,30 +459,30 @@
       <div class="card-header">
         <span class="card-icon">📣</span>
         <div>
-          <div class="card-title">빨래 요청하기</div>
-          <div class="card-subtitle">여러 명 선택 후 전송</div>
+          <div class="card-title" data-i18n="laundryRequestTitle">빨래 요청하기</div>
+          <div class="card-subtitle" data-i18n="choreRequestSubtitle">여러 명 선택 후 전송</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-laundry"></div>
-      <button class="nudge-send-btn" id="send-nudge-laundry" disabled onclick="sendNudgeMulti('laundry')">📣 전송하기</button>
+      <button class="nudge-send-btn" id="send-nudge-laundry" data-i18n="nudgeSendBtn" disabled onclick="sendNudgeMulti('laundry')">📣 전송하기</button>
     </div>
   </div>
 </div>
 
 <div class="bottom-btn-group">
-  <button class="flat-btn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
+  <button class="flat-btn" data-i18n="qrShareBtn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
   <div class="qr-box" id="qrBox">
-    <p>카메라로 찍으면 패밀리로그 앱이 열립니다</p>
+    <p data-i18n="qrShareDesc">카메라로 찍으면 패밀리로그 앱이 열립니다</p>
     <div id="qrcode"></div>
   </div>
-  <button class="flat-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
+  <button class="flat-btn" data-i18n="resetBtn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
 </div>
 
 <!-- 프로필 선택 모달 -->
 <div class="modal-overlay center" id="profileOverlay">
   <div class="modal-panel rounded" style="text-align:center">
     <div style="font-size:48px;margin-bottom:8px">🏠</div>
-    <div class="profile-select-title">이 기기를 사용하는 분은<br>누구세요?</div>
+    <div class="profile-select-title" data-i18n-html="profileModalQuestion">이 기기를 사용하는 분은<br>누구세요?</div>
     <div class="profile-grid" id="profileGrid"></div>
   </div>
 </div>
@@ -488,21 +491,26 @@
 <div class="modal-overlay" id="settingsOverlay" onclick="closeSettingsOutside(event)">
   <div class="modal-panel">
     <div class="modal-handle"></div>
-    <div class="modal-title">⚙️ 설정</div>
+    <div class="modal-title" data-i18n="settingsModalTitle">⚙️ 설정</div>
 
     <div class="settings-section">
-      <div class="settings-section-title">내 프로필</div>
+      <div class="settings-section-title" data-i18n="myProfileSection">내 프로필</div>
       <div id="currentProfileRow" style="display:flex;align-items:center;gap:10px;padding:10px 0;">
         <div id="settingsProfileDot" class="member-color-dot"></div>
         <span id="settingsProfileName" style="font-size:15px;font-weight:700;color:#3d2b1f;flex:1"></span>
-        <button class="flat-btn" style="width:auto;padding:6px 14px;font-size:13px;margin:0" onclick="openProfileModal()">변경</button>
+        <button class="flat-btn" data-i18n="changeBtn" style="width:auto;padding:6px 14px;font-size:13px;margin:0" onclick="openProfileModal()">변경</button>
       </div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">알림</div>
+      <div class="settings-section-title" data-i18n="languageSection">언어</div>
+      <div id="langSwitch" style="display:flex;gap:8px"></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title" data-i18n="notifSection">알림</div>
       <div class="notif-row">
-        <span>🔔 알림 받기</span>
+        <span data-i18n="notifReceiveLabel">🔔 알림 받기</span>
         <label class="toggle-wrap">
           <input type="checkbox" id="notifToggle" onchange="toggleNotification(this.checked)" />
           <span class="toggle-slider"></span>
@@ -510,27 +518,27 @@
       </div>
       <div id="notifStatus" style="font-size:12px;color:#a0856a;padding:8px 0 0"></div>
       <div id="notifDebug" style="font-size:11px;color:#b09080;padding:4px 0 0;word-break:break-all"></div>
-      <button id="notifTestBtn" onclick="testLocalNotif()"
+      <button id="notifTestBtn" data-i18n="notifTestBtn" onclick="testLocalNotif()"
         style="margin-top:10px;padding:8px 14px;border-radius:10px;border:1.5px solid #e07b39;
                background:#fff;color:#e07b39;font-size:13px;font-weight:700;cursor:pointer;width:100%">
         🔔 브라우저 알림 테스트
       </button>
 
-      <div class="settings-section-title" style="margin-top:16px">항목별 알림</div>
+      <div class="settings-section-title" data-i18n="notifCategorySection" style="margin-top:16px">항목별 알림</div>
       <div id="notifCategoryList"></div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">가족 관리</div>
+      <div class="settings-section-title" data-i18n="familySection">가족 관리</div>
       <div id="memberList"></div>
       <div class="add-member-row">
-        <input class="add-member-input" id="newMemberInput" placeholder="이름 입력 후 추가" maxlength="6"
+        <input class="add-member-input" id="newMemberInput" data-i18n-placeholder="addMemberPlaceholder" placeholder="이름 입력 후 추가" maxlength="6"
                onkeydown="if(event.key==='Enter') addMember()" />
-        <button class="add-member-btn" onclick="addMember()">추가</button>
+        <button class="add-member-btn" data-i18n="addBtn" onclick="addMember()">추가</button>
       </div>
     </div>
 
-    <button class="modal-close-btn" onclick="closeSettings()">완료</button>
+    <button class="modal-close-btn" data-i18n="doneBtn" onclick="closeSettings()">완료</button>
   </div>
 </div>
 
@@ -572,18 +580,155 @@ const COLORS = [
 ];
 
 const CHORE_CATEGORIES = [
-  { id: 'delivery',  label: '택배수령',  icon: '📦' },
-  { id: 'recycling', label: '분리수거',  icon: '♻️' },
-  { id: 'dishes',    label: '설거지',   icon: '🍽️' },
-  { id: 'cleaning',  label: '청소',     icon: '🧹' },
-  { id: 'laundry',   label: '빨래',     icon: '👕' },
+  { id: 'delivery',  ko: '택배수령',  en: 'Delivery',   icon: '📦' },
+  { id: 'recycling', ko: '분리수거',  en: 'Recycling',  icon: '♻️' },
+  { id: 'dishes',    ko: '설거지',   en: 'Dishes',     icon: '🍽️' },
+  { id: 'cleaning',  ko: '청소',     en: 'Cleaning',   icon: '🧹' },
+  { id: 'laundry',   ko: '빨래',     en: 'Laundry',    icon: '👕' },
 ];
 const ALL_TYPES = ['food', 'water', ...CHORE_CATEGORIES.map(c => c.id)];
 
 const NOTIF_CATEGORIES = [
-  { id: 'danchu', label: '단추밥', icon: '🐾' },
+  { id: 'danchu', ko: '단추밥', en: "Danchu's Meal", icon: '🐾' },
   ...CHORE_CATEGORIES,
 ];
+function catLabel(cat) { return cat[currentLang] || cat.ko; }
+
+// ── 다국어(i18n) ─────────────────────────────────────────
+const LANG_KEY = 'danchu_lang';
+const I18N = {
+  appTitle:            { ko: '패밀리로그', en: 'FamilyLog' },
+  subtitleTemplate:    { ko: '가족 생활 관리 · {n}명', en: 'Family Life Log · {n} members' },
+  settingsTitleAttr:   { ko: '설정', en: 'Settings' },
+  profileSetPrompt:    { ko: '👤 프로필 설정', en: '👤 Set Profile' },
+  profileModalQuestion:{ ko: '이 기기를 사용하는 분은<br>누구세요?', en: 'Who is using<br>this device?' },
+  tabDanchu:    { ko: '🐾 단추밥',   en: "🐾 Danchu's Meal" },
+  tabDelivery:  { ko: '📦 택배수령', en: '📦 Delivery' },
+  tabRecycling: { ko: '♻️ 분리수거', en: '♻️ Recycling' },
+  tabDishes:    { ko: '🍽️ 설거지',  en: '🍽️ Dishes' },
+  tabCleaning:  { ko: '🧹 청소',    en: '🧹 Cleaning' },
+  tabLaundry:   { ko: '👕 빨래',    en: '👕 Laundry' },
+  foodTitle:        { ko: '사료', en: 'Food' },
+  foodSubtitle:     { ko: '하루 권장 횟수: 2회', en: 'Recommended: 2x/day' },
+  waterTitle:       { ko: '물', en: 'Water' },
+  waterSubtitle:    { ko: '신선한 물 상시 제공', en: 'Keep fresh water available' },
+  nudgeDanchuTitle:    { ko: '밥 부탁하기', en: 'Ask to Feed' },
+  nudgeDanchuSubtitle: { ko: '단추에게 밥을 주세요!', en: 'Please feed Danchu!' },
+  historyTitle: { ko: '📋 최근 7일 전체 기록', en: '📋 Last 7 Days' },
+  historyDate:  { ko: '날짜', en: 'Date' },
+  historyTime:  { ko: '시간', en: 'Time' },
+  historyType:  { ko: '구분', en: 'Type' },
+  historyWho:   { ko: '담당', en: 'Member' },
+  noRecordsTable: { ko: '기록 없음', en: 'No records' },
+  deliveryTitle:     { ko: '택배수령', en: 'Delivery' },
+  deliverySubtitle:  { ko: '오늘 택배 수령 담당', en: "Today's delivery duty" },
+  deliveryRequestTitle: { ko: '택배수령 요청하기', en: 'Request Delivery' },
+  recyclingTitle:     { ko: '분리수거', en: 'Recycling' },
+  recyclingSubtitle: { ko: '오늘 분리수거 담당', en: "Today's recycling duty" },
+  recyclingRequestTitle: { ko: '분리수거 요청하기', en: 'Request Recycling' },
+  dishesTitle:     { ko: '설거지', en: 'Dishes' },
+  dishesSubtitle:    { ko: '오늘 설거지 담당', en: "Today's dish duty" },
+  dishesRequestTitle: { ko: '설거지 요청하기', en: 'Request Dishes' },
+  cleaningTitle:     { ko: '청소', en: 'Cleaning' },
+  cleaningSubtitle:  { ko: '오늘 청소 담당', en: "Today's cleaning duty" },
+  cleaningRequestTitle: { ko: '청소 요청하기', en: 'Request Cleaning' },
+  laundryTitle:     { ko: '빨래', en: 'Laundry' },
+  laundrySubtitle:   { ko: '오늘 빨래 담당', en: "Today's laundry duty" },
+  laundryRequestTitle: { ko: '빨래 요청하기', en: 'Request Laundry' },
+  choreRequestSubtitle:      { ko: '여러 명 선택 후 전송', en: 'Select multiple, then send' },
+  qrShareBtn:  { ko: '📱 QR코드로 공유하기', en: '📱 Share via QR Code' },
+  qrShareDesc: { ko: '카메라로 찍으면 패밀리로그 앱이 열립니다', en: 'Scan with camera to open FamilyLog' },
+  resetBtn:    { ko: '🔄 오늘 기록 초기화', en: "🔄 Reset Today's Records" },
+  settingsModalTitle: { ko: '⚙️ 설정', en: '⚙️ Settings' },
+  myProfileSection:   { ko: '내 프로필', en: 'My Profile' },
+  changeBtn:          { ko: '변경', en: 'Change' },
+  notifSection:       { ko: '알림', en: 'Notifications' },
+  notifReceiveLabel:  { ko: '🔔 알림 받기', en: '🔔 Receive Notifications' },
+  notifTestBtn:       { ko: '🔔 브라우저 알림 테스트', en: '🔔 Test Browser Notification' },
+  notifCategorySection: { ko: '항목별 알림', en: 'Per-item Notifications' },
+  familySection:      { ko: '가족 관리', en: 'Family Members' },
+  addMemberPlaceholder: { ko: '이름 입력 후 추가', en: 'Enter name to add' },
+  addBtn:  { ko: '추가', en: 'Add' },
+  doneBtn: { ko: '완료', en: 'Done' },
+  languageSection: { ko: '언어', en: 'Language' },
+  statusPending:      { ko: '대기중', en: 'Pending' },
+  statusDoneTemplate: { ko: '{n}회 완료', en: '{n} done' },
+  emptyLog:           { ko: '아직 기록이 없습니다', en: 'No records yet' },
+  reactionCountTemplate: { ko: '{n}명', en: '{n}' },
+  foodMaxAlertTemplate: { ko: '오늘 사료 배식 횟수({n}회)를 초과했어요.', en: "Today's feeding count ({n}) has been exceeded." },
+  needProfileAlert:   { ko: '먼저 프로필을 설정해 주세요.', en: 'Please set your profile first.' },
+  resetConfirm:       { ko: '오늘 전체 기록을 모두 초기화할까요?', en: "Reset all of today's records?" },
+  feedAlertNone:      { ko: '🚨 단추가 오늘 아직 밥을 못 먹었어요!', en: "🚨 Danchu hasn't been fed today yet!" },
+  feedAlertOverdueTemplate: { ko: '🚨 단추가 마지막 배식 후 {n}시간이 지났어요!', en: '🚨 It has been {n} hours since Danchu was last fed!' },
+  nudgeConfirmTemplate: { ko: '{names}에게\n{task} 알림을 보낼까요?', en: 'Send a notification to {names}\nfor {task}?' },
+  nudgeDefaultTask:   { ko: '"단추에게 밥을 주세요"', en: '"Please feed Danchu"' },
+  nudgeNoTokens:      { ko: '알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!', en: 'No devices to receive notifications.\nPlease have everyone turn on notifications in the app first!' },
+  nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
+  nudgeSendBtn:       { ko: '📣 전송하기', en: '📣 Send' },
+  nudgeSent:          { ko: '✅ 전송됨!', en: '✅ Sent!' },
+  nudgeError:         { ko: '전송 중 오류가 발생했습니다.', en: 'An error occurred while sending.' },
+  notifOff:           { ko: '알림이 꺼졌습니다.', en: 'Notifications turned off.' },
+  notifNotSupported:  { ko: '이 브라우저는 푸시 알림을 지원하지 않습니다.', en: 'This browser does not support push notifications.' },
+  notifPermDenied:    { ko: '알림 권한이 거부됐습니다. 브라우저 설정에서 허용해 주세요.', en: 'Notification permission denied. Please allow it in your browser settings.' },
+  notifRegistered:    { ko: '✅ 알림이 등록됐습니다!', en: '✅ Notifications enabled!' },
+  notifErrorTemplate: { ko: '알림 오류: {msg}', en: 'Notification error: {msg}' },
+  notifNeedsFirebase: { ko: 'Firebase 설정 후 사용 가능합니다.', en: 'Available after Firebase setup.' },
+  notifTestNoPerm:    { ko: '⚠️ 알림 권한이 없어요. 토글을 켜서 권한을 허용해 주세요.', en: '⚠️ No notification permission. Turn on the toggle to allow it.' },
+  notifTestTitle:     { ko: '🔔 패밀리로그 알림 테스트', en: '🔔 FamilyLog Notification Test' },
+  notifTestBody:      { ko: '이 알림이 보이면 브라우저 알림은 정상이에요!', en: 'If you see this, browser notifications are working!' },
+  notifTestSent:      { ko: '✅ 테스트 알림을 전송했어요. 화면 오른쪽 아래를 확인하세요!', en: '✅ Test notification sent. Check the bottom-right of your screen!' },
+  notifTestFailTemplate: { ko: '❌ 알림 표시 실패: {msg}', en: '❌ Failed to show notification: {msg}' },
+  memberDupAlert:     { ko: '이미 있는 이름이에요.', en: 'This name already exists.' },
+  memberMinAlert:     { ko: '최소 1명은 있어야 해요.', en: 'At least 1 member is required.' },
+  memberDeleteConfirmTemplate: { ko: '{name}을(를) 삭제할까요?', en: 'Delete {name}?' },
+  dayNames: { ko: ['일','월','화','수','목','금','토'], en: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] },
+};
+let currentLang = localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'ko';
+function t(key, vars) {
+  const entry = I18N[key];
+  let s = entry ? (entry[currentLang] || entry.ko) : key;
+  if (vars) Object.keys(vars).forEach(k => { s = s.split('{' + k + '}').join(vars[k]); });
+  return s;
+}
+function setLang(lang) {
+  currentLang = lang === 'en' ? 'en' : 'ko';
+  localStorage.setItem(LANG_KEY, currentLang);
+  document.documentElement.lang = currentLang;
+  document.title = t('appTitle');
+  applyStaticI18n();
+  document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+  render(cachedData);
+  renderMemberSettings();
+  renderNotifCategoryList();
+  renderLangSwitch();
+  checkFeedingAlert(cachedData);
+}
+
+function applyStaticI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  const settingsBtn = document.getElementById('settingsBtn');
+  if (settingsBtn) settingsBtn.title = t('settingsTitleAttr');
+  const titleH1 = document.getElementById('appTitleH1');
+  if (titleH1) titleH1.textContent = t('appTitle');
+}
+
+function renderLangSwitch() {
+  const wrap = document.getElementById('langSwitch');
+  if (!wrap) return;
+  const langs = [['ko', '한국어'], ['en', 'English']];
+  wrap.innerHTML = langs.map(([code, label]) => `
+    <button class="flat-btn" style="width:auto;flex:1;margin:0;padding:8px 0;${currentLang === code ? 'background:#e07b39;border-color:#e07b39;color:#fff' : ''}"
+      onclick="setLang('${code}')">${label}</button>
+  `).join('');
+}
 
 // ── Firebase 초기화 ──────────────────────────────────────
 let db = null;
@@ -612,10 +757,11 @@ function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function formatDate(d) {
-  const days = ['일','월','화','수','목','금','토'];
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  const days = t('dayNames');
+  return currentLang === 'en'
+    ? `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()} (${days[d.getDay()]})`
+    : `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
 }
-document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
 
 function loadMembers() {
   try {
@@ -653,7 +799,7 @@ function updateProfileUI() {
     if (dot) { dot.style.background = c.bg; document.getElementById('settingsProfileName').textContent = profile; }
   } else {
     document.getElementById('profileChipDot').style.background = '#e07b39';
-    document.getElementById('profileChipName').textContent = '👤 프로필 설정';
+    document.getElementById('profileChipName').textContent = t('profileSetPrompt');
     chip.classList.add('unset');
   }
 }
@@ -727,7 +873,7 @@ function render(data) {
   ALL_TYPES.forEach(t => { if (!data[t]) data[t] = []; });
   const members = loadMembers();
   const profile = getProfile();
-  document.getElementById('memberCount').textContent = members.length;
+  document.getElementById('appSubtitleP').textContent = t('subtitleTemplate', { n: members.length });
   updateProfileUI();
   renderCard('food',  data, MAX_FOOD,  members, profile);
   renderCard('water', data, Infinity,  members, profile);
@@ -744,13 +890,13 @@ function renderCard(type, data, maxCount, members, profile) {
   if (!logEl || !btnsEl || !badge) return;
 
   logEl.innerHTML = logs.length === 0
-    ? '<div class="empty-msg">아직 기록이 없습니다</div>'
+    ? `<div class="empty-msg">${t('emptyLog')}</div>`
     : logs.map((entry, i) => {
         const reactions = entry.reactions || [];
         const liked = profile && reactions.includes(profile);
         const hasReactions = reactions.length > 0;
         const label = hasReactions
-          ? (reactions.length <= 2 ? reactions.join(', ') : `${reactions.length}명`)
+          ? (reactions.length <= 2 ? reactions.join(', ') : t('reactionCountTemplate', { n: reactions.length }))
           : '';
         const showCls = hasReactions ? ' show' : '';
         return `<div class="log-item">
@@ -767,7 +913,7 @@ function renderCard(type, data, maxCount, members, profile) {
       }).join('');
 
   const isFull = logs.length >= maxCount;
-  badge.textContent = logs.length > 0 ? `${logs.length}회 완료` : '대기중';
+  badge.textContent = logs.length > 0 ? t('statusDoneTemplate', { n: logs.length }) : t('statusPending');
   badge.className   = 'status-badge ' + (logs.length > 0 ? 'done' : 'ok');
 
   const doneNames = new Set(logs.map(l => l.who));
@@ -783,10 +929,10 @@ function renderCard(type, data, maxCount, members, profile) {
 }
 
 function typeLabel(type) {
-  if (type === 'food')  return '🍖 사료';
-  if (type === 'water') return '💧 물';
+  if (type === 'food')  return `🍖 ${t('foodTitle')}`;
+  if (type === 'water') return `💧 ${t('waterTitle')}`;
   const cat = CHORE_CATEGORIES.find(c => c.id === type);
-  return cat ? `${cat.icon} ${cat.label}` : type;
+  return cat ? `${cat.icon} ${catLabel(cat)}` : type;
 }
 function typeTagClass(type) {
   return (type === 'food' || type === 'water') ? type : 'chore';
@@ -803,7 +949,7 @@ function weekKeys() {
   return keys;
 }
 function formatDateLabel(key) {
-  const days = ['일','월','화','수','목','금','토'];
+  const days = t('dayNames');
   const [y, m, d] = key.split('-').map(Number);
   return `${m}/${d}(${days[new Date(y, m - 1, d).getDay()]})`;
 }
@@ -842,7 +988,7 @@ function renderHistory(byDate, keys) {
   const tbody = document.getElementById('historyBody-danchu');
   if (!tbody) return;
   tbody.innerHTML = all.length === 0
-    ? '<tr><td colspan="4" style="text-align:center;color:#c9a07a;padding:16px">기록 없음</td></tr>'
+    ? `<tr><td colspan="4" style="text-align:center;color:#c9a07a;padding:16px">${t('noRecordsTable')}</td></tr>`
     : all.map(e =>
         `<tr>
           <td>${formatDateLabel(e.date)}</td>
@@ -858,7 +1004,7 @@ function feed(type, who) {
   const data = cachedData || loadLocalData();
   if (!data[type]) data[type] = [];
   if (type === 'food' && data.food.length >= MAX_FOOD) {
-    alert(`오늘 사료 배식 횟수(${MAX_FOOD}회)를 초과했어요.`);
+    alert(t('foodMaxAlertTemplate', { n: MAX_FOOD }));
     return;
   }
   const entry = { who, time: timeStr() };
@@ -909,7 +1055,7 @@ function lpEnd() {
 
 function toggleReaction(type, index) {
   const profile = getProfile();
-  if (!profile) { alert('먼저 프로필을 설정해 주세요.'); return; }
+  if (!profile) { alert(t('needProfileAlert')); return; }
   const data = cachedData || loadLocalData();
   const entry = data[type][index];
   if (!entry.reactions) entry.reactions = [];
@@ -937,7 +1083,7 @@ function deleteEntry(type, index) {
 }
 
 function resetDay() {
-  if (!confirm('오늘 전체 기록을 모두 초기화할까요?')) return;
+  if (!confirm(t('resetConfirm'))) return;
   const fresh = emptyData();
   if (db) {
     const update = {};
@@ -954,7 +1100,7 @@ function checkFeedingAlert(data) {
   const banner = document.getElementById('alertBanner');
   if (!data || !data.food || data.food.length === 0) {
     if (new Date().getHours() >= 8) {
-      banner.textContent = '🚨 단추가 오늘 아직 밥을 못 먹었어요!';
+      banner.textContent = t('feedAlertNone');
       banner.classList.add('show'); return;
     }
   } else {
@@ -962,7 +1108,7 @@ function checkFeedingAlert(data) {
     const [lh, lm] = lastEntry.time.split(':').map(Number);
     const diffH = (Date.now() - new Date().setHours(lh, lm, 0, 0)) / 3600000;
     if (diffH >= 8) {
-      banner.textContent = `🚨 단추가 마지막 배식 후 ${Math.floor(diffH)}시간이 지났어요!`;
+      banner.textContent = t('feedAlertOverdueTemplate', { n: Math.floor(diffH) });
       banner.classList.add('show'); return;
     }
   }
@@ -1014,35 +1160,35 @@ function toggleNudgeSelect(cardKey, name, btn) {
 
 async function sendNudgeMulti(cardKey) {
   const from = getProfile();
-  if (!from) { alert('먼저 내 프로필을 설정해주세요.'); return; }
+  if (!from) { alert(t('needProfileAlert')); return; }
   const sel = getOrCreateSelection(cardKey);
   if (sel.size === 0) return;
   const cat = CHORE_CATEGORIES.find(c => c.id === cardKey);
-  const task = cat ? cat.label : null;
+  const task = cat ? catLabel(cat) : null;
   const toList = [...sel];
-  const taskStr = task ? `"${task}"` : '"단추에게 밥을 주세요"';
-  if (!confirm(`${toList.join(', ')}에게\n${taskStr} 알림을 보낼까요?`)) return;
+  const taskStr = task ? `"${task}"` : t('nudgeDefaultTask');
+  if (!confirm(t('nudgeConfirmTemplate', { names: toList.join(', '), task: taskStr }))) return;
   const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '전송 중...'; }
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = t('nudgeSending'); }
   try {
     for (const toMember of toList) {
       const payload = { from, to: toMember, category: cardKey };
       if (task) payload.task = task;
       const result = await sendNudgeApi(payload);
       if (result.reason === 'no_tokens') {
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '📣 전송하기'; }
-        alert('알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!');
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = t('nudgeSendBtn'); }
+        alert(t('nudgeNoTokens'));
         return;
       }
     }
     nudgeSelections[cardKey] = new Set();
     renderNudgeButtons(cardKey, loadMembers());
-    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '✅ 전송됨!'; }
-    setTimeout(() => { if (sendBtn) sendBtn.textContent = '📣 전송하기'; }, 2000);
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = t('nudgeSent'); }
+    setTimeout(() => { if (sendBtn) sendBtn.textContent = t('nudgeSendBtn'); }, 2000);
   } catch(e) {
     console.error(e);
-    if (sendBtn) { sendBtn.disabled = sel.size === 0; sendBtn.textContent = '📣 전송하기'; }
-    alert('전송 중 오류가 발생했습니다.');
+    if (sendBtn) { sendBtn.disabled = sel.size === 0; sendBtn.textContent = t('nudgeSendBtn'); }
+    alert(t('nudgeError'));
   }
 }
 
@@ -1052,16 +1198,16 @@ async function toggleNotification(enabled) {
   if (!enabled) {
     localStorage.setItem(NOTIF_KEY, 'off');
     if (db) db.doc(`tokens/${getDeviceId()}`).set({ enabled: false }, { merge: true }).catch(() => {});
-    statusEl.textContent = '알림이 꺼졌습니다.'; return;
+    statusEl.textContent = t('notifOff'); return;
   }
   if (!('PushManager' in window)) {
-    statusEl.textContent = '이 브라우저는 푸시 알림을 지원하지 않습니다.';
+    statusEl.textContent = t('notifNotSupported');
     document.getElementById('notifToggle').checked = false; return;
   }
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      statusEl.textContent = '알림 권한이 거부됐습니다. 브라우저 설정에서 허용해 주세요.';
+      statusEl.textContent = t('notifPermDenied');
       document.getElementById('notifToggle').checked = false; return;
     }
     await navigator.serviceWorker.register('./firebase-messaging-sw.js');
@@ -1080,9 +1226,9 @@ async function toggleNotification(enabled) {
       }, { merge: true });
     }
     localStorage.setItem(NOTIF_KEY, 'on');
-    statusEl.textContent = '✅ 알림이 등록됐습니다!';
+    statusEl.textContent = t('notifRegistered');
   } catch(e) {
-    statusEl.textContent = '알림 오류: ' + (e?.message || String(e));
+    statusEl.textContent = t('notifErrorTemplate', { msg: e?.message || String(e) });
     document.getElementById('notifToggle').checked = false; console.error(e);
   }
 }
@@ -1110,7 +1256,7 @@ function renderNotifCategoryList() {
   const cats = loadNotifCategories();
   listEl.innerHTML = NOTIF_CATEGORIES.map(c => `
     <div class="notif-row">
-      <span>${c.icon} ${c.label}</span>
+      <span>${c.icon} ${catLabel(c)}</span>
       <label class="toggle-wrap">
         <input type="checkbox" ${cats[c.id] ? 'checked' : ''} onchange="toggleNotifCategory('${c.id}', this.checked)" />
         <span class="toggle-slider"></span>
@@ -1123,7 +1269,7 @@ function initNotifToggle() {
   const toggle = document.getElementById('notifToggle');
   const status = document.getElementById('notifStatus');
   toggle.checked = (localStorage.getItem(NOTIF_KEY) === 'on');
-  if (!IS_FIREBASE) { status.textContent = 'Firebase 설정 후 사용 가능합니다.'; toggle.disabled = true; }
+  if (!IS_FIREBASE) { status.textContent = t('notifNeedsFirebase'); toggle.disabled = true; }
   renderNotifCategoryList();
   updateNotifDebug();
 }
@@ -1149,19 +1295,19 @@ async function updateNotifDebug() {
 async function testLocalNotif() {
   const statusEl = document.getElementById('notifStatus');
   if (Notification.permission !== 'granted') {
-    statusEl.textContent = '⚠️ 알림 권한이 없어요. 토글을 켜서 권한을 허용해 주세요.';
+    statusEl.textContent = t('notifTestNoPerm');
     return;
   }
   try {
     const reg = await navigator.serviceWorker.ready;
-    await reg.showNotification('🔔 패밀리로그 알림 테스트', {
-      body: '이 알림이 보이면 브라우저 알림은 정상이에요!',
+    await reg.showNotification(t('notifTestTitle'), {
+      body: t('notifTestBody'),
       icon: '/animation-quiz/icon-192.png',
       badge: '/animation-quiz/icon-192.png',
     });
-    statusEl.textContent = '✅ 테스트 알림을 전송했어요. 화면 오른쪽 아래를 확인하세요!';
+    statusEl.textContent = t('notifTestSent');
   } catch(e) {
-    statusEl.textContent = '❌ 알림 표시 실패: ' + (e?.message || String(e));
+    statusEl.textContent = t('notifTestFailTemplate', { msg: e?.message || String(e) });
   }
 }
 
@@ -1183,7 +1329,7 @@ function selectProfile(name) {
 
 // ── 설정 모달 ───────────────────────────────────────────
 function openSettings() {
-  renderMemberSettings(); initNotifToggle(); updateProfileUI();
+  renderMemberSettings(); initNotifToggle(); updateProfileUI(); renderLangSwitch();
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings() {
@@ -1210,13 +1356,13 @@ function addMember() {
   const name = input.value.trim();
   if (!name) return;
   const members = loadMembers();
-  if (members.includes(name)) { alert('이미 있는 이름이에요.'); return; }
+  if (members.includes(name)) { alert(t('memberDupAlert')); return; }
   members.push(name); saveMembers(members); input.value = ''; renderMemberSettings();
 }
 function deleteMember(index) {
   const members = loadMembers();
-  if (members.length <= 1) { alert('최소 1명은 있어야 해요.'); return; }
-  if (!confirm(`${members[index]}을(를) 삭제할까요?`)) return;
+  if (members.length <= 1) { alert(t('memberMinAlert')); return; }
+  if (!confirm(t('memberDeleteConfirmTemplate', { name: members[index] }))) return;
   if (getProfile() === members[index]) localStorage.removeItem(PROFILE_KEY);
   members.splice(index, 1); saveMembers(members); renderMemberSettings();
 }
@@ -1243,6 +1389,10 @@ function toggleQR() {
 }
 
 // ── 시작 ────────────────────────────────────────────────
+document.documentElement.lang = currentLang;
+document.title = t('appTitle');
+applyStaticI18n();
+document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
 cachedData = loadLocalData();
 render(cachedData);
 updateProfileUI();
