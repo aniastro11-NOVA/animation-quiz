@@ -1,7 +1,7 @@
 {
-  "name": "한강이네",
-  "short_name": "한강이네",
-  "description": "한강이네 가족 생활 관리 앱",
+  "name": "패밀리로그",
+  "short_name": "패밀리로그",
+  "description": "가족 생활 관리 앱",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fdf6ee",

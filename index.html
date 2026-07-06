@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>한강이네</title>
+  <title>패밀리로그</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="한강이네" />
+  <meta name="apple-mobile-web-app-title" content="패밀리로그" />
   <meta name="theme-color" content="#e07b39" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -249,7 +249,7 @@
 <header>
   <button class="settings-btn" onclick="openSettings()" title="설정">⚙️</button>
   <div class="dog-emoji">🏠</div>
-  <h1>한강이네</h1>
+  <h1>패밀리로그</h1>
   <p>가족 생활 관리 · <span id="memberCount"></span>명</p>
   <div id="profileChip" class="profile-chip" onclick="openProfileModal()">
     <div id="profileChipDot" class="profile-chip-dot"></div>
@@ -469,7 +469,7 @@
 <div class="bottom-btn-group">
   <button class="flat-btn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
   <div class="qr-box" id="qrBox">
-    <p>카메라로 찍으면 한강이네 앱이 열립니다</p>
+    <p>카메라로 찍으면 패밀리로그 앱이 열립니다</p>
     <div id="qrcode"></div>
   </div>
   <button class="flat-btn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
@@ -1154,7 +1154,7 @@ async function testLocalNotif() {
   }
   try {
     const reg = await navigator.serviceWorker.ready;
-    await reg.showNotification('🔔 한강이네 알림 테스트', {
+    await reg.showNotification('🔔 패밀리로그 알림 테스트', {
       body: '이 알림이 보이면 브라우저 알림은 정상이에요!',
       icon: '/animation-quiz/icon-192.png',
       badge: '/animation-quiz/icon-192.png',
