@@ -1,5 +1,26 @@
 {
   "functions": {
     "source": "functions"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "functions/**",
+      ".firebaserc",
+      ".git/**",
+      ".github/**",
+      "node_modules/**",
+      "package.json",
+      "package-lock.json"
+    ],
+    "headers": [
+      {
+        "source": "/.well-known/assetlinks.json",
+        "headers": [
+          { "key": "Content-Type", "value": "application/json" }
+        ]
+      }
+    ]
   }
 }
