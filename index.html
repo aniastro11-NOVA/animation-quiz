@@ -480,6 +480,22 @@
   <button class="flat-btn" data-i18n="resetBtn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
 </div>
 
+<!-- 가족 코드 온보딩 모달 -->
+<div class="modal-overlay center" id="householdOverlay">
+  <div class="modal-panel rounded" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:8px">🔑</div>
+    <div class="profile-select-title" data-i18n-html="householdIntro">우리 가족만의<br>기록 공간이 필요해요</div>
+    <p style="font-size:13px;color:#7a5c3e;margin:0 0 16px" data-i18n="householdDesc">
+      같은 가족 코드를 쓰는 사람끼리만 기록이 공유돼요.
+    </p>
+    <input class="add-member-input" id="householdCodeInput" data-i18n-placeholder="householdCodePlaceholder"
+           placeholder="가족 코드 입력 (예: AB12CD)" maxlength="10"
+           style="text-align:center;text-transform:uppercase;font-size:17px;font-weight:700;margin-bottom:10px;width:100%;box-sizing:border-box" />
+    <button class="add-member-btn" data-i18n="householdJoinBtn" style="width:100%;margin-bottom:10px" onclick="joinHousehold()">코드로 참여하기</button>
+    <button class="flat-btn" data-i18n="householdCreateBtn" style="width:100%" onclick="createHousehold()">새 가족 코드 만들기</button>
+  </div>
+</div>
+
 <!-- 프로필 선택 모달 -->
 <div class="modal-overlay center" id="profileOverlay">
   <div class="modal-panel rounded" style="text-align:center">
@@ -494,6 +510,14 @@
   <div class="modal-panel">
     <div class="modal-handle"></div>
     <div class="modal-title" data-i18n="settingsModalTitle">⚙️ 설정</div>
+
+    <div class="settings-section">
+      <div class="settings-section-title" data-i18n="householdSection">가족 코드</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:#7a5c3e">
+        <span data-i18n="householdCurrentLabel">현재 코드</span>
+        <span id="householdCodeDisplay" style="font-size:16px;font-weight:800;color:#e07b39;letter-spacing:1px"></span>
+      </div>
+    </div>
 
     <div class="settings-section">
       <div class="settings-section-title" data-i18n="myProfileSection">내 프로필</div>
@@ -588,17 +612,29 @@ const PET_NAME_KEY    = 'danchu_pet_name';
 const PET_ENABLED_KEY = 'danchu_pet_enabled';
 const DEFAULT_PET_NAME = '단추';
 const MAX_FOOD    = 2;
-const DEFAULT_MEMBERS = ['경희', '범이', '한이', '강이'];
+const DEFAULT_MEMBERS = ['가족1', '가족2'];
+
+// ── 가족(household) 코드 — 가족마다 완전히 분리된 데이터 공간 ──
+const HOUSEHOLD_KEY = 'danchu_household';
+function getHousehold() { return localStorage.getItem(HOUSEHOLD_KEY) || ''; }
+function setHousehold(code) { localStorage.setItem(HOUSEHOLD_KEY, code); }
+function hPath(sub) { return `households/${getHousehold()}/${sub}`; }
+function makeHouseholdCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 혼동되는 0/O, 1/I 제외
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
 
 function getPetName() { return localStorage.getItem(PET_NAME_KEY) || DEFAULT_PET_NAME; }
 function setPetName(name) {
   localStorage.setItem(PET_NAME_KEY, name);
-  if (db) db.doc('config/pet').set({ name }, { merge: true }).catch(() => {});
+  if (db) db.doc(hPath('config/pet')).set({ name }, { merge: true }).catch(() => {});
 }
 function isPetEnabled() { return localStorage.getItem(PET_ENABLED_KEY) !== 'off'; }
 function setPetEnabled(enabled) {
   localStorage.setItem(PET_ENABLED_KEY, enabled ? 'on' : 'off');
-  if (db) db.doc('config/pet').set({ enabled }, { merge: true }).catch(() => {});
+  if (db) db.doc(hPath('config/pet')).set({ enabled }, { merge: true }).catch(() => {});
 }
 const COLORS = [
   { bg: '#e07b39', bd: '#c96b2a' },
@@ -689,6 +725,15 @@ const I18N = {
   addBtn:  { ko: '추가', en: 'Add' },
   doneBtn: { ko: '완료', en: 'Done' },
   languageSection: { ko: '언어', en: 'Language' },
+  householdIntro: { ko: '우리 가족만의<br>기록 공간이 필요해요', en: 'You need a private<br>space for your family' },
+  householdDesc: { ko: '같은 가족 코드를 쓰는 사람끼리만 기록이 공유돼요.', en: 'Only people using the same family code share records.' },
+  householdCodePlaceholder: { ko: '가족 코드 입력 (예: AB12CD)', en: 'Enter family code (e.g. AB12CD)' },
+  householdJoinBtn: { ko: '코드로 참여하기', en: 'Join with code' },
+  householdCreateBtn: { ko: '새 가족 코드 만들기', en: 'Create new family code' },
+  householdInvalidCode: { ko: '올바른 가족 코드를 입력해주세요 (영문/숫자 4~10자).', en: 'Please enter a valid family code (4-10 letters/digits).' },
+  householdCreatedAlertTemplate: { ko: '가족 코드가 생성됐어요: {code}\n\n이 코드를 가족들에게 알려주고, 다른 기기에서 "코드로 참여하기"로 입력하게 해주세요. 이 코드는 설정에서 다시 확인할 수 있어요.', en: 'Your family code is: {code}\n\nShare this with your family and have them enter it via "Join with code" on their devices. You can find this code again in Settings.' },
+  householdSection: { ko: '가족 코드', en: 'Family Code' },
+  householdCurrentLabel: { ko: '현재 코드', en: 'Current code' },
   statusPending:      { ko: '대기중', en: 'Pending' },
   statusDoneTemplate: { ko: '{n}회 완료', en: '{n} done' },
   emptyLog:           { ko: '아직 기록이 없습니다', en: 'No records yet' },
@@ -852,7 +897,7 @@ function loadMembers() {
 }
 function saveMembers(members) {
   localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
-  if (db) db.doc('config/members').set({ list: members }).catch(() => {});
+  if (db) db.doc(hPath('config/members')).set({ list: members }).catch(() => {});
 }
 
 function getProfile() { return localStorage.getItem(PROFILE_KEY) || null; }
@@ -860,7 +905,7 @@ function setProfile(name) {
   localStorage.setItem(PROFILE_KEY, name);
   updateProfileUI();
   if (db) {
-    db.doc(`tokens/${getDeviceId()}`).set({
+    db.doc(hPath(`tokens/${getDeviceId()}`)).set({
       owner: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     }, { merge: true }).catch(() => {});
   }
@@ -888,7 +933,7 @@ let cachedData = null;
 let unsubscribeFirestore = null;
 let activeTab = 'danchu';
 
-function todayDocRef() { return db ? db.doc(`feedings/${todayKey()}`) : null; }
+function todayDocRef() { return db ? db.doc(hPath(`feedings/${todayKey()}`)) : null; }
 
 function emptyData() {
   const d = { date: todayKey() };
@@ -1060,7 +1105,7 @@ function initWeekHistory() {
     return;
   }
   if (unsubscribeWeekHistory) unsubscribeWeekHistory();
-  unsubscribeWeekHistory = db.collection('feedings')
+  unsubscribeWeekHistory = db.collection(hPath('feedings'))
     .where(firebase.firestore.FieldPath.documentId(), 'in', keys)
     .onSnapshot(snap => {
       const byDate = {};
@@ -1272,7 +1317,7 @@ async function sendNudgeMulti(cardKey) {
   if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = t('nudgeSending'); }
   try {
     for (const toMember of toList) {
-      const payload = { from, to: toMember, category: cardKey };
+      const payload = { from, to: toMember, category: cardKey, household: getHousehold() };
       if (task) payload.task = task;
       const result = await sendNudgeApi(payload);
       if (result.reason === 'no_tokens') {
@@ -1297,7 +1342,7 @@ async function toggleNotification(enabled) {
   const statusEl = document.getElementById('notifStatus');
   if (!enabled) {
     localStorage.setItem(NOTIF_KEY, 'off');
-    if (db) db.doc(`tokens/${getDeviceId()}`).set({ enabled: false }, { merge: true }).catch(() => {});
+    if (db) db.doc(hPath(`tokens/${getDeviceId()}`)).set({ enabled: false }, { merge: true }).catch(() => {});
     statusEl.textContent = t('notifOff'); return;
   }
   if (!('PushManager' in window)) {
@@ -1319,7 +1364,7 @@ async function toggleNotification(enabled) {
       applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
     });
     if (db) {
-      await db.doc(`tokens/${getDeviceId()}`).set({
+      await db.doc(hPath(`tokens/${getDeviceId()}`)).set({
         subscription: subscription.toJSON(), owner: getProfile() || '',
         enabled: true, categories: loadNotifCategories(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1343,7 +1388,7 @@ function loadNotifCategories() {
 }
 function saveNotifCategories(cats) {
   localStorage.setItem(NOTIF_CATS_KEY, JSON.stringify(cats));
-  if (db) db.doc(`tokens/${getDeviceId()}`).set({ categories: cats }, { merge: true }).catch(() => {});
+  if (db) db.doc(hPath(`tokens/${getDeviceId()}`)).set({ categories: cats }, { merge: true }).catch(() => {});
 }
 function toggleNotifCategory(id, enabled) {
   const cats = loadNotifCategories();
@@ -1431,6 +1476,8 @@ function selectProfile(name) {
 // ── 설정 모달 ───────────────────────────────────────────
 function openSettings() {
   renderMemberSettings(); initNotifToggle(); updateProfileUI(); renderLangSwitch(); applyPetUI();
+  const codeEl = document.getElementById('householdCodeDisplay');
+  if (codeEl) codeEl.textContent = getHousehold();
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings() {
@@ -1489,10 +1536,35 @@ function toggleQR() {
   }
 }
 
+// ── 가족 코드 온보딩 ────────────────────────────────────
+function joinHousehold() {
+  const input = document.getElementById('householdCodeInput');
+  const code = (input.value || '').trim().toUpperCase();
+  if (!/^[A-Z0-9]{4,10}$/.test(code)) { alert(t('householdInvalidCode')); return; }
+  setHousehold(code);
+  document.getElementById('householdOverlay').classList.remove('open');
+  startApp();
+}
+function createHousehold() {
+  const code = makeHouseholdCode();
+  setHousehold(code);
+  document.getElementById('householdOverlay').classList.remove('open');
+  alert(t('householdCreatedAlertTemplate', { code }));
+  startApp();
+}
+
 // ── 시작 ────────────────────────────────────────────────
 document.documentElement.lang = currentLang;
 document.title = t('appTitle');
 applyStaticI18n();
+
+if (!getHousehold()) {
+  document.getElementById('householdOverlay').classList.add('open');
+} else {
+  startApp();
+}
+
+function startApp() {
 document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
 cachedData = loadLocalData();
 render(cachedData);
@@ -1503,15 +1575,15 @@ applyPetUI();
   if (db) {
     try {
       const [membersSnap, tokenSnap, petSnap] = await Promise.all([
-        db.doc('config/members').get(),
-        db.doc(`tokens/${getDeviceId()}`).get(),
-        db.doc('config/pet').get(),
+        db.doc(hPath('config/members')).get(),
+        db.doc(hPath(`tokens/${getDeviceId()}`)).get(),
+        db.doc(hPath('config/pet')).get(),
       ]);
       const firestoreList = membersSnap.exists ? membersSnap.data().list : null;
       if (firestoreList && firestoreList.length > 0) {
         localStorage.setItem(MEMBERS_KEY, JSON.stringify(firestoreList));
       } else {
-        db.doc('config/members').set({ list: loadMembers() }).catch(() => {});
+        db.doc(hPath('config/members')).set({ list: loadMembers() }).catch(() => {});
       }
       if (!getProfile() && tokenSnap.exists && tokenSnap.data().owner) {
         localStorage.setItem(PROFILE_KEY, tokenSnap.data().owner);
@@ -1521,7 +1593,7 @@ applyPetUI();
         if (typeof petData.name === 'string') localStorage.setItem(PET_NAME_KEY, petData.name);
         if (typeof petData.enabled === 'boolean') localStorage.setItem(PET_ENABLED_KEY, petData.enabled ? 'on' : 'off');
       } else {
-        db.doc('config/pet').set({ name: getPetName(), enabled: isPetEnabled() }).catch(() => {});
+        db.doc(hPath('config/pet')).set({ name: getPetName(), enabled: isPetEnabled() }).catch(() => {});
       }
       applyPetUI();
       render(cachedData);
@@ -1541,7 +1613,7 @@ applyPetUI();
           });
         }
         if (sub) {
-          db.doc(`tokens/${getDeviceId()}`).set({
+          db.doc(hPath(`tokens/${getDeviceId()}`)).set({
             subscription: sub.toJSON(), enabled: true,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
           }, { merge: true }).catch(() => {});
@@ -1570,6 +1642,7 @@ applyPetUI();
     }
   }, 60 * 1000);
 })();
+}
 </script>
 </body>
 </html>
