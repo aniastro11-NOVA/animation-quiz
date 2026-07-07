@@ -258,7 +258,7 @@
 </header>
 
 <div class="tab-nav">
-  <button class="tab-btn active" data-tab="danchu"    data-i18n="tabDanchu"    onclick="switchTab('danchu')">🐾 단추밥</button>
+  <button class="tab-btn active" data-tab="danchu"    id="tabBtnDanchu"    onclick="switchTab('danchu')">🐾 단추밥</button>
   <button class="tab-btn"        data-tab="delivery"  data-i18n="tabDelivery"  onclick="switchTab('delivery')">📦 택배수령</button>
   <button class="tab-btn"        data-tab="recycling" data-i18n="tabRecycling" onclick="switchTab('recycling')">♻️ 분리수거</button>
   <button class="tab-btn"        data-tab="dishes"    data-i18n="tabDishes"    onclick="switchTab('dishes')">🍽️ 설거지</button>
@@ -302,7 +302,7 @@
         <span class="card-icon">📣</span>
         <div>
           <div class="card-title" data-i18n="nudgeDanchuTitle">밥 부탁하기</div>
-          <div class="card-subtitle" data-i18n="nudgeDanchuSubtitle">단추에게 밥을 주세요!</div>
+          <div class="card-subtitle" id="nudgeDanchuSubtitleEl">단추에게 밥을 주세요!</div>
         </div>
       </div>
       <div class="member-buttons" id="btns-nudge-danchu"></div>
@@ -508,6 +508,22 @@
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-title" data-i18n="petSection">반려동물</div>
+      <div class="notif-row">
+        <span data-i18n="petHaveLabel">🐾 반려동물이 있어요</span>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="petToggle" onchange="togglePetEnabled(this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div id="petNameRow" style="display:flex;gap:8px;margin-top:10px">
+        <input class="add-member-input" id="petNameInput" data-i18n-placeholder="petNamePlaceholder"
+               placeholder="반려동물 이름 (예: 단추)" maxlength="6"
+               onblur="savePetName(this.value)" onkeydown="if(event.key==='Enter') this.blur()" />
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-title" data-i18n="notifSection">알림</div>
       <div class="notif-row">
         <span data-i18n="notifReceiveLabel">🔔 알림 받기</span>
@@ -566,8 +582,22 @@ const PROFILE_KEY = 'danchu_profile';
 const NOTIF_KEY      = 'danchu_notif';
 const NOTIF_CATS_KEY = 'danchu_notif_categories';
 const DEVICE_KEY  = 'danchu_device';
+const PET_NAME_KEY    = 'danchu_pet_name';
+const PET_ENABLED_KEY = 'danchu_pet_enabled';
+const DEFAULT_PET_NAME = '단추';
 const MAX_FOOD    = 2;
 const DEFAULT_MEMBERS = ['경희', '범이', '한이', '강이'];
+
+function getPetName() { return localStorage.getItem(PET_NAME_KEY) || DEFAULT_PET_NAME; }
+function setPetName(name) {
+  localStorage.setItem(PET_NAME_KEY, name);
+  if (db) db.doc('config/pet').set({ name }, { merge: true }).catch(() => {});
+}
+function isPetEnabled() { return localStorage.getItem(PET_ENABLED_KEY) !== 'off'; }
+function setPetEnabled(enabled) {
+  localStorage.setItem(PET_ENABLED_KEY, enabled ? 'on' : 'off');
+  if (db) db.doc('config/pet').set({ enabled }, { merge: true }).catch(() => {});
+}
 const COLORS = [
   { bg: '#e07b39', bd: '#c96b2a' },
   { bg: '#4f8edc', bd: '#3a72b8' },
@@ -589,10 +619,13 @@ const CHORE_CATEGORIES = [
 const ALL_TYPES = ['food', 'water', ...CHORE_CATEGORIES.map(c => c.id)];
 
 const NOTIF_CATEGORIES = [
-  { id: 'danchu', ko: '단추밥', en: "Danchu's Meal", icon: '🐾' },
+  { id: 'danchu', icon: '🐾' },
   ...CHORE_CATEGORIES,
 ];
-function catLabel(cat) { return cat[currentLang] || cat.ko; }
+function catLabel(cat) {
+  if (cat.id === 'danchu') return t('petMealLabelTemplate', { name: getPetName() });
+  return cat[currentLang] || cat.ko;
+}
 
 // ── 다국어(i18n) ─────────────────────────────────────────
 const LANG_KEY = 'danchu_lang';
@@ -602,7 +635,10 @@ const I18N = {
   settingsTitleAttr:   { ko: '설정', en: 'Settings' },
   profileSetPrompt:    { ko: '👤 프로필 설정', en: '👤 Set Profile' },
   profileModalQuestion:{ ko: '이 기기를 사용하는 분은<br>누구세요?', en: 'Who is using<br>this device?' },
-  tabDanchu:    { ko: '🐾 단추밥',   en: "🐾 Danchu's Meal" },
+  petMealLabelTemplate: { ko: '{name}밥', en: "{name}'s Meal" },
+  petSection:       { ko: '반려동물', en: 'Pet' },
+  petHaveLabel:     { ko: '🐾 반려동물이 있어요', en: '🐾 I have a pet' },
+  petNamePlaceholder: { ko: '반려동물 이름 (예: 단추)', en: "Pet's name (e.g. Danchu)" },
   tabDelivery:  { ko: '📦 택배수령', en: '📦 Delivery' },
   tabRecycling: { ko: '♻️ 분리수거', en: '♻️ Recycling' },
   tabDishes:    { ko: '🍽️ 설거지',  en: '🍽️ Dishes' },
@@ -613,7 +649,7 @@ const I18N = {
   waterTitle:       { ko: '물', en: 'Water' },
   waterSubtitle:    { ko: '신선한 물 상시 제공', en: 'Keep fresh water available' },
   nudgeDanchuTitle:    { ko: '밥 부탁하기', en: 'Ask to Feed' },
-  nudgeDanchuSubtitle: { ko: '단추에게 밥을 주세요!', en: 'Please feed Danchu!' },
+  nudgeDanchuSubtitleTemplate: { ko: '{name}에게 밥을 주세요!', en: 'Please feed {name}!' },
   historyTitle: { ko: '📋 최근 7일 전체 기록', en: '📋 Last 7 Days' },
   historyDate:  { ko: '날짜', en: 'Date' },
   historyTime:  { ko: '시간', en: 'Time' },
@@ -658,10 +694,10 @@ const I18N = {
   foodMaxAlertTemplate: { ko: '오늘 사료 배식 횟수({n}회)를 초과했어요.', en: "Today's feeding count ({n}) has been exceeded." },
   needProfileAlert:   { ko: '먼저 프로필을 설정해 주세요.', en: 'Please set your profile first.' },
   resetConfirm:       { ko: '오늘 전체 기록을 모두 초기화할까요?', en: "Reset all of today's records?" },
-  feedAlertNone:      { ko: '🚨 단추가 오늘 아직 밥을 못 먹었어요!', en: "🚨 Danchu hasn't been fed today yet!" },
-  feedAlertOverdueTemplate: { ko: '🚨 단추가 마지막 배식 후 {n}시간이 지났어요!', en: '🚨 It has been {n} hours since Danchu was last fed!' },
+  feedAlertNoneTemplate:    { ko: '🚨 오늘 아직 {name}에게 밥을 주지 않았어요!', en: "🚨 {name} hasn't been fed today yet!" },
+  feedAlertOverdueTemplate: { ko: '🚨 {name}에게 마지막으로 밥을 준 지 {n}시간이 지났어요!', en: '🚨 It has been {n} hours since {name} was last fed!' },
   nudgeConfirmTemplate: { ko: '{names}에게\n{task} 알림을 보낼까요?', en: 'Send a notification to {names}\nfor {task}?' },
-  nudgeDefaultTask:   { ko: '"단추에게 밥을 주세요"', en: '"Please feed Danchu"' },
+  nudgeDefaultTaskTemplate: { ko: '"{name}에게 밥을 주세요"', en: '"Please feed {name}"' },
   nudgeNoTokens:      { ko: '알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!', en: 'No devices to receive notifications.\nPlease have everyone turn on notifications in the app first!' },
   nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
   nudgeSendBtn:       { ko: '📣 전송하기', en: '📣 Send' },
@@ -696,6 +732,7 @@ function setLang(lang) {
   document.documentElement.lang = currentLang;
   document.title = t('appTitle');
   applyStaticI18n();
+  applyPetUI();
   document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
   render(cachedData);
   renderMemberSettings();
@@ -728,6 +765,47 @@ function renderLangSwitch() {
     <button class="flat-btn" style="width:auto;flex:1;margin:0;padding:8px 0;${currentLang === code ? 'background:#e07b39;border-color:#e07b39;color:#fff' : ''}"
       onclick="setLang('${code}')">${label}</button>
   `).join('');
+}
+
+// ── 반려동물 설정 ───────────────────────────────────────
+function togglePetEnabled(enabled) {
+  setPetEnabled(enabled);
+  applyPetUI();
+  render(cachedData);
+  renderNotifCategoryList();
+  checkFeedingAlert(cachedData);
+}
+function savePetName(name) {
+  name = name.trim();
+  const input = document.getElementById('petNameInput');
+  if (!name) { if (input) input.value = getPetName(); return; }
+  setPetName(name);
+  applyPetUI();
+  render(cachedData);
+  renderNotifCategoryList();
+  checkFeedingAlert(cachedData);
+}
+function applyPetUI() {
+  const enabled = isPetEnabled();
+  const name = getPetName();
+  const tabBtn = document.getElementById('tabBtnDanchu');
+  if (tabBtn) {
+    tabBtn.style.display = enabled ? '' : 'none';
+    tabBtn.textContent = '🐾 ' + t('petMealLabelTemplate', { name });
+  }
+  if (!enabled && activeTab === 'danchu') { switchTab('delivery'); }
+  else {
+    const panel = document.getElementById('panel-danchu');
+    if (panel) panel.style.display = (enabled && activeTab === 'danchu') ? '' : 'none';
+  }
+  const nudgeSub = document.getElementById('nudgeDanchuSubtitleEl');
+  if (nudgeSub) nudgeSub.textContent = t('nudgeDanchuSubtitleTemplate', { name });
+  const petToggle = document.getElementById('petToggle');
+  if (petToggle) petToggle.checked = enabled;
+  const petNameInput = document.getElementById('petNameInput');
+  if (petNameInput) petNameInput.value = name;
+  const petNameRow = document.getElementById('petNameRow');
+  if (petNameRow) petNameRow.style.display = enabled ? 'flex' : 'none';
 }
 
 // ── Firebase 초기화 ──────────────────────────────────────
@@ -1098,9 +1176,11 @@ function resetDay() {
 // ── 알림 배너 ───────────────────────────────────────────
 function checkFeedingAlert(data) {
   const banner = document.getElementById('alertBanner');
+  if (!isPetEnabled()) { banner.classList.remove('show'); return; }
+  const petName = getPetName();
   if (!data || !data.food || data.food.length === 0) {
     if (new Date().getHours() >= 8) {
-      banner.textContent = t('feedAlertNone');
+      banner.textContent = t('feedAlertNoneTemplate', { name: petName });
       banner.classList.add('show'); return;
     }
   } else {
@@ -1108,7 +1188,7 @@ function checkFeedingAlert(data) {
     const [lh, lm] = lastEntry.time.split(':').map(Number);
     const diffH = (Date.now() - new Date().setHours(lh, lm, 0, 0)) / 3600000;
     if (diffH >= 8) {
-      banner.textContent = t('feedAlertOverdueTemplate', { n: Math.floor(diffH) });
+      banner.textContent = t('feedAlertOverdueTemplate', { n: Math.floor(diffH), name: petName });
       banner.classList.add('show'); return;
     }
   }
@@ -1166,7 +1246,7 @@ async function sendNudgeMulti(cardKey) {
   const cat = CHORE_CATEGORIES.find(c => c.id === cardKey);
   const task = cat ? catLabel(cat) : null;
   const toList = [...sel];
-  const taskStr = task ? `"${task}"` : t('nudgeDefaultTask');
+  const taskStr = task ? `"${task}"` : t('nudgeDefaultTaskTemplate', { name: getPetName() });
   if (!confirm(t('nudgeConfirmTemplate', { names: toList.join(', '), task: taskStr }))) return;
   const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
   if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = t('nudgeSending'); }
@@ -1254,7 +1334,8 @@ function renderNotifCategoryList() {
   const listEl = document.getElementById('notifCategoryList');
   if (!listEl) return;
   const cats = loadNotifCategories();
-  listEl.innerHTML = NOTIF_CATEGORIES.map(c => `
+  const visibleCats = NOTIF_CATEGORIES.filter(c => c.id !== 'danchu' || isPetEnabled());
+  listEl.innerHTML = visibleCats.map(c => `
     <div class="notif-row">
       <span>${c.icon} ${catLabel(c)}</span>
       <label class="toggle-wrap">
@@ -1329,7 +1410,7 @@ function selectProfile(name) {
 
 // ── 설정 모달 ───────────────────────────────────────────
 function openSettings() {
-  renderMemberSettings(); initNotifToggle(); updateProfileUI(); renderLangSwitch();
+  renderMemberSettings(); initNotifToggle(); updateProfileUI(); renderLangSwitch(); applyPetUI();
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings() {
@@ -1396,13 +1477,15 @@ document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date()
 cachedData = loadLocalData();
 render(cachedData);
 updateProfileUI();
+applyPetUI();
 
 (async function init() {
   if (db) {
     try {
-      const [membersSnap, tokenSnap] = await Promise.all([
+      const [membersSnap, tokenSnap, petSnap] = await Promise.all([
         db.doc('config/members').get(),
         db.doc(`tokens/${getDeviceId()}`).get(),
+        db.doc('config/pet').get(),
       ]);
       const firestoreList = membersSnap.exists ? membersSnap.data().list : null;
       if (firestoreList && firestoreList.length > 0) {
@@ -1413,6 +1496,16 @@ updateProfileUI();
       if (!getProfile() && tokenSnap.exists && tokenSnap.data().owner) {
         localStorage.setItem(PROFILE_KEY, tokenSnap.data().owner);
       }
+      if (petSnap.exists) {
+        const petData = petSnap.data();
+        if (typeof petData.name === 'string') localStorage.setItem(PET_NAME_KEY, petData.name);
+        if (typeof petData.enabled === 'boolean') localStorage.setItem(PET_ENABLED_KEY, petData.enabled ? 'on' : 'off');
+      } else {
+        db.doc('config/pet').set({ name: getPetName(), enabled: isPetEnabled() }).catch(() => {});
+      }
+      applyPetUI();
+      render(cachedData);
+      checkFeedingAlert(cachedData);
     } catch(e) {}
   }
 
