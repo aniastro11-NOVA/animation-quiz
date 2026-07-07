@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.novaanimation.familylog",
+        "sha256_cert_fingerprints": ["1D:6D:6A:75:0F:6F:BF:8B:BA:57:81:C4:30:18:E7:0D:5F:6D:F9:98:44:89:E5:68:E2:DD:A2:66:FB:EE:1B:AB"]
+      }
+    }]
