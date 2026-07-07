@@ -95,6 +95,7 @@
 
     .log-item {
       display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; row-gap: 6px;
       background: #fdf6ee; border-radius: 10px; padding: 8px 14px; font-size: 14px;
     }
     .log-item .who { font-weight: 700; color: #3d2b1f; }
@@ -112,13 +113,14 @@
       cursor: pointer; font-size: 16px; padding: 0 0 0 8px; line-height: 1;
     }
     .log-item .delete-btn:hover { color: #c0392b; }
+    .reaction-group { display: none; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .reaction-group.show { display: flex; }
     .reaction-btn {
-      display: none; align-items: center; gap: 4px; white-space: nowrap;
+      display: flex; align-items: center; gap: 3px; white-space: nowrap;
       background: none; border: 1.5px solid #e8d5c0; border-radius: 999px;
-      padding: 3px 10px; font-size: 12px; cursor: pointer; color: #a0856a;
+      padding: 2px 7px; font-size: 12px; cursor: pointer; color: #a0856a;
       transition: background .15s, border-color .15s, color .15s;
     }
-    .reaction-btn.show { display: flex; }
     .reaction-btn.liked { background: #fff0e0; border-color: #e07b39; color: #e07b39; font-weight: 700; }
     .reaction-btn:active { transform: scale(.93); }
     .log-item .who { -webkit-user-select: none; user-select: none; cursor: default; }
@@ -960,6 +962,18 @@ function render(data) {
   CHORE_CATEGORIES.forEach(cat => renderNudgeButtons(cat.id, members));
 }
 
+const REACTION_EMOJIS = ['👍', '👌', '❤️'];
+function getReactionMap(entry) {
+  const r = entry && entry.reactions;
+  if (!r) return {};
+  if (Array.isArray(r)) {
+    const map = {};
+    r.forEach(name => { map[name] = '👍'; });
+    return map;
+  }
+  return r;
+}
+
 function renderCard(type, data, maxCount, members, profile) {
   const logs   = data[type] || [];
   const logEl  = document.getElementById('log-'   + type);
@@ -970,13 +984,19 @@ function renderCard(type, data, maxCount, members, profile) {
   logEl.innerHTML = logs.length === 0
     ? `<div class="empty-msg">${t('emptyLog')}</div>`
     : logs.map((entry, i) => {
-        const reactions = entry.reactions || [];
-        const liked = profile && reactions.includes(profile);
-        const hasReactions = reactions.length > 0;
-        const label = hasReactions
-          ? (reactions.length <= 2 ? reactions.join(', ') : t('reactionCountTemplate', { n: reactions.length }))
-          : '';
+        const map = getReactionMap(entry);
+        const names = Object.keys(map);
+        const hasReactions = names.length > 0;
+        const myReaction = profile ? map[profile] : null;
         const showCls = hasReactions ? ' show' : '';
+        const reactionBtns = REACTION_EMOJIS.map(emoji => {
+          const reactors = names.filter(n => map[n] === emoji);
+          const count = reactors.length;
+          const label = count === 0 ? '' : (count <= 2 ? reactors.join(', ') : t('reactionCountTemplate', { n: count }));
+          const mine = myReaction === emoji;
+          return `<button class="reaction-btn${mine ? ' liked' : ''}"
+                    onclick="toggleReaction('${type}',${i},'${emoji}')">${emoji}${label ? ' ' + label : ''}</button>`;
+        }).join('');
         return `<div class="log-item">
           <span class="who"
             ontouchstart="lpStart('${type}',${i})" ontouchend="lpEnd()" ontouchcancel="lpEnd()"
@@ -984,8 +1004,7 @@ function renderCard(type, data, maxCount, members, profile) {
           >${entry.who}</span>
           <input type="time" class="time-input" value="${entry.time}"
             onchange="saveTime('${type}',${i},this.value)" />
-          <button id="rbtn-${type}-${i}" class="reaction-btn${liked ? ' liked' : ''}${showCls}"
-            onclick="toggleReaction('${type}',${i})">👍${label ? ' ' + label : ''}</button>
+          <div id="rgroup-${type}-${i}" class="reaction-group${showCls}">${reactionBtns}</div>
           <button class="delete-btn" onclick="deleteEntry('${type}',${i})">✕</button>
         </div>`;
       }).join('');
@@ -1109,19 +1128,20 @@ function saveTime(type, index, newTime) {
   cachedData = data;
 }
 
-// ── 길게 누르기 (좋아요 표시) ──────────────────────────
+// ── 길게 누르기 (반응 표시) ──────────────────────────
 let _lpTimer = null;
 function lpStart(type, index) {
   _lpTimer = setTimeout(() => {
     _lpTimer = null;
-    const btn = document.getElementById(`rbtn-${type}-${index}`);
-    if (btn) {
-      btn.classList.add('show');
+    const grp = document.getElementById(`rgroup-${type}-${index}`);
+    if (grp) {
+      grp.classList.add('show');
       // 반응 없으면 3초 후 자동 숨김
       const entry = (cachedData || loadLocalData())[type]?.[index] || {};
-      if (!(entry.reactions || []).length) {
+      if (Object.keys(getReactionMap(entry)).length === 0) {
         setTimeout(() => {
-          if (btn && !(entry.reactions || []).length) btn.classList.remove('show');
+          const stillEmpty = Object.keys(getReactionMap((cachedData || loadLocalData())[type]?.[index] || {})).length === 0;
+          if (grp && stillEmpty) grp.classList.remove('show');
         }, 3000);
       }
     }
@@ -1131,18 +1151,18 @@ function lpEnd() {
   if (_lpTimer) { clearTimeout(_lpTimer); _lpTimer = null; }
 }
 
-function toggleReaction(type, index) {
+function toggleReaction(type, index, emoji) {
   const profile = getProfile();
   if (!profile) { alert(t('needProfileAlert')); return; }
   const data = cachedData || loadLocalData();
   const entry = data[type][index];
-  if (!entry.reactions) entry.reactions = [];
-  const pos = entry.reactions.indexOf(profile);
-  if (pos >= 0) {
-    entry.reactions.splice(pos, 1);
+  const map = getReactionMap(entry);
+  if (map[profile] === emoji) {
+    delete map[profile];
   } else {
-    entry.reactions.push(profile);
+    map[profile] = emoji;
   }
+  entry.reactions = map;
   if (db) {
     todayDocRef().set({ [type]: data[type] }, { merge: true }).catch(() => saveLocalData(data));
   } else { saveLocalData(data); }
