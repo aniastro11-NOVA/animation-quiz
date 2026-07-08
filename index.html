@@ -1569,6 +1569,7 @@ function applyHouseholdSwitch(code, isNew) {
   }
 }
 function openHouseholdSwitch() {
+  document.getElementById('settingsOverlay').classList.remove('open');
   document.getElementById('householdCloseBtn').style.display = 'block';
   document.getElementById('householdOverlay').classList.add('open');
 }
