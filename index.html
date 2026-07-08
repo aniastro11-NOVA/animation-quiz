@@ -482,7 +482,9 @@
 
 <!-- 가족 코드 온보딩 모달 -->
 <div class="modal-overlay center" id="householdOverlay">
-  <div class="modal-panel rounded" style="text-align:center">
+  <div class="modal-panel rounded" style="text-align:center;position:relative">
+    <button id="householdCloseBtn" onclick="document.getElementById('householdOverlay').classList.remove('open')"
+      style="display:none;position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;color:#c9a07a">✕</button>
     <div style="font-size:48px;margin-bottom:8px">🔑</div>
     <div class="profile-select-title" data-i18n-html="householdIntro">우리 가족만의<br>기록 공간이 필요해요</div>
     <p style="font-size:13px;color:#7a5c3e;margin:0 0 16px" data-i18n="householdDesc">
@@ -515,7 +517,8 @@
       <div class="settings-section-title" data-i18n="householdSection">가족 코드</div>
       <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:#7a5c3e">
         <span data-i18n="householdCurrentLabel">현재 코드</span>
-        <span id="householdCodeDisplay" style="font-size:16px;font-weight:800;color:#e07b39;letter-spacing:1px"></span>
+        <span id="householdCodeDisplay" style="font-size:16px;font-weight:800;color:#e07b39;letter-spacing:1px;flex:1"></span>
+        <button class="flat-btn" data-i18n="changeBtn" style="width:auto;padding:6px 14px;font-size:13px;margin:0" onclick="openHouseholdSwitch()">변경</button>
       </div>
     </div>
 
@@ -1537,20 +1540,37 @@ function toggleQR() {
 }
 
 // ── 가족 코드 온보딩 ────────────────────────────────────
+let _appStarted = false;
+
 function joinHousehold() {
   const input = document.getElementById('householdCodeInput');
   const code = (input.value || '').trim().toUpperCase();
   if (!/^[A-Z0-9]{4,10}$/.test(code)) { alert(t('householdInvalidCode')); return; }
-  setHousehold(code);
-  document.getElementById('householdOverlay').classList.remove('open');
-  startApp();
+  applyHouseholdSwitch(code, false);
 }
 function createHousehold() {
-  const code = makeHouseholdCode();
+  applyHouseholdSwitch(makeHouseholdCode(), true);
+}
+function applyHouseholdSwitch(code, isNew) {
+  if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
+  if (unsubscribeWeekHistory) { unsubscribeWeekHistory(); unsubscribeWeekHistory = null; }
+  // 이전 가족의 로컬 캐시를 지워서 새 가족 데이터와 섞이지 않게 함
+  [STORAGE_KEY, MEMBERS_KEY, PROFILE_KEY, PET_NAME_KEY, PET_ENABLED_KEY].forEach(k => localStorage.removeItem(k));
   setHousehold(code);
+  const input = document.getElementById('householdCodeInput');
+  if (input) input.value = '';
   document.getElementById('householdOverlay').classList.remove('open');
-  alert(t('householdCreatedAlertTemplate', { code }));
-  startApp();
+  if (isNew) alert(t('householdCreatedAlertTemplate', { code }));
+  if (_appStarted) {
+    closeSettings();
+    loadHouseholdData();
+  } else {
+    startApp();
+  }
+}
+function openHouseholdSwitch() {
+  document.getElementById('householdCloseBtn').style.display = 'block';
+  document.getElementById('householdOverlay').classList.add('open');
 }
 
 // ── 시작 ────────────────────────────────────────────────
@@ -1565,13 +1585,34 @@ if (!getHousehold()) {
 }
 
 function startApp() {
-document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
-cachedData = loadLocalData();
-render(cachedData);
-updateProfileUI();
-applyPetUI();
+  _appStarted = true;
+  loadHouseholdData();
 
-(async function init() {
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      render(cachedData || loadLocalData());
+      if (db) initDataListener();
+    }
+  });
+
+  setInterval(() => {
+    const data = cachedData || loadLocalData();
+    if (data.date !== todayKey()) {
+      cachedData = null; initDataListener();
+      initWeekHistory();
+      document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+    }
+  }, 60 * 1000);
+}
+
+// 최초 실행과 가족 코드 전환(변경) 시 공통으로 호출 — 새 household의 데이터를 불러와 렌더링
+async function loadHouseholdData() {
+  document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
+  cachedData = loadLocalData();
+  render(cachedData);
+  updateProfileUI();
+  applyPetUI();
+
   if (db) {
     try {
       const [membersSnap, tokenSnap, petSnap] = await Promise.all([
@@ -1625,23 +1666,6 @@ applyPetUI();
   updateProfileUI();
   initDataListener();
   initWeekHistory();
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      render(cachedData || loadLocalData());
-      if (db) initDataListener();
-    }
-  });
-
-  setInterval(() => {
-    const data = cachedData || loadLocalData();
-    if (data.date !== todayKey()) {
-      cachedData = null; initDataListener();
-      initWeekHistory();
-      document.getElementById('dateBar').textContent = '📅 ' + formatDate(new Date());
-    }
-  }, 60 * 1000);
-})();
 }
 </script>
 </body>
