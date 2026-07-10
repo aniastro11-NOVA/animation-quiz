@@ -750,6 +750,9 @@ const I18N = {
   householdCreateBtn: { ko: '새 가족 만들기 (코드 자동 생성)', en: 'Create new family (auto code)' },
   householdInvalidName: { ko: '가족 이름을 입력해주세요 (1~12자).', en: 'Please enter a family name (1-12 characters).' },
   householdInvalidCode: { ko: '올바른 가족 코드를 입력해주세요 (영문/숫자 4~10자).', en: 'Please enter a valid family code (4-10 letters/digits).' },
+  householdNameTaken: { ko: '이미 사용 중인 가족 이름이에요.\n다른 이름을 정해주세요.', en: 'This family name is already taken.\nPlease choose a different name.' },
+  householdNotFound: { ko: '해당 가족을 찾을 수 없어요.\n이름과 코드를 다시 확인하거나, 처음이라면 "새 가족 만들기"를 눌러주세요.', en: 'Family not found.\nPlease check the name and code, or tap "Create new family" if you are new.' },
+  householdCodeMismatch: { ko: '가족 코드가 일치하지 않아요.\n가족에게 정확한 코드를 다시 확인해주세요.', en: 'The family code does not match.\nPlease double-check the code with your family.' },
   householdCreatedAlertTemplate: { ko: '가족이 만들어졌어요!\n\n가족 이름: {name}\n가족 코드: {code}\n\n가족들에게 이름과 코드를 함께 알려주고, 다른 기기에서 똑같이 입력하게 해주세요. 설정에서 다시 확인할 수 있어요.', en: 'Your family is ready!\n\nFamily name: {name}\nFamily code: {code}\n\nShare both with your family so they can enter them on their devices. You can find them again in Settings.' },
   householdSection: { ko: '가족 코드', en: 'Family Code' },
   householdCurrentLabel: { ko: '현재 가족', en: 'Current family' },
@@ -1567,17 +1570,43 @@ function readHouseholdName() {
   return (document.getElementById('householdNameInput').value || '')
     .replace(/[/#\s]/g, '');
 }
-function joinHousehold() {
+// 가족 이름 중복 확인용 레지스트리: familyNames/{이름} → { household: '이름#코드' }
+function familyNameRef(name) { return db ? db.doc(`familyNames/${name}`) : null; }
+
+async function joinHousehold() {
   const name = readHouseholdName();
   if (!name) { alert(t('householdInvalidName')); return; }
   const code = (document.getElementById('householdCodeInput').value || '').trim().toUpperCase();
   if (!/^[A-Z0-9]{4,10}$/.test(code)) { alert(t('householdInvalidCode')); return; }
-  applyHouseholdSwitch(`${name}#${code}`, false);
+  const householdId = `${name}#${code}`;
+  if (db) {
+    try {
+      const regSnap = await familyNameRef(name).get();
+      if (regSnap.exists) {
+        // 등록된 가족 — 코드까지 일치해야 참여 가능
+        if (regSnap.data().household !== householdId) { alert(t('householdCodeMismatch')); return; }
+      } else {
+        // 레지스트리 도입 전에 만들어진 가족이면 데이터 존재 여부로 확인 후 자동 등록
+        const legacySnap = await db.doc(`households/${householdId}/config/members`).get();
+        if (!legacySnap.exists) { alert(t('householdNotFound')); return; }
+        await familyNameRef(name).set({ household: householdId }).catch(() => {});
+      }
+    } catch (e) { console.warn('household check failed', e); }
+  }
+  applyHouseholdSwitch(householdId, false);
 }
-function createHousehold() {
+async function createHousehold() {
   const name = readHouseholdName();
   if (!name) { alert(t('householdInvalidName')); return; }
-  applyHouseholdSwitch(`${name}#${makeHouseholdCode()}`, true);
+  if (db) {
+    try {
+      const regSnap = await familyNameRef(name).get();
+      if (regSnap.exists) { alert(t('householdNameTaken')); return; }
+    } catch (e) { console.warn('household check failed', e); }
+  }
+  const householdId = `${name}#${makeHouseholdCode()}`;
+  if (db) await familyNameRef(name).set({ household: householdId }).catch(() => {});
+  applyHouseholdSwitch(householdId, true);
 }
 // 저장된 household ID("이름#코드" 또는 구버전 "코드")를 표시용으로 분해
 function parseHousehold(id) {
