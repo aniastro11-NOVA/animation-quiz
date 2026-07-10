@@ -487,9 +487,16 @@
       style="display:none;position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;color:#c9a07a">✕</button>
     <div style="font-size:48px;margin-bottom:8px">🔑</div>
     <div class="profile-select-title" data-i18n-html="householdIntro">우리 가족만의<br>기록 공간이 필요해요</div>
-    <p style="font-size:13px;color:#7a5c3e;margin:0 0 16px" data-i18n="householdDesc">
+    <p style="font-size:13px;color:#7a5c3e;margin:0 0 12px" data-i18n="householdDesc">
       가족 이름과 코드가 모두 일치하는 사람끼리만 기록이 공유돼요.
     </p>
+    <div style="font-size:12px;color:#a0856a;text-align:left;background:#fdf6ee;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6"
+         data-i18n-html="householdGuide">
+      <b>처음이신가요?</b><br>
+      → 아래 <b>'새 가족 만들기'</b>를 누르세요. 코드가 자동으로 만들어져요.<br><br>
+      <b>가족 중 누군가 이미 만들었나요?</b><br>
+      → 그분에게 가족 이름과 코드를 물어봐서 입력하세요.
+    </div>
     <input class="add-member-input" id="householdNameInput" data-i18n-placeholder="householdNamePlaceholder"
            placeholder="가족 이름 (예: 김씨네)" maxlength="12"
            style="text-align:center;font-size:16px;font-weight:700;margin-bottom:8px;width:100%;box-sizing:border-box" />
@@ -733,6 +740,10 @@ const I18N = {
   languageSection: { ko: '언어', en: 'Language' },
   householdIntro: { ko: '우리 가족만의<br>기록 공간이 필요해요', en: 'You need a private<br>space for your family' },
   householdDesc: { ko: '가족 이름과 코드가 모두 일치하는 사람끼리만 기록이 공유돼요.', en: 'Only people whose family name AND code both match share records.' },
+  householdGuide: {
+    ko: "<b>처음이신가요?</b><br>→ 아래 <b>'새 가족 만들기'</b>를 누르세요. 코드가 자동으로 만들어져요.<br><br><b>가족 중 누군가 이미 만들었나요?</b><br>→ 그분에게 가족 이름과 코드를 물어봐서 입력하세요.",
+    en: "<b>First time here?</b><br>→ Tap <b>'Create new family'</b> below. A code will be generated for you.<br><br><b>Did a family member already create one?</b><br>→ Ask them for the family name and code, then enter them here.",
+  },
   householdNamePlaceholder: { ko: '가족 이름 (예: 김씨네)', en: 'Family name (e.g. The Kims)' },
   householdCodePlaceholder: { ko: '가족 코드 입력 (예: AB12CD)', en: 'Enter family code (e.g. AB12CD)' },
   householdJoinBtn: { ko: '이름+코드로 참여하기', en: 'Join with name + code' },
