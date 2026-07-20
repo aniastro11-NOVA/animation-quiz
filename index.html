@@ -768,6 +768,7 @@ const I18N = {
   nudgeConfirmTemplate: { ko: '{names}에게\n{task} 알림을 보낼까요?', en: 'Send a notification to {names}\nfor {task}?' },
   nudgeDefaultTaskTemplate: { ko: '"{name}에게 밥을 주세요"', en: '"Please feed {name}"' },
   nudgeNoTokens:      { ko: '알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!', en: 'No devices to receive notifications.\nPlease have everyone turn on notifications in the app first!' },
+  nudgePartialTemplate: { ko: '{names}님은 알림이 꺼져 있어서 전달하지 못했어요.\n나머지 가족에게는 전송됐어요!', en: 'Could not reach {names} (notifications are off).\nThe rest of the family received it!' },
   nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
   nudgeSendBtn:       { ko: '📣 전송하기', en: '📣 Send' },
   nudgeSent:          { ko: '✅ 전송됨!', en: '✅ Sent!' },
@@ -1338,20 +1339,29 @@ async function sendNudgeMulti(cardKey) {
   const sendBtn = document.getElementById(`send-nudge-${cardKey}`);
   if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = t('nudgeSending'); }
   try {
+    // 알림이 꺼진 사람이 있어도 나머지에게는 계속 전송 (중간에 중단하지 않음)
+    const failedMembers = [];
+    let sentCount = 0;
     for (const toMember of toList) {
       const payload = { from, to: toMember, category: cardKey, household: getHousehold() };
       if (task) payload.task = task;
       const result = await sendNudgeApi(payload);
-      if (result.reason === 'no_tokens') {
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = t('nudgeSendBtn'); }
-        alert(t('nudgeNoTokens'));
-        return;
-      }
+      if (result.reason === 'no_tokens') failedMembers.push(toMember);
+      else sentCount++;
+    }
+    if (sentCount === 0) {
+      // 아무에게도 전달 못함 — 선택 유지하고 재시도 가능하게
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = t('nudgeSendBtn'); }
+      alert(t('nudgeNoTokens'));
+      return;
     }
     nudgeSelections[cardKey] = new Set();
     renderNudgeButtons(cardKey, loadMembers());
     if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = t('nudgeSent'); }
     setTimeout(() => { if (sendBtn) sendBtn.textContent = t('nudgeSendBtn'); }, 2000);
+    if (failedMembers.length > 0) {
+      alert(t('nudgePartialTemplate', { names: failedMembers.join(', ') }));
+    }
   } catch(e) {
     console.error(e);
     if (sendBtn) { sendBtn.disabled = sel.size === 0; sendBtn.textContent = t('nudgeSendBtn'); }
