@@ -101,13 +101,34 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     return;
   }
 
-  const { from, to, task, category, household } = req.body || {};
-  if (!to) {
-    res.status(400).json({ error: 'to is required' });
-    return;
-  }
+  const { from, to, task, category, household, notice } = req.body || {};
   if (!household) {
     res.status(400).json({ error: 'household is required' });
+    return;
+  }
+
+  // 공지 브로드캐스트 — 가족 전체(알림 켠 기기)에게 전송
+  if (notice) {
+    const db = admin.firestore();
+    const subDocs = await getSubscriptionDocs(db, household, undefined, 'notice');
+    if (subDocs.length === 0) {
+      res.json({ success: false, reason: 'no_tokens' });
+      return;
+    }
+    const text = String(notice).slice(0, 200);
+    const { sent, failed } = await sendToAll(db, household, subDocs, {
+      title: '📢 가족 공지',
+      body:  from ? `${from}: ${text}` : text,
+      icon:  'https://danchu-feeding.web.app/icon-192.png',
+      badge: 'https://danchu-feeding.web.app/icon-192.png',
+      url:   'https://danchu-feeding.web.app/',
+    });
+    res.json({ success: sent > 0, sent, failed, ...(sent === 0 ? { reason: 'no_tokens' } : {}) });
+    return;
+  }
+
+  if (!to) {
+    res.status(400).json({ error: 'to is required' });
     return;
   }
 

@@ -29,6 +29,19 @@
     }
     .alert-banner.show { display: block; }
 
+    .notice-banner {
+      display: none; width: 100%; max-width: 420px; position: relative;
+      background: #eaf3ff; border: 2px solid #4f8edc;
+      border-radius: 14px; padding: 12px 34px 12px 16px; margin-bottom: 12px;
+      font-size: 14px; font-weight: 700; color: #1e4c7c;
+    }
+    .notice-banner.show { display: block; }
+    .notice-banner .notice-close {
+      position: absolute; top: 8px; right: 10px;
+      background: none; border: none; font-size: 15px; cursor: pointer; color: #7ba2cf;
+    }
+    .notice-banner .notice-meta { font-size: 11px; font-weight: 400; color: #5a7ca5; margin-top: 4px; }
+
     header {
       text-align: center; margin-bottom: 16px;
       position: relative; width: 100%; max-width: 420px;
@@ -247,6 +260,12 @@
 <body>
 
 <div class="alert-banner" id="alertBanner"></div>
+
+<div class="notice-banner" id="noticeBanner">
+  <button class="notice-close" onclick="dismissNotice()">✕</button>
+  <div id="noticeText"></div>
+  <div class="notice-meta" id="noticeMeta"></div>
+</div>
 
 <header>
   <button class="settings-btn" id="settingsBtn" onclick="openSettings()" title="설정">⚙️</button>
@@ -472,12 +491,29 @@
 </div>
 
 <div class="bottom-btn-group">
+  <button class="flat-btn" data-i18n="noticeWriteBtn" onclick="openNoticeModal()">📢 공지 보내기</button>
   <button class="flat-btn" data-i18n="qrShareBtn" onclick="toggleQR()">📱 QR코드로 공유하기</button>
   <div class="qr-box" id="qrBox">
     <p data-i18n="qrShareDesc">카메라로 찍으면 패밀리로그 앱이 열립니다</p>
     <div id="qrcode"></div>
   </div>
   <button class="flat-btn" data-i18n="resetBtn" onclick="resetDay()">🔄 오늘 기록 초기화</button>
+</div>
+
+<!-- 공지 작성 모달 -->
+<div class="modal-overlay center" id="noticeOverlay">
+  <div class="modal-panel rounded">
+    <div class="modal-title" data-i18n="noticeModalTitle">📢 공지사항</div>
+    <textarea id="noticeInput" maxlength="200" rows="4" data-i18n-placeholder="noticePlaceholder"
+      placeholder="가족에게 알릴 내용을 적어주세요 (예: 이번 주 토요일 대청소!)"
+      style="width:100%;box-sizing:border-box;font-size:15px;font-family:inherit;color:#3d2b1f;
+             border:1.5px solid #e8d5c0;border-radius:10px;padding:10px 12px;background:#fdf6ee;resize:none"></textarea>
+    <p style="font-size:12px;color:#a0856a;margin:8px 0 14px" data-i18n="noticeHint">
+      가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.
+    </p>
+    <button class="add-member-btn" id="noticeSendBtn" data-i18n="noticeSendBtn" style="width:100%;margin-bottom:10px" onclick="postNotice()">📢 보내기</button>
+    <button class="modal-close-btn" data-i18n="cancelBtn" style="margin-top:0" onclick="closeNoticeModal()">취소</button>
+  </div>
 </div>
 
 <!-- 가족 코드 온보딩 모달 -->
@@ -672,6 +708,7 @@ const ALL_TYPES = ['food', 'water', ...CHORE_CATEGORIES.map(c => c.id)];
 const NOTIF_CATEGORIES = [
   { id: 'danchu', icon: '🐾' },
   ...CHORE_CATEGORIES,
+  { id: 'notice', ko: '공지사항', en: 'Notices', icon: '📢' },
 ];
 function catLabel(cat) {
   if (cat.id === 'danchu') return t('petMealLabelTemplate', { name: getPetName() });
@@ -769,6 +806,14 @@ const I18N = {
   nudgeDefaultTaskTemplate: { ko: '"{name}에게 밥을 주세요"', en: '"Please feed {name}"' },
   nudgeNoTokens:      { ko: '알림을 받을 기기가 없어요.\n먼저 가족 모두 앱에서 알림을 켜주세요!', en: 'No devices to receive notifications.\nPlease have everyone turn on notifications in the app first!' },
   nudgePartialTemplate: { ko: '{names}님은 알림이 꺼져 있어서 전달하지 못했어요.\n나머지 가족에게는 전송됐어요!', en: 'Could not reach {names} (notifications are off).\nThe rest of the family received it!' },
+  noticeWriteBtn:   { ko: '📢 공지 보내기', en: '📢 Send Notice' },
+  noticeModalTitle: { ko: '📢 공지사항', en: '📢 Family Notice' },
+  noticePlaceholder: { ko: '가족에게 알릴 내용을 적어주세요 (예: 이번 주 토요일 대청소!)', en: 'Write a notice for your family (e.g. Big cleanup this Saturday!)' },
+  noticeHint:     { ko: '가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.', en: 'Shown at the top of the app for everyone, and delivered as a notification.' },
+  noticeSendBtn:  { ko: '📢 보내기', en: '📢 Send' },
+  noticeEmpty:    { ko: '내용을 입력해주세요.', en: 'Please write something.' },
+  noticeSent:     { ko: '공지를 보냈어요!', en: 'Notice sent!' },
+  cancelBtn:      { ko: '취소', en: 'Cancel' },
   nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
   nudgeSendBtn:       { ko: '📣 전송하기', en: '📣 Send' },
   nudgeSent:          { ko: '✅ 전송됨!', en: '✅ Sent!' },
@@ -1369,6 +1414,81 @@ async function sendNudgeMulti(cardKey) {
   }
 }
 
+// ── 공지사항 ────────────────────────────────────────────
+const NOTICE_DISMISS_KEY = 'danchu_notice_dismissed';
+let unsubscribeNotice = null;
+let currentNotice = null;
+
+function noticeTs(n) { return (n && n.ts && n.ts.toMillis) ? n.ts.toMillis() : 0; }
+
+function initNoticeListener() {
+  if (!db) return;
+  if (unsubscribeNotice) unsubscribeNotice();
+  unsubscribeNotice = db.doc(hPath('config/notice')).onSnapshot(snap => {
+    currentNotice = snap.exists ? snap.data() : null;
+    renderNoticeBanner();
+  }, () => {});
+}
+
+function renderNoticeBanner() {
+  const banner = document.getElementById('noticeBanner');
+  if (!banner) return;
+  const dismissedAt = Number(localStorage.getItem(NOTICE_DISMISS_KEY) || 0);
+  const ts = noticeTs(currentNotice);
+  if (!currentNotice || !currentNotice.text || ts <= dismissedAt) {
+    banner.classList.remove('show');
+    return;
+  }
+  document.getElementById('noticeText').textContent = '📢 ' + currentNotice.text;
+  const d = new Date(ts);
+  const meta = [currentNotice.author, `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`]
+    .filter(Boolean).join(' · ');
+  document.getElementById('noticeMeta').textContent = meta;
+  banner.classList.add('show');
+}
+
+function dismissNotice() {
+  localStorage.setItem(NOTICE_DISMISS_KEY, String(noticeTs(currentNotice) || Date.now()));
+  renderNoticeBanner();
+}
+
+function openNoticeModal() {
+  if (!getProfile()) { alert(t('needProfileAlert')); return; }
+  document.getElementById('noticeOverlay').classList.add('open');
+}
+function closeNoticeModal() {
+  document.getElementById('noticeOverlay').classList.remove('open');
+}
+
+async function postNotice() {
+  const input = document.getElementById('noticeInput');
+  const text = (input.value || '').trim();
+  if (!text) { alert(t('noticeEmpty')); return; }
+  const from = getProfile();
+  const btn = document.getElementById('noticeSendBtn');
+  if (btn) { btn.disabled = true; btn.textContent = t('nudgeSending'); }
+  try {
+    if (db) {
+      await db.doc(hPath('config/notice')).set({
+        text, author: from,
+        ts: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+    // 배너 저장과 별개로 푸시 알림도 발송 (실패해도 배너는 유지되므로 무시)
+    try { await sendNudgeApi({ household: getHousehold(), from, notice: text }); } catch (e) {}
+    // 작성자 본인 기기에서는 방금 쓴 공지를 바로 닫힌 상태로 시작하지 않도록 dismiss 초기화
+    localStorage.removeItem(NOTICE_DISMISS_KEY);
+    input.value = '';
+    closeNoticeModal();
+    alert(t('noticeSent'));
+  } catch (e) {
+    console.error(e);
+    alert(t('nudgeError'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = t('noticeSendBtn'); }
+  }
+}
+
 // ── Web Push 알림 설정 ──────────────────────────────────
 async function toggleNotification(enabled) {
   const statusEl = document.getElementById('notifStatus');
@@ -1627,8 +1747,9 @@ function parseHousehold(id) {
 function applyHouseholdSwitch(householdId, isNew) {
   if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
   if (unsubscribeWeekHistory) { unsubscribeWeekHistory(); unsubscribeWeekHistory = null; }
+  if (unsubscribeNotice) { unsubscribeNotice(); unsubscribeNotice = null; currentNotice = null; }
   // 이전 가족의 로컬 캐시를 지워서 새 가족 데이터와 섞이지 않게 함
-  [STORAGE_KEY, MEMBERS_KEY, PROFILE_KEY, PET_NAME_KEY, PET_ENABLED_KEY].forEach(k => localStorage.removeItem(k));
+  [STORAGE_KEY, MEMBERS_KEY, PROFILE_KEY, PET_NAME_KEY, PET_ENABLED_KEY, NOTICE_DISMISS_KEY].forEach(k => localStorage.removeItem(k));
   setHousehold(householdId);
   document.getElementById('householdNameInput').value = '';
   document.getElementById('householdCodeInput').value = '';
@@ -1743,6 +1864,7 @@ async function loadHouseholdData() {
   updateProfileUI();
   initDataListener();
   initWeekHistory();
+  initNoticeListener();
 }
 </script>
 </body>
