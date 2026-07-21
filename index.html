@@ -827,6 +827,7 @@ const I18N = {
   noticeDeleteBtn:     { ko: '🗑 현재 공지 내리기', en: '🗑 Remove current notice' },
   noticeDeleteConfirm: { ko: '현재 공지를 모든 가족의 화면에서 내릴까요?', en: "Remove the current notice from everyone's screen?" },
   noticeDeleted:       { ko: '공지를 내렸어요.', en: 'Notice removed.' },
+  noticeEditedSuffix:  { ko: ' (수정)', en: ' (edited)' },
   noticeHistoryBtn:    { ko: '📜 지난 공지 기록', en: '📜 Notice history' },
   noticeHistoryTitle:  { ko: '📜 지난 공지 기록', en: '📜 Notice History' },
   noticeHistoryEmpty:  { ko: '아직 보낸 공지가 없어요.', en: 'No notices sent yet.' },
@@ -1470,12 +1471,20 @@ function dismissNotice() {
   renderNoticeBanner();
 }
 
+// 내용 끝에 붙은 "(수정)"/"(edited)" 표시를 떼어낸 원본 텍스트
+function stripEditMark(s) {
+  return String(s || '').replace(/\s*\((?:수정|edited)\)\s*$/i, '').trim();
+}
+
+let _noticeEditBase = null; // 수정 모드로 열렸을 때 원본(표시 제거) 텍스트, 새 공지면 null
+
 function openNoticeModal() {
   if (!getProfile()) { alert(t('needProfileAlert')); return; }
   // 기존 공지가 있으면 내용을 미리 채워 수정하기 쉽게, 삭제 버튼도 표시
   const hasNotice = !!(currentNotice && currentNotice.text);
   document.getElementById('noticeInput').value = hasNotice ? currentNotice.text : '';
   document.getElementById('noticeDeleteBtn').style.display = hasNotice ? 'block' : 'none';
+  _noticeEditBase = hasNotice ? stripEditMark(currentNotice.text) : null;
   document.getElementById('noticeOverlay').classList.add('open');
 }
 function closeNoticeModal() {
@@ -1536,8 +1545,13 @@ async function openNoticeHistory() {
 
 async function postNotice() {
   const input = document.getElementById('noticeInput');
-  const text = (input.value || '').trim();
-  if (!text) { alert(t('noticeEmpty')); return; }
+  const raw = (input.value || '').trim();
+  const base = stripEditMark(raw);
+  if (!base) { alert(t('noticeEmpty')); return; }
+  // 기존 공지를 열어(수정 모드) 내용이 바뀐 채로 보내면 끝에 "(수정)" 자동 표시.
+  // 새 공지이거나 내용을 안 바꾸고 재전송할 땐 입력 그대로 유지.
+  const isEdited = _noticeEditBase !== null && base !== _noticeEditBase;
+  const text = isEdited ? base + t('noticeEditedSuffix') : raw;
   const from = getProfile();
   const btn = document.getElementById('noticeSendBtn');
   if (btn) { btn.disabled = true; btn.textContent = t('nudgeSending'); }
@@ -1553,6 +1567,7 @@ async function postNotice() {
     // 작성자 본인 기기에서는 방금 쓴 공지를 바로 닫힌 상태로 시작하지 않도록 dismiss 초기화
     localStorage.removeItem(NOTICE_DISMISS_KEY);
     input.value = '';
+    _noticeEditBase = null;
     closeNoticeModal();
     alert(t('noticeSent'));
   } catch (e) {
