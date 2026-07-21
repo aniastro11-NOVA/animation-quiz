@@ -512,6 +512,7 @@
       가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.
     </p>
     <button class="add-member-btn" id="noticeSendBtn" data-i18n="noticeSendBtn" style="width:100%;margin-bottom:10px" onclick="postNotice()">📢 보내기</button>
+    <button class="flat-btn" id="noticeDeleteBtn" data-i18n="noticeDeleteBtn" style="width:100%;margin-bottom:10px;display:none;color:#c0392b;border-color:#e8c5c0" onclick="deleteNotice()">🗑 현재 공지 내리기</button>
     <button class="modal-close-btn" data-i18n="cancelBtn" style="margin-top:0" onclick="closeNoticeModal()">취소</button>
   </div>
 </div>
@@ -813,6 +814,9 @@ const I18N = {
   noticeSendBtn:  { ko: '📢 보내기', en: '📢 Send' },
   noticeEmpty:    { ko: '내용을 입력해주세요.', en: 'Please write something.' },
   noticeSent:     { ko: '공지를 보냈어요!', en: 'Notice sent!' },
+  noticeDeleteBtn:     { ko: '🗑 현재 공지 내리기', en: '🗑 Remove current notice' },
+  noticeDeleteConfirm: { ko: '현재 공지를 모든 가족의 화면에서 내릴까요?', en: "Remove the current notice from everyone's screen?" },
+  noticeDeleted:       { ko: '공지를 내렸어요.', en: 'Notice removed.' },
   cancelBtn:      { ko: '취소', en: 'Cancel' },
   nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
   nudgeSendBtn:       { ko: '📣 전송하기', en: '📣 Send' },
@@ -1454,10 +1458,28 @@ function dismissNotice() {
 
 function openNoticeModal() {
   if (!getProfile()) { alert(t('needProfileAlert')); return; }
+  // 기존 공지가 있으면 내용을 미리 채워 수정하기 쉽게, 삭제 버튼도 표시
+  const hasNotice = !!(currentNotice && currentNotice.text);
+  document.getElementById('noticeInput').value = hasNotice ? currentNotice.text : '';
+  document.getElementById('noticeDeleteBtn').style.display = hasNotice ? 'block' : 'none';
   document.getElementById('noticeOverlay').classList.add('open');
 }
 function closeNoticeModal() {
   document.getElementById('noticeOverlay').classList.remove('open');
+}
+
+async function deleteNotice() {
+  if (!confirm(t('noticeDeleteConfirm'))) return;
+  try {
+    if (db) await db.doc(hPath('config/notice')).delete();
+    currentNotice = null;
+    renderNoticeBanner();
+    closeNoticeModal();
+    alert(t('noticeDeleted'));
+  } catch (e) {
+    console.error(e);
+    alert(t('nudgeError'));
+  }
 }
 
 async function postNotice() {
