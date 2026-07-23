@@ -3,6 +3,9 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.novaanimation.familylog",
-        "sha256_cert_fingerprints": ["1D:6D:6A:75:0F:6F:BF:8B:BA:57:81:C4:30:18:E7:0D:5F:6D:F9:98:44:89:E5:68:E2:DD:A2:66:FB:EE:1B:AB"]
+        "sha256_cert_fingerprints": [
+          "1D:6D:6A:75:0F:6F:BF:8B:BA:57:81:C4:30:18:E7:0D:5F:6D:F9:98:44:89:E5:68:E2:DD:A2:66:FB:EE:1B:AB",
+          "1F:40:C8:7F:F5:BA:FE:3C:E9:64:DF:E8:E1:98:40:1A:01:1F:6A:1D:4A:6F:41:5C:4D:D2:1F:B4:42:A8:61:12"
+        ]
       }
     }]
