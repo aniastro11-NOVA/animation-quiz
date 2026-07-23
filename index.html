@@ -1119,7 +1119,7 @@ function render(data) {
   CHORE_CATEGORIES.forEach(cat => renderNudgeButtons(cat.id, members));
 }
 
-const REACTION_EMOJIS = ['👍', '👌', '❤️'];
+const REACTION_EMOJIS = ['✅', '👍', '👌', '❤️'];
 function getReactionMap(entry) {
   const r = entry && entry.reactions;
   if (!r) return {};
