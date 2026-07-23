@@ -51,9 +51,10 @@
     .notice-react-btn.mine { background: #dbeafe; border-color: #4f8edc; color: #1e4c7c; }
     .notice-react-btn:active { transform: scale(.93); }
     .notice-who-btn {
-      background: none; border: none; font-size: 11px; color: #4f8edc;
-      cursor: pointer; text-decoration: underline; padding: 3px 4px; font-weight: 700;
+      background: none; border: none; font-size: 15px; opacity: .55;
+      cursor: pointer; padding: 3px 4px; line-height: 1;
     }
+    .notice-who-btn:hover { opacity: 1; }
 
     header {
       text-align: center; margin-bottom: 16px;
@@ -544,8 +545,7 @@
 <!-- 공지 반응 명단 모달 -->
 <div class="modal-overlay center" id="noticeReactorsOverlay">
   <div class="modal-panel rounded">
-    <div class="modal-title" data-i18n="noticeReactorsTitle">누가 반응했나요?</div>
-    <div id="noticeReactorsList" style="max-height:52vh;overflow-y:auto;margin-bottom:14px"></div>
+    <div id="noticeReactorsList" style="max-height:52vh;overflow-y:auto;margin:6px 0 14px"></div>
     <button class="modal-close-btn" data-i18n="closeBtn" style="margin-top:0" onclick="document.getElementById('noticeReactorsOverlay').classList.remove('open')">닫기</button>
   </div>
 </div>
@@ -855,8 +855,6 @@ const I18N = {
   noticeHistoryBtn:    { ko: '📜 지난 공지 기록', en: '📜 Notice history' },
   noticeHistoryTitle:  { ko: '📜 지난 공지 기록', en: '📜 Notice History' },
   noticeHistoryEmpty:  { ko: '아직 보낸 공지가 없어요.', en: 'No notices sent yet.' },
-  noticeWhoBtn:        { ko: '👀 누가 반응했나요?', en: '👀 Who reacted?' },
-  noticeReactorsTitle: { ko: '누가 반응했나요?', en: 'Who reacted?' },
   noticeReactorsEmpty: { ko: '아직 반응이 없어요.', en: 'No reactions yet.' },
   closeBtn:            { ko: '닫기', en: 'Close' },
   cancelBtn:      { ko: '취소', en: 'Cancel' },
@@ -1509,7 +1507,7 @@ function renderNoticeReactions() {
     return `<button class="notice-react-btn${mine ? ' mine' : ''}" onclick="toggleNoticeReaction('${emoji}')">${emoji}${count ? ' ' + count : ''}</button>`;
   }).join('');
   const whoBtn = total > 0
-    ? `<button class="notice-who-btn" onclick="openNoticeReactors()">${t('noticeWhoBtn')}</button>` : '';
+    ? `<button class="notice-who-btn" onclick="openNoticeReactors()">👀</button>` : '';
   el.innerHTML = btns + whoBtn;
 }
 
