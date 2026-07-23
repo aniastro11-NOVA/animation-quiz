@@ -852,6 +852,7 @@ const I18N = {
   noticeHistoryTitle:  { ko: '📜 지난 공지 기록', en: '📜 Notice History' },
   noticeHistoryEmpty:  { ko: '아직 보낸 공지가 없어요.', en: 'No notices sent yet.' },
   noticeReactorsEmpty: { ko: '아직 반응이 없어요.', en: 'No reactions yet.' },
+  reactionCancelTitle: { ko: '내 반응 취소', en: 'Cancel my reaction' },
   closeBtn:            { ko: '닫기', en: 'Close' },
   cancelBtn:      { ko: '취소', en: 'Cancel' },
   nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
@@ -1540,28 +1541,51 @@ async function toggleNoticeReaction(emoji) {
 }
 
 function openNoticeReactors() {
-  openReactorsModal((currentNotice && currentNotice.reactions) || {});
+  const map = (currentNotice && currentNotice.reactions) || {};
+  const profile = getProfile();
+  const myEmoji = profile ? map[profile] : null;
+  openReactorsModal(map, { myEmoji, onCancel: myEmoji ? () => toggleNoticeReaction(myEmoji) : null });
 }
 
 // 이모지별로 반응한 사람을 묶어 명단 모달에 표시 (공지·기록 공용)
-function openReactorsModal(map) {
+// 내가 누른 이모지 줄에는 ✕를 붙여, 누르면 내 반응 취소
+let _reactorsCancelFn = null;
+function openReactorsModal(map, opts) {
+  opts = opts || {};
+  _reactorsCancelFn = opts.onCancel || null;
+  const myEmoji = opts.myEmoji || null;
   const listEl = document.getElementById('noticeReactorsList');
   const rows = REACTION_EMOJIS.map(emoji => {
     const names = Object.keys(map).filter(n => map[n] === emoji);
     if (names.length === 0) return '';
-    return `<div style="display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid #f0e4d4">
+    const cancelX = (emoji === myEmoji)
+      ? `<button onclick="cancelMyReaction()" title="${t('reactionCancelTitle')}"
+           style="background:none;border:none;color:#c9a07a;font-size:15px;cursor:pointer;padding:0 2px;line-height:1">✕</button>`
+      : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #f0e4d4">
       <span style="font-size:18px">${emoji}</span>
       <span style="font-size:14px;color:#3d2b1f;font-weight:700;flex:1">${escapeHtml(names.join(', '))}</span>
       <span style="font-size:13px;color:#a0856a">${names.length}</span>
+      ${cancelX}
     </div>`;
   }).join('');
   listEl.innerHTML = rows || `<div class="empty-msg">${t('noticeReactorsEmpty')}</div>`;
   document.getElementById('noticeReactorsOverlay').classList.add('open');
 }
 
+function cancelMyReaction() {
+  const fn = _reactorsCancelFn;
+  _reactorsCancelFn = null;
+  document.getElementById('noticeReactorsOverlay').classList.remove('open');
+  if (fn) fn();
+}
+
 function showRecordReactors(type, index) {
   const entry = (cachedData || loadLocalData())[type]?.[index];
-  openReactorsModal(getReactionMap(entry || {}));
+  const map = getReactionMap(entry || {});
+  const profile = getProfile();
+  const myEmoji = profile ? map[profile] : null;
+  openReactorsModal(map, { myEmoji, onCancel: myEmoji ? () => toggleReaction(type, index, myEmoji) : null });
 }
 
 function dismissNotice() {
