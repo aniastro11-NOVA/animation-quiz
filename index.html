@@ -41,6 +41,19 @@
       background: none; border: none; font-size: 15px; cursor: pointer; color: #7ba2cf;
     }
     .notice-banner .notice-meta { font-size: 11px; font-weight: 400; color: #5a7ca5; margin-top: 4px; }
+    .notice-reactions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+    .notice-react-btn {
+      display: flex; align-items: center; gap: 3px; white-space: nowrap;
+      background: #fff; border: 1.5px solid #c9ddf5; border-radius: 999px;
+      padding: 3px 9px; font-size: 13px; cursor: pointer; color: #5a7ca5; font-weight: 700;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .notice-react-btn.mine { background: #dbeafe; border-color: #4f8edc; color: #1e4c7c; }
+    .notice-react-btn:active { transform: scale(.93); }
+    .notice-who-btn {
+      background: none; border: none; font-size: 11px; color: #4f8edc;
+      cursor: pointer; text-decoration: underline; padding: 3px 4px; font-weight: 700;
+    }
 
     header {
       text-align: center; margin-bottom: 16px;
@@ -265,6 +278,7 @@
   <button class="notice-close" onclick="dismissNotice()">✕</button>
   <div id="noticeText"></div>
   <div class="notice-meta" id="noticeMeta"></div>
+  <div class="notice-reactions" id="noticeReactions"></div>
 </div>
 
 <header>
@@ -524,6 +538,15 @@
     <div class="modal-title" data-i18n="noticeHistoryTitle">📜 지난 공지 기록</div>
     <div id="noticeHistoryList" style="max-height:52vh;overflow-y:auto;margin-bottom:14px"></div>
     <button class="modal-close-btn" data-i18n="closeBtn" style="margin-top:0" onclick="document.getElementById('noticeHistoryOverlay').classList.remove('open')">닫기</button>
+  </div>
+</div>
+
+<!-- 공지 반응 명단 모달 -->
+<div class="modal-overlay center" id="noticeReactorsOverlay">
+  <div class="modal-panel rounded">
+    <div class="modal-title" data-i18n="noticeReactorsTitle">누가 반응했나요?</div>
+    <div id="noticeReactorsList" style="max-height:52vh;overflow-y:auto;margin-bottom:14px"></div>
+    <button class="modal-close-btn" data-i18n="closeBtn" style="margin-top:0" onclick="document.getElementById('noticeReactorsOverlay').classList.remove('open')">닫기</button>
   </div>
 </div>
 
@@ -832,6 +855,9 @@ const I18N = {
   noticeHistoryBtn:    { ko: '📜 지난 공지 기록', en: '📜 Notice history' },
   noticeHistoryTitle:  { ko: '📜 지난 공지 기록', en: '📜 Notice History' },
   noticeHistoryEmpty:  { ko: '아직 보낸 공지가 없어요.', en: 'No notices sent yet.' },
+  noticeWhoBtn:        { ko: '👀 누가 반응했나요?', en: '👀 Who reacted?' },
+  noticeReactorsTitle: { ko: '누가 반응했나요?', en: 'Who reacted?' },
+  noticeReactorsEmpty: { ko: '아직 반응이 없어요.', en: 'No reactions yet.' },
   closeBtn:            { ko: '닫기', en: 'Close' },
   cancelBtn:      { ko: '취소', en: 'Cancel' },
   nudgeSending:       { ko: '전송 중...', en: 'Sending...' },
@@ -1464,7 +1490,56 @@ function renderNoticeBanner() {
   const meta = [currentNotice.author, `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`]
     .filter(Boolean).join(' · ');
   document.getElementById('noticeMeta').textContent = meta;
+  renderNoticeReactions();
   banner.classList.add('show');
+}
+
+// 공지 반응 종류: 확인(✅) · 좋아요(👍) · 확인(👌) · 하트(❤️)
+const NOTICE_REACTION_EMOJIS = ['✅', '👍', '👌', '❤️'];
+
+function renderNoticeReactions() {
+  const el = document.getElementById('noticeReactions');
+  if (!el) return;
+  const map = (currentNotice && currentNotice.reactions) || {};
+  const profile = getProfile();
+  const total = Object.keys(map).length;
+  const btns = NOTICE_REACTION_EMOJIS.map(emoji => {
+    const count = Object.values(map).filter(e => e === emoji).length;
+    const mine = profile && map[profile] === emoji;
+    return `<button class="notice-react-btn${mine ? ' mine' : ''}" onclick="toggleNoticeReaction('${emoji}')">${emoji}${count ? ' ' + count : ''}</button>`;
+  }).join('');
+  const whoBtn = total > 0
+    ? `<button class="notice-who-btn" onclick="openNoticeReactors()">${t('noticeWhoBtn')}</button>` : '';
+  el.innerHTML = btns + whoBtn;
+}
+
+async function toggleNoticeReaction(emoji) {
+  const profile = getProfile();
+  if (!profile) { alert(t('needProfileAlert')); return; }
+  if (!currentNotice) return;
+  const map = { ...(currentNotice.reactions || {}) };
+  if (map[profile] === emoji) delete map[profile];
+  else map[profile] = emoji;
+  currentNotice.reactions = map; // 즉시 반영 (스냅샷으로도 곧 갱신됨)
+  renderNoticeReactions();
+  if (db) db.doc(hPath('config/notice')).set({ reactions: map }, { merge: true }).catch(() => {});
+}
+
+function openNoticeReactors() {
+  const map = (currentNotice && currentNotice.reactions) || {};
+  const listEl = document.getElementById('noticeReactorsList');
+  // 이모지별로 반응한 사람 묶어서 표시
+  const rows = NOTICE_REACTION_EMOJIS.map(emoji => {
+    const names = Object.keys(map).filter(n => map[n] === emoji);
+    if (names.length === 0) return '';
+    return `<div style="display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid #f0e4d4">
+      <span style="font-size:18px">${emoji}</span>
+      <span style="font-size:14px;color:#3d2b1f;font-weight:700;flex:1">${escapeHtml(names.join(', '))}</span>
+      <span style="font-size:13px;color:#a0856a">${names.length}</span>
+    </div>`;
+  }).join('');
+  listEl.innerHTML = rows || `<div class="empty-msg">${t('noticeReactorsEmpty')}</div>`;
+  document.getElementById('noticeReactorsOverlay').classList.add('open');
 }
 
 function dismissNotice() {
