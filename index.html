@@ -523,9 +523,9 @@
     <p style="font-size:12px;color:#a0856a;margin:8px 0 14px" data-i18n="noticeHint">
       가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.
     </p>
-    <button class="add-member-btn" id="noticeSendBtn" data-i18n="noticeSendBtn" style="width:100%;margin-bottom:10px" onclick="postNotice()">📢 보내기</button>
-    <button class="flat-btn" id="noticeDeleteBtn" data-i18n="noticeDeleteBtn" style="width:100%;margin-bottom:10px;display:none;color:#c0392b;border-color:#e8c5c0" onclick="deleteNotice()">🗑 현재 공지 내리기</button>
-    <button class="flat-btn" data-i18n="noticeHistoryBtn" style="width:100%;margin-bottom:10px" onclick="openNoticeHistory()">📜 지난 공지 기록</button>
+    <button class="add-member-btn" id="noticeSendBtn" data-i18n="noticeSendBtn" style="width:100%;margin-bottom:10px" onclick="postNotice()">📢 공지 작성/수정</button>
+    <button class="flat-btn" id="noticeDeleteBtn" data-i18n="noticeDeleteBtn" style="width:100%;margin-bottom:10px;display:none;color:#c0392b;border-color:#e8c5c0" onclick="deleteNotice()">🗑 공지 내리기</button>
+    <button class="flat-btn" data-i18n="noticeHistoryBtn" style="width:100%;margin-bottom:10px" onclick="openNoticeHistory()">📜 공지 기록</button>
     <button class="modal-close-btn" data-i18n="cancelBtn" style="margin-top:0" onclick="closeNoticeModal()">취소</button>
   </div>
 </div>
@@ -840,15 +840,15 @@ const I18N = {
   noticeModalTitle: { ko: '📢 공지사항', en: '📢 Family Notice' },
   noticePlaceholder: { ko: '가족에게 알릴 내용을 적어주세요 (예: 이번 주 토요일 대청소!)', en: 'Write a notice for your family (e.g. Big cleanup this Saturday!)' },
   noticeHint:     { ko: '가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.', en: 'Shown at the top of the app for everyone, and delivered as a notification.' },
-  noticeSendBtn:  { ko: '📢 보내기', en: '📢 Send' },
+  noticeSendBtn:  { ko: '📢 공지 작성/수정', en: '📢 Post / Edit' },
   noticeEmpty:    { ko: '내용을 입력해주세요.', en: 'Please write something.' },
   noticeSent:     { ko: '공지를 보냈어요!', en: 'Notice sent!' },
-  noticeDeleteBtn:     { ko: '🗑 현재 공지 내리기', en: '🗑 Remove current notice' },
+  noticeDeleteBtn:     { ko: '🗑 공지 내리기', en: '🗑 Remove notice' },
   noticeDeleteConfirm: { ko: '현재 공지를 모든 가족의 화면에서 내릴까요?', en: "Remove the current notice from everyone's screen?" },
   noticeDeleted:       { ko: '공지를 내렸어요.', en: 'Notice removed.' },
   noticeEditedSuffix:  { ko: ' (수정)', en: ' (edited)' },
   noticeDismissConfirm: { ko: '이 공지를 삭제하시겠습니까?', en: 'Remove this notice?' },
-  noticeHistoryBtn:    { ko: '📜 지난 공지 기록', en: '📜 Notice history' },
+  noticeHistoryBtn:    { ko: '📜 공지 기록', en: '📜 Notice history' },
   noticeHistoryTitle:  { ko: '📜 지난 공지 기록', en: '📜 Notice History' },
   noticeHistoryEmpty:  { ko: '아직 보낸 공지가 없어요.', en: 'No notices sent yet.' },
   noticeReactorsEmpty: { ko: '아직 반응이 없어요.', en: 'No reactions yet.' },
