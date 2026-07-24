@@ -107,7 +107,7 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     return;
   }
 
-  const { from, to, task, category, household, notice } = req.body || {};
+  const { from, to, task, category, household, notice, ackTo, ackFrom } = req.body || {};
   if (!household) {
     res.status(400).json({ error: 'household is required' });
     return;
@@ -120,6 +120,24 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     await db.collection(`households/${household}/notifications`)
       .add({ ...entry, ts: admin.firestore.FieldValue.serverTimestamp() })
       .catch(() => {});
+  }
+
+  // 확인(ack) 처리 — 알림창 "확인" 버튼 → 보낸 사람에게 "확인했어요" 알림
+  if (ackTo && ackFrom) {
+    const body = `${ackFrom}님이 확인했어요 👌`;
+    await logNotification({ type: 'ack', to: ackTo, from: ackFrom, body });
+    const subDocs = await getSubscriptionDocs(db, household, ackTo, undefined);
+    if (subDocs.length > 0) {
+      await sendToAll(db, household, subDocs, {
+        title: '✅ 확인',
+        body,
+        icon:  'https://danchu-feeding.web.app/icon-192.png',
+        badge: 'https://danchu-feeding.web.app/notification-badge.png',
+        url:   'https://danchu-feeding.web.app/',
+      });
+    }
+    res.json({ success: true });
+    return;
   }
 
   // 공지 브로드캐스트 — 가족 전체(알림 켠 기기)에게 전송
@@ -169,6 +187,8 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     icon:  'https://danchu-feeding.web.app/icon-192.png',
     badge: 'https://danchu-feeding.web.app/notification-badge.png',
     url:   'https://danchu-feeding.web.app/',
+    // 알림창 "확인" 버튼용 — 받은 사람(to)이 누르면 보낸 사람(from)에게 알림
+    ...(from ? { ack: { household, ackTo: from, ackFrom: to } } : {}),
   });
 
   if (sent === 0) {
