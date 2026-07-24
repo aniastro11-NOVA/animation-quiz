@@ -530,6 +530,17 @@
   </div>
 </div>
 
+<!-- 공지 작성/수정 선택 모달 -->
+<div class="modal-overlay center" id="noticeIntentOverlay">
+  <div class="modal-panel rounded">
+    <div class="modal-title" data-i18n="noticeIntentTitle">📢 공지 작성/수정</div>
+    <p style="font-size:13px;color:#7a5c3e;margin:0 0 16px" data-i18n="noticeIntentDesc">현재 올라온 공지가 있어요. 어떻게 할까요?</p>
+    <button class="add-member-btn" data-i18n="noticeIntentNew" style="width:100%;margin-bottom:10px" onclick="chooseNoticeIntent('new')">📢 새 공지 작성</button>
+    <button class="flat-btn" data-i18n="noticeIntentEdit" style="width:100%;margin-bottom:10px" onclick="chooseNoticeIntent('edit')">✏️ 공지 수정</button>
+    <button class="modal-close-btn" data-i18n="cancelBtn" style="margin-top:0" onclick="closeNoticeIntent()">취소</button>
+  </div>
+</div>
+
 <!-- 공지 기록 모달 -->
 <div class="modal-overlay center" id="noticeHistoryOverlay">
   <div class="modal-panel rounded">
@@ -841,6 +852,10 @@ const I18N = {
   noticePlaceholder: { ko: '가족에게 알릴 내용을 적어주세요 (예: 이번 주 토요일 대청소!)', en: 'Write a notice for your family (e.g. Big cleanup this Saturday!)' },
   noticeHint:     { ko: '가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.', en: 'Shown at the top of the app for everyone, and delivered as a notification.' },
   noticeSendBtn:  { ko: '📢 공지 작성/수정', en: '📢 Post / Edit' },
+  noticeIntentTitle: { ko: '📢 공지 작성/수정', en: '📢 Post / Edit' },
+  noticeIntentDesc:  { ko: '현재 올라온 공지가 있어요. 어떻게 할까요?', en: 'There is a current notice. What would you like to do?' },
+  noticeIntentNew:   { ko: '📢 새 공지 작성', en: '📢 Write a new notice' },
+  noticeIntentEdit:  { ko: '✏️ 공지 수정', en: '✏️ Edit current notice' },
   noticeEmpty:    { ko: '내용을 입력해주세요.', en: 'Please write something.' },
   noticeSent:     { ko: '공지를 보냈어요!', en: 'Notice sent!' },
   noticeDeleteBtn:     { ko: '🗑 공지 내리기', en: '🗑 Remove notice' },
@@ -1601,6 +1616,7 @@ function stripEditMark(s) {
 }
 
 let _noticeEditBase = null; // 수정 모드로 열렸을 때 원본(표시 제거) 텍스트, 새 공지면 null
+let _noticeIntent = null;   // 'new'(새 공지) | 'edit'(수정) | null(미선택)
 
 function openNoticeModal() {
   if (!getProfile()) { alert(t('needProfileAlert')); return; }
@@ -1609,10 +1625,31 @@ function openNoticeModal() {
   document.getElementById('noticeInput').value = hasNotice ? currentNotice.text : '';
   document.getElementById('noticeDeleteBtn').style.display = hasNotice ? 'block' : 'none';
   _noticeEditBase = hasNotice ? stripEditMark(currentNotice.text) : null;
+  _noticeIntent = null;
   document.getElementById('noticeOverlay').classList.add('open');
 }
 function closeNoticeModal() {
   document.getElementById('noticeOverlay').classList.remove('open');
+  _noticeIntent = null;
+}
+
+// 공지 작성/수정 눌렀을 때: 기존 공지가 있으면 새로 쓸지 고칠지 선택
+function openNoticeIntentDialog() {
+  document.getElementById('noticeIntentOverlay').classList.add('open');
+}
+function closeNoticeIntent() {
+  document.getElementById('noticeIntentOverlay').classList.remove('open');
+}
+function chooseNoticeIntent(intent) {
+  _noticeIntent = intent;
+  closeNoticeIntent();
+  if (intent === 'new') {
+    // 새 공지: 입력창 비우고 새로 작성 (기존 공지는 게시하면 대체됨)
+    const input = document.getElementById('noticeInput');
+    input.value = '';
+    input.focus();
+  }
+  // 'edit'이면 기존 내용 그대로 두고 편집
 }
 
 async function deleteNotice() {
@@ -1669,12 +1706,16 @@ async function openNoticeHistory() {
 
 async function postNotice() {
   const input = document.getElementById('noticeInput');
+  // 기존 공지가 있는데 아직 새 공지/수정 선택 안 했으면 선택창 먼저
+  const hasExisting = !!(currentNotice && currentNotice.text);
+  if (hasExisting && _noticeIntent === null) { openNoticeIntentDialog(); return; }
+
   const raw = (input.value || '').trim();
   const base = stripEditMark(raw);
   if (!base) { alert(t('noticeEmpty')); return; }
-  // 기존 공지를 열어(수정 모드) 내용이 바뀐 채로 보내면 끝에 "(수정)" 자동 표시.
-  // 새 공지이거나 내용을 안 바꾸고 재전송할 땐 입력 그대로 유지.
-  const isEdited = _noticeEditBase !== null && base !== _noticeEditBase;
+  // '수정' 선택 + 내용이 바뀐 경우에만 끝에 "(수정)" 자동 표시.
+  // '새 공지'거나 내용 그대로면 입력 그대로 게시(기존 공지는 대체됨).
+  const isEdited = _noticeIntent === 'edit' && _noticeEditBase !== null && base !== _noticeEditBase;
   const text = isEdited ? base + t('noticeEditedSuffix') : raw;
   const from = getProfile();
   const btn = document.getElementById('noticeSendBtn');
@@ -1692,6 +1733,7 @@ async function postNotice() {
     localStorage.removeItem(NOTICE_DISMISS_KEY);
     input.value = '';
     _noticeEditBase = null;
+    _noticeIntent = null;
     closeNoticeModal();
     alert(t('noticeSent'));
   } catch (e) {
