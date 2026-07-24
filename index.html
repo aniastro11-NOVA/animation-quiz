@@ -1936,8 +1936,8 @@ async function testLocalNotif() {
     const reg = await navigator.serviceWorker.ready;
     await reg.showNotification(t('notifTestTitle'), {
       body: t('notifTestBody'),
-      icon: '/animation-quiz/icon-192.png',
-      badge: '/animation-quiz/icon-192.png',
+      icon: '/icon-192.png',
+      badge: '/notification-badge.png',
     });
     statusEl.textContent = t('notifTestSent');
   } catch(e) {

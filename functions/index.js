@@ -91,7 +91,7 @@ exports.checkFeedingAlert = onSchedule(
         title: `🐾 ${petName} 밥 알림`,
         body,
         icon:  'https://danchu-feeding.web.app/icon-192.png',
-        badge: 'https://danchu-feeding.web.app/icon-192.png',
+        badge: 'https://danchu-feeding.web.app/notification-badge.png',
         url:   'https://danchu-feeding.web.app/',
       });
     }));
@@ -136,7 +136,7 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
       title: '📢 가족 공지',
       body,
       icon:  'https://danchu-feeding.web.app/icon-192.png',
-      badge: 'https://danchu-feeding.web.app/icon-192.png',
+      badge: 'https://danchu-feeding.web.app/notification-badge.png',
       url:   'https://danchu-feeding.web.app/',
     });
     res.json({ success: sent > 0, sent, failed, ...(sent === 0 ? { reason: 'no_tokens' } : {}) });
@@ -167,7 +167,7 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     title: notifTitle,
     body:  notifBody,
     icon:  'https://danchu-feeding.web.app/icon-192.png',
-    badge: 'https://danchu-feeding.web.app/icon-192.png',
+    badge: 'https://danchu-feeding.web.app/notification-badge.png',
     url:   'https://danchu-feeding.web.app/',
   });
 

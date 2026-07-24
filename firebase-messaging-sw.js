@@ -19,25 +19,25 @@ self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data.json(); } catch(e) {}
   event.waitUntil(
-    self.registration.showNotification(data.title || '🐾 단추 알림', {
-      body:              data.body  || '단추 배식을 확인해 주세요!',
-      icon:              data.icon  || '/animation-quiz/icon-192.png',
-      badge:             data.badge || '/animation-quiz/icon-192.png',
+    self.registration.showNotification(data.title || '🐾 패밀리로그 알림', {
+      body:              data.body  || '알림을 확인해 주세요!',
+      icon:              data.icon  || '/icon-192.png',
+      badge:             data.badge || '/notification-badge.png',
       requireInteraction: true,
       vibrate:           [200, 100, 200],
-      data:              { url: data.url || 'https://aniastro11-nova.github.io/animation-quiz/' },
+      data:              { url: data.url || 'https://danchu-feeding.web.app/' },
     })
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || 'https://aniastro11-nova.github.io/animation-quiz/';
+  const url = event.notification.data?.url || 'https://danchu-feeding.web.app/';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
       // 앱이 이미 열려있으면 포커스만 (navigate X → 리셋 방지)
       for (const client of clientList) {
-        if (client.url.startsWith('https://aniastro11-nova.github.io/animation-quiz') && 'focus' in client) {
+        if (client.url.startsWith('https://danchu-feeding.web.app') && 'focus' in client) {
           return client.focus();
         }
       }
