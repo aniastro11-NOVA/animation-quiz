@@ -77,13 +77,19 @@ exports.checkFeedingAlert = onSchedule(
       const hoursSince = (Date.now() - lastFoodMs) / 3600000;
       if (hoursSince < 8) return;
 
+      const h = Math.floor(hoursSince);
+      const body = `${petName}가 ${h}시간째 밥을 못 먹었어요!`;
+      // 앱 내 알림 목록에 기록
+      await db.collection(`households/${household}/notifications`)
+        .add({ type: 'feeding', to: 'all', from: '', body, ts: admin.firestore.FieldValue.serverTimestamp() })
+        .catch(() => {});
+
       const subDocs = await getSubscriptionDocs(db, household, undefined, 'danchu');
       if (subDocs.length === 0) return;
 
-      const h = Math.floor(hoursSince);
       await sendToAll(db, household, subDocs, {
         title: `🐾 ${petName} 밥 알림`,
-        body:  `${petName}가 ${h}시간째 밥을 못 먹었어요!`,
+        body,
         icon:  'https://danchu-feeding.web.app/icon-192.png',
         badge: 'https://danchu-feeding.web.app/icon-192.png',
         url:   'https://danchu-feeding.web.app/',
@@ -107,18 +113,28 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     return;
   }
 
+  const db = admin.firestore();
+
+  // 앱 내 알림 목록용 기록 저장 (푸시 성공 여부와 무관하게 남김)
+  async function logNotification(entry) {
+    await db.collection(`households/${household}/notifications`)
+      .add({ ...entry, ts: admin.firestore.FieldValue.serverTimestamp() })
+      .catch(() => {});
+  }
+
   // 공지 브로드캐스트 — 가족 전체(알림 켠 기기)에게 전송
   if (notice) {
-    const db = admin.firestore();
+    const text = String(notice).slice(0, 200);
+    const body = from ? `${from}: ${text}` : text;
+    await logNotification({ type: 'notice', to: 'all', from: from || '', body });
     const subDocs = await getSubscriptionDocs(db, household, undefined, 'notice');
     if (subDocs.length === 0) {
       res.json({ success: false, reason: 'no_tokens' });
       return;
     }
-    const text = String(notice).slice(0, 200);
     const { sent, failed } = await sendToAll(db, household, subDocs, {
       title: '📢 가족 공지',
-      body:  from ? `${from}: ${text}` : text,
+      body,
       icon:  'https://danchu-feeding.web.app/icon-192.png',
       badge: 'https://danchu-feeding.web.app/icon-192.png',
       url:   'https://danchu-feeding.web.app/',
@@ -132,19 +148,20 @@ exports.nudgeAll = onRequest({ cors: true }, async (req, res) => {
     return;
   }
 
-  const db = admin.firestore();
-  const subDocs = await getSubscriptionDocs(db, household, to, category);
-
-  if (subDocs.length === 0) {
-    res.json({ success: false, reason: 'no_tokens' });
-    return;
-  }
-
   const fromStr = from ? `${from}가 ` : '';
   const notifTitle = task ? `🏠 ${task} 부탁` : '🐾 밥을 주세요!';
   const notifBody  = task
     ? `${fromStr}${to}에게 ${task} 부탁했어요`
     : `${fromStr}${to}에게 부탁했어요`;
+
+  // 대상자(to)의 앱 내 알림 목록에 기록 (알림이 꺼져 있어도 앱에서 확인 가능)
+  await logNotification({ type: 'nudge', to, from: from || '', body: notifBody });
+
+  const subDocs = await getSubscriptionDocs(db, household, to, category);
+  if (subDocs.length === 0) {
+    res.json({ success: false, reason: 'no_tokens' });
+    return;
+  }
 
   const { sent, failed } = await sendToAll(db, household, subDocs, {
     title: notifTitle,

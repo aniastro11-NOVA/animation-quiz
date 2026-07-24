@@ -59,6 +59,14 @@
       position: absolute; top: 0; right: 0;
       background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; line-height: 1;
     }
+    .bell-btn {
+      position: absolute; top: 0; left: 0;
+      background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; line-height: 1;
+    }
+    .bell-dot {
+      display: none; position: absolute; top: 2px; right: 2px;
+      width: 9px; height: 9px; border-radius: 50%; background: #e05c5c; border: 1.5px solid #fdf6ee;
+    }
     .dog-emoji { font-size: 56px; line-height: 1; margin-bottom: 6px; }
     header h1 { font-size: 24px; font-weight: 800; color: #3d2b1f; }
     header p  { font-size: 13px; color: #a0856a; margin-top: 4px; }
@@ -280,6 +288,9 @@
 </div>
 
 <header>
+  <button class="bell-btn" id="bellBtn" onclick="openNotifList()" title="알림" style="position:absolute;top:0;left:0">
+    🔔<span class="bell-dot" id="bellDot"></span>
+  </button>
   <button class="settings-btn" id="settingsBtn" onclick="openSettings()" title="설정">⚙️</button>
   <div class="dog-emoji">🏠</div>
   <h1 id="appTitleH1">패밀리로그</h1>
@@ -527,6 +538,15 @@
     <button class="flat-btn" id="noticeDeleteBtn" data-i18n="noticeDeleteBtn" style="width:100%;margin-bottom:10px;display:none;color:#c0392b;border-color:#e8c5c0" onclick="deleteNotice()">🗑 공지 내리기</button>
     <button class="flat-btn" data-i18n="noticeHistoryBtn" style="width:100%;margin-bottom:10px" onclick="openNoticeHistory()">📜 공지 기록</button>
     <button class="modal-close-btn" data-i18n="cancelBtn" style="margin-top:0" onclick="closeNoticeModal()">취소</button>
+  </div>
+</div>
+
+<!-- 알림 목록 모달 -->
+<div class="modal-overlay center" id="notifListOverlay">
+  <div class="modal-panel rounded">
+    <div class="modal-title" data-i18n="notifListTitle">🔔 알림</div>
+    <div id="notifList" style="max-height:56vh;overflow-y:auto;margin-bottom:14px"></div>
+    <button class="modal-close-btn" data-i18n="closeBtn" style="margin-top:0" onclick="document.getElementById('notifListOverlay').classList.remove('open')">닫기</button>
   </div>
 </div>
 
@@ -852,6 +872,8 @@ const I18N = {
   noticePlaceholder: { ko: '가족에게 알릴 내용을 적어주세요 (예: 이번 주 토요일 대청소!)', en: 'Write a notice for your family (e.g. Big cleanup this Saturday!)' },
   noticeHint:     { ko: '가족 모두의 앱 상단에 표시되고, 알림으로도 전달돼요.', en: 'Shown at the top of the app for everyone, and delivered as a notification.' },
   noticeSendBtn:  { ko: '📢 공지 작성/수정', en: '📢 Post / Edit' },
+  notifListTitle: { ko: '🔔 알림', en: '🔔 Notifications' },
+  notifListEmpty: { ko: '받은 알림이 없어요.', en: 'No notifications yet.' },
   noticeIntentTitle: { ko: '📢 공지 작성/수정', en: '📢 Post / Edit' },
   noticeIntentDesc:  { ko: '현재 올라온 공지가 있어요. 어떻게 할까요?', en: 'There is a current notice. What would you like to do?' },
   noticeIntentNew:   { ko: '📢 새 공지 작성', en: '📢 Write a new notice' },
@@ -1472,6 +1494,65 @@ async function sendNudgeMulti(cardKey) {
   }
 }
 
+// ── 받은 알림 목록 ──────────────────────────────────────
+const NOTIF_READ_KEY = 'danchu_notif_read';
+let _notifications = [];
+let unsubscribeNotifs = null;
+
+function tsMs(ts) { return (ts && ts.toMillis) ? ts.toMillis() : 0; }
+function myNotifications() {
+  const me = getProfile();
+  return _notifications.filter(n => n.to === 'all' || n.to === me);
+}
+
+function initNotifListener() {
+  if (!db) return;
+  if (unsubscribeNotifs) unsubscribeNotifs();
+  unsubscribeNotifs = db.collection(hPath('notifications')).orderBy('ts', 'desc').limit(50)
+    .onSnapshot(snap => {
+      _notifications = snap.docs.map(d => d.data());
+      updateBellBadge();
+    }, () => {});
+}
+
+function updateBellBadge() {
+  const dot = document.getElementById('bellDot');
+  if (!dot) return;
+  const lastRead = Number(localStorage.getItem(NOTIF_READ_KEY) || 0);
+  const hasUnread = myNotifications().some(n => tsMs(n.ts) > lastRead);
+  dot.style.display = hasUnread ? 'block' : 'none';
+}
+
+const NOTIF_ICON = { nudge: '📣', notice: '📢', feeding: '🐾' };
+function openNotifList() {
+  const listEl = document.getElementById('notifList');
+  const mine = myNotifications();
+  if (mine.length === 0) {
+    listEl.innerHTML = `<div class="empty-msg">${t('notifListEmpty')}</div>`;
+  } else {
+    const lastRead = Number(localStorage.getItem(NOTIF_READ_KEY) || 0);
+    listEl.innerHTML = mine.map(n => {
+      const ms = tsMs(n.ts);
+      const when = ms ? fmtNoticeTime(ms) : '';
+      const unread = ms > lastRead;
+      const icon = NOTIF_ICON[n.type] || '🔔';
+      return `<div style="display:flex;gap:10px;padding:10px 4px;border-bottom:1px solid #f0e4d4;${unread ? 'background:#fff7ef' : ''}">
+        <span style="font-size:18px">${icon}</span>
+        <div style="flex:1">
+          <div style="font-size:14px;color:#3d2b1f;font-weight:700;white-space:pre-wrap;word-break:break-word">${escapeHtml(n.body || '')}</div>
+          <div style="font-size:11px;color:#a0856a;margin-top:4px">${escapeHtml(when)}</div>
+        </div>
+        ${unread ? '<span style="width:8px;height:8px;border-radius:50%;background:#e05c5c;flex-shrink:0;margin-top:6px"></span>' : ''}
+      </div>`;
+    }).join('');
+  }
+  // 모두 읽음 처리
+  const latest = mine.length ? tsMs(mine[0].ts) : Date.now();
+  localStorage.setItem(NOTIF_READ_KEY, String(Math.max(latest, Date.now())));
+  updateBellBadge();
+  document.getElementById('notifListOverlay').classList.add('open');
+}
+
 // ── 공지사항 ────────────────────────────────────────────
 const NOTICE_DISMISS_KEY = 'danchu_notice_dismissed';
 let unsubscribeNotice = null;
@@ -2003,8 +2084,9 @@ function applyHouseholdSwitch(householdId, isNew) {
   if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
   if (unsubscribeWeekHistory) { unsubscribeWeekHistory(); unsubscribeWeekHistory = null; }
   if (unsubscribeNotice) { unsubscribeNotice(); unsubscribeNotice = null; currentNotice = null; }
+  if (unsubscribeNotifs) { unsubscribeNotifs(); unsubscribeNotifs = null; _notifications = []; }
   // 이전 가족의 로컬 캐시를 지워서 새 가족 데이터와 섞이지 않게 함
-  [STORAGE_KEY, MEMBERS_KEY, PROFILE_KEY, PET_NAME_KEY, PET_ENABLED_KEY, NOTICE_DISMISS_KEY].forEach(k => localStorage.removeItem(k));
+  [STORAGE_KEY, MEMBERS_KEY, PROFILE_KEY, PET_NAME_KEY, PET_ENABLED_KEY, NOTICE_DISMISS_KEY, NOTIF_READ_KEY].forEach(k => localStorage.removeItem(k));
   setHousehold(householdId);
   document.getElementById('householdNameInput').value = '';
   document.getElementById('householdCodeInput').value = '';
@@ -2120,6 +2202,7 @@ async function loadHouseholdData() {
   initDataListener();
   initWeekHistory();
   initNoticeListener();
+  initNotifListener();
 }
 </script>
 </body>
