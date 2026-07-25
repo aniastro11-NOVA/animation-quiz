@@ -24,8 +24,11 @@ async function getSubscriptionDocs(db, household, owner, category) {
 // 만료된 구독(410)은 Firestore에서 비활성화, 에러 로그 출력
 async function sendToAll(db, household, subDocs, payload) {
   const msg = JSON.stringify(payload);
+  // urgency:'high' — 기기가 절전(도즈) 상태여도 즉시 깨워 배달하도록 요청
+  // TTL 4시간 — 기기가 오래 꺼져 있어도 그 안에 켜지면 배달
+  const opts = { urgency: 'high', TTL: 4 * 60 * 60 };
   const results = await Promise.allSettled(
-    subDocs.map(({ sub }) => webpush.sendNotification(sub, msg))
+    subDocs.map(({ sub }) => webpush.sendNotification(sub, msg, opts))
   );
 
   let sent = 0;
